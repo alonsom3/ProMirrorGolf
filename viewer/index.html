@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProMirrorGolf - 3D Swing Analysis</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div id="app-container">
+        <!-- Header Bar -->
+        <header class="app-header">
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 32 32" class="logo-icon">
+                    <path d="M16 2 L20 8 L16 14 Z" fill="#FF4444"/>
+                    <rect x="15" y="8" width="2" height="20" fill="#E0E0E0"/>
+                    <circle cx="16" cy="28" r="3" fill="#FF4444"/>
+                </svg>
+                <span class="logo-text">ProMirrorGolf</span>
+            </div>
+            <div class="header-controls">
+                <select id="pro-selector" class="control-select">
+                    <option value="">Select Pro...</option>
+                    <!-- Populated by JS -->
+                </select>
+                <select id="club-selector" class="control-select">
+                    <option value="driver">Driver</option>
+                    <option value="7iron">7-Iron</option>
+                </select>
+                <button id="export-btn" class="control-btn">Export</button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- 3D Viewer Container -->
+            <div class="viewer-container">
+                <!-- User View -->
+                <div class="viewer-panel" id="user-viewer">
+                    <div class="viewer-header">
+                        <h3>Your Swing</h3>
+                        <div class="view-controls">
+                            <button class="view-btn active" data-view="dtl">DTL</button>
+                            <button class="view-btn" data-view="face">Face</button>
+                            <button class="view-btn" data-view="top">Top</button>
+                        </div>
+                    </div>
+                    <div class="canvas-container" id="user-canvas"></div>
+                </div>
+
+                <!-- Pro View -->
+                <div class="viewer-panel" id="pro-viewer">
+                    <div class="viewer-header">
+                        <h3 id="pro-name">Select a Pro</h3>
+                        <div class="view-controls">
+                            <button class="view-btn active" data-view="dtl">DTL</button>
+                            <button class="view-btn" data-view="face">Face</button>
+                            <button class="view-btn" data-view="top">Top</button>
+                        </div>
+                    </div>
+                    <div class="canvas-container" id="pro-canvas"></div>
+                </div>
+
+                <!-- Overlay Toggle -->
+                <button id="overlay-toggle" class="overlay-btn">
+                    <svg width="20" height="20" viewBox="0 0 20 20">
+                        <rect x="2" y="4" width="12" height="12" fill="#888" opacity="0.5"/>
+                        <rect x="6" y="2" width="12" height="12" fill="#FF4444" opacity="0.7"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Playback Controls -->
+            <div class="playback-controls">
+                <button id="play-pause-btn" class="playback-btn">
+                    <svg class="play-icon" width="20" height="20" viewBox="0 0 20 20">
+                        <path d="M5 3 L15 10 L5 17 Z" fill="#E0E0E0"/>
+                    </svg>
+                    <svg class="pause-icon" width="20" height="20" viewBox="0 0 20 20" style="display:none;">
+                        <rect x="5" y="3" width="3" height="14" fill="#E0E0E0"/>
+                        <rect x="12" y="3" width="3" height="14" fill="#E0E0E0"/>
+                    </svg>
+                </button>
+                <div class="timeline-container">
+                    <div class="timeline-phases">
+                        <div class="phase address" style="width: 10%;">Address</div>
+                        <div class="phase backswing" style="width: 35%;">Backswing</div>
+                        <div class="phase top" style="width: 5%;">Top</div>
+                        <div class="phase downswing" style="width: 30%;">Downswing</div>
+                        <div class="phase impact" style="width: 5%;">Impact</div>
+                        <div class="phase follow" style="width: 15%;">Follow</div>
+                    </div>
+                    <input type="range" id="timeline-scrubber" class="timeline-scrubber" min="0" max="300" value="0">
+                    <div class="timeline-progress" id="timeline-progress"></div>
+                </div>
+                <div class="speed-controls">
+                    <button class="speed-btn" data-speed="0.25">0.25x</button>
+                    <button class="speed-btn active" data-speed="1">1x</button>
+                    <button class="speed-btn" data-speed="2">2x</button>
+                </div>
+                <span class="frame-counter">Frame: <span id="current-frame">0</span> / 300</span>
+            </div>
+
+            <!-- Metrics Panel -->
+            <div class="metrics-panel">
+                <h2>Swing Analysis</h2>
+                
+                <!-- Key Metrics -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">Hip Rotation</span>
+                            <span class="metric-status good">✓</span>
+                        </div>
+                        <div class="metric-values">
+                            <span class="user-value">45.2°</span>
+                            <span class="vs">vs</span>
+                            <span class="pro-value">48.3°</span>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-range">
+                                <div class="ideal-range" style="left: 35%; width: 30%;"></div>
+                                <div class="user-marker" style="left: 45%;"></div>
+                                <div class="pro-marker" style="left: 48%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">Shoulder Rotation</span>
+                            <span class="metric-status warning">!</span>
+                        </div>
+                        <div class="metric-values">
+                            <span class="user-value">78.5°</span>
+                            <span class="vs">vs</span>
+                            <span class="pro-value">96.2°</span>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-range">
+                                <div class="ideal-range" style="left: 40%; width: 35%;"></div>
+                                <div class="user-marker" style="left: 39%;"></div>
+                                <div class="pro-marker" style="left: 48%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">X-Factor</span>
+                            <span class="metric-status good">✓</span>
+                        </div>
+                        <div class="metric-values">
+                            <span class="user-value">43.1°</span>
+                            <span class="vs">vs</span>
+                            <span class="pro-value">47.9°</span>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-range">
+                                <div class="ideal-range" style="left: 35%; width: 35%;"></div>
+                                <div class="user-marker" style="left: 43%;"></div>
+                                <div class="pro-marker" style="left: 48%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">Spine Angle</span>
+                            <span class="metric-status error">✗</span>
+                        </div>
+                        <div class="metric-values">
+                            <span class="user-value">25.3°</span>
+                            <span class="vs">vs</span>
+                            <span class="pro-value">33.2°</span>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-range">
+                                <div class="ideal-range" style="left: 30%; width: 30%;"></div>
+                                <div class="user-marker" style="left: 25%;"></div>
+                                <div class="pro-marker" style="left: 33%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">Tempo Ratio</span>
+                            <span class="metric-status good">✓</span>
+                        </div>
+                        <div class="metric-values">
+                            <span class="user-value">3.0:1</span>
+                            <span class="vs">vs</span>
+                            <span class="pro-value">3.1:1</span>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-range">
+                                <div class="ideal-range" style="left: 30%; width: 40%;"></div>
+                                <div class="user-marker" style="left: 45%;"></div>
+                                <div class="pro-marker" style="left: 47%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <span class="metric-label">Weight Shift</span>
+                            <span class="metric-status warning">!</span>
+                        </div>
+                        <div class="metric-values">
+                            <span class="user-value">72%</span>
+                            <span class="vs">vs</span>
+                            <span class="pro-value">85%</span>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-range">
+                                <div class="ideal-range" style="left: 50%; width: 40%;"></div>
+                                <div class="user-marker" style="left: 72%;"></div>
+                                <div class="pro-marker" style="left: 85%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="recommendations">
+                    <h3>Top 3 Improvements</h3>
+                    <div class="recommendation-list">
+                        <div class="recommendation-item error">
+                            <div class="rec-number">1</div>
+                            <div class="rec-content">
+                                <h4>Increase Spine Angle at Address</h4>
+                                <p>Your spine angle of 25.3° is too upright. Bend more from the hips to achieve 30-35°. This will improve your swing plane and ball striking.</p>
+                                <div class="drill-suggestion">
+                                    <strong>Drill:</strong> Place a club across your hips and practice tilting forward while keeping your back straight.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="recommendation-item warning">
+                            <div class="rec-number">2</div>
+                            <div class="rec-content">
+                                <h4>Increase Shoulder Turn</h4>
+                                <p>Your shoulder rotation of 78.5° limits your power. Work on achieving 90°+ turn for more distance.</p>
+                                <div class="drill-suggestion">
+                                    <strong>Drill:</strong> Practice backswings with your trail foot stepped back to encourage fuller rotation.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="recommendation-item warning">
+                            <div class="rec-number">3</div>
+                            <div class="rec-content">
+                                <h4>Improve Weight Transfer</h4>
+                                <p>Transfer more weight to your lead foot through impact. Currently at 72%, aim for 80-85%.</p>
+                                <div class="drill-suggestion">
+                                    <strong>Drill:</strong> Practice stepping through your swing, lifting your trail foot after impact.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Modal -->
+        <div id="export-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Export Analysis</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="export-options">
+                        <button class="export-option" data-format="mp4">
+                            <svg width="40" height="40" viewBox="0 0 40 40">
+                                <rect x="8" y="12" width="24" height="16" fill="#3A3A3A"/>
+                                <polygon points="18,20 26,20 22,24" fill="#FF4444"/>
+                            </svg>
+                            <span>Export as Video</span>
+                            <small>MP4 with side-by-side comparison</small>
+                        </button>
+                        <button class="export-option" data-format="html">
+                            <svg width="40" height="40" viewBox="0 0 40 40">
+                                <text x="20" y="25" text-anchor="middle" fill="#3A3A3A" font-size="16">&lt;/&gt;</text>
+                            </svg>
+                            <span>Export as HTML</span>
+                            <small>Interactive viewer for sharing</small>
+                        </button>
+                        <button class="export-option" data-format="pdf">
+                            <svg width="40" height="40" viewBox="0 0 40 40">
+                                <rect x="10" y="8" width="20" height="24" fill="#3A3A3A"/>
+                                <text x="20" y="22" text-anchor="middle" fill="#FF4444" font-size="10">PDF</text>
+                            </svg>
+                            <span>Export as Report</span>
+                            <small>PDF with metrics and analysis</small>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load JavaScript Files -->
+    <script src="js/skeleton-renderer.js"></script>
+    <script src="js/metrics-display.js"></script>
+    <script src="js/controls.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "pros": [
+    {
+      "name": "Rory McIlroy",
+      "club": "Driver",
+      "metrics": {
+        "hip_rotation": 48.2,
+        "shoulder_rotation": 96.2
+      }
+    }
+  ]
+}

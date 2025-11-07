@@ -1,0 +1,22 @@
+{
+  "cameras": {
+    "dtl_id": 2,
+    "face_id": 0,
+    "fps": 60,
+    "resolution": [1280, 720]
+  },
+  "server": {
+    "port": 8080,
+    "host": "localhost"
+  },
+  "paths": {
+    "data": "./data",
+    "viewer": "./viewer"
+  }
+  "mlm2pro": {
+    "connector_path": "D:/ProMirrorGolf/MLM2PRO-OGS-Connector/connector.exe",  ← Update this path
+    "connector_type": "opengolfsim",
+    "listen_port": 5555
+  }
+}
+
