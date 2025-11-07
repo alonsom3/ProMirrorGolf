@@ -1,7 +1,7 @@
 # ProMirrorGolf
 
 <div align="center">
-  <img src="logo.png" alt="ProMirrorGolf Logo" width="200"/>
+  <img src="viewer\assets\logo.svg" alt="ProMirrorGolf Logo" width="200"/>
   
   **Free, Open-Source Golf Swing Analysis with 3D Skeleton Visualization**
   
