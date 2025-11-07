@@ -12,11 +12,10 @@
   "paths": {
     "data": "./data",
     "viewer": "./viewer"
-  }
+  },
   "mlm2pro": {
-    "connector_path": "D:/ProMirrorGolf/MLM2PRO-OGS-Connector/connector.exe",  ← Update this path
+    "connector_path": "D:/ProMirrorGolf/MLM2PRO-OGS-Connector/connector.exe",
     "connector_type": "opengolfsim",
     "listen_port": 5555
   }
 }
-
