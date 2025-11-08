@@ -3,7 +3,10 @@
     "dtl_id": 2,
     "face_id": 0,
     "fps": 60,
-    "resolution": [1280, 720]
+    "resolution": [
+      1280,
+      720
+    ]
   },
   "server": {
     "port": 8080,
@@ -17,5 +20,28 @@
     "connector_path": "D:/ProMirrorGolf/MLM2PRO-OGS-Connector/connector.exe",
     "connector_type": "opengolfsim",
     "listen_port": 5555
+  },
+  "ai": {
+    "pose_model": "mediapipe",
+    "use_gpu": false,
+    "min_detection_confidence": 0.5
+  },
+  "database": {
+    "user_swings_path": "./data/swings.db",
+    "pro_swings_path": "./data/pro_swings.db"
+  },
+  "output": {
+    "videos_dir": "./output/videos",
+    "reports_dir": "./output/reports"
+  },
+  "overlay": {
+    "enabled": true,
+    "endpoint": "http://localhost:8765/display",
+    "port": 8765,
+    "auto_hide_seconds": 10
+  },
+  "processing": {
+    "auto_start": true,
+    "min_shot_interval": 3.0
   }
 }
