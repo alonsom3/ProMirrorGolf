@@ -1161,8 +1161,9 @@ class ProMirrorGolfUI:
                     "- Checking system resources"
                 ))
             except Exception as e:
-                logger.error(f"Error processing videos: {e}", exc_info=True)
-                self.root.after(0, lambda: messagebox.showerror("Error", f"Failed to process videos:\n{str(e)}"))
+                error_msg = str(e)
+                logger.error(f"Error processing videos: {error_msg}", exc_info=True)
+                self.root.after(0, lambda err=error_msg: messagebox.showerror("Error", f"Failed to process videos:\n{err}"))
     
     def export_video(self):
         """Export current swing video"""
@@ -1383,7 +1384,12 @@ class ProMirrorGolfUI:
     
     def playback_control(self, control):
         """Handle playback controls"""
-        logger.info(f"Playback control: {control}")
+        # Use ASCII-safe representation for logging to avoid Unicode encoding errors on Windows
+        try:
+            control_safe = control.encode('ascii', 'replace').decode('ascii')
+        except:
+            control_safe = repr(control)  # Fallback to repr if encoding fails
+        logger.info(f"Playback control: {control_safe}")
         
         if not self.current_swing_data and not self.video_frames:
             self.update_status("No swing data available for playback")
