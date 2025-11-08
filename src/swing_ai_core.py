@@ -406,7 +406,7 @@ class SwingAIController:
                 
                 # Calculate ETA
                 elapsed_time = time.time() - self.processing_start_time
-        if processed_count > 0 and elapsed_time > 0:
+                if processed_count > 0 and elapsed_time > 0:
                     avg_time_per_frame = elapsed_time / processed_count
                     remaining_frames = total_frames_to_process - processed_count
                     eta_seconds = remaining_frames * avg_time_per_frame
