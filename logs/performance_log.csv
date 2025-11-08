@@ -1,0 +1,4 @@
+timestamp,video_name,total_frames,total_time,avg_frame_time,max_frame_time,min_frame_time,p95_frame_time,cpu_usage,gpu_usage,memory_usage_mb,quality_mode,downsample_factor
+2025-11-08T11:54:37.883723,test_dtl,6,0.23,199.18,200.09,198.63,200.09,4.2,0.0,8945.7,balanced,5
+2025-11-08T11:56:31.458712,test_dtl,6,0.23,198.67,198.67,198.67,198.67,3.6,0.0,9080.9,balanced,5
+2025-11-08T12:07:17.921658,test_dtl,6,0.23,200.28,200.45,199.42,200.45,2.1,0.0,9084.4,balanced,5

@@ -28,7 +28,8 @@ class MetricsPanel(ctk.CTkFrame):
     
     def create_widgets(self):
         """Create metrics panel widgets"""
-        self.pack(side='right', fill='y', padx=0, pady=0)
+        # Don't pack here - parent will use grid
+        # self.pack(side='right', fill='y', padx=0, pady=0)
         self.pack_propagate(False)
         
         # Border
@@ -245,30 +246,44 @@ class MetricsPanel(ctk.CTkFrame):
         self.update_recommendations_display()
     
     def update_swing_data(self, swing_data: Dict):
-        """Update metrics and recommendations from swing data"""
+        """Update metrics and recommendations from swing data (optimized for performance)"""
         # Extract metrics from swing_data
         metrics = swing_data.get('metrics', {})
         flaw_analysis = swing_data.get('flaw_analysis', {})
         pro_match = swing_data.get('pro_match', {})
+        pro_metrics = pro_match.get('metrics', {})
         
-        # Convert metrics to display format
+        # Convert metrics to display format (optimized: only process numeric metrics)
         display_metrics = {}
         for key, value in metrics.items():
             if isinstance(value, (int, float)):
+                pro_value = pro_metrics.get(key, value)
+                diff = value - pro_value
                 display_metrics[key.replace('_', ' ').title()] = {
                     'value': f"{value:.1f}",
                     'unit': self._get_unit_for_metric(key),
-                    'pro': f"{pro_match.get('metrics', {}).get(key, 'N/A')}",
-                    'diff': f"{value - pro_match.get('metrics', {}).get(key, value):.1f}",
-                    'status': 'good' if abs(value - pro_match.get('metrics', {}).get(key, value)) < 5 else 'warning'
+                    'pro': f"{pro_value:.1f}" if isinstance(pro_value, (int, float)) else 'N/A',
+                    'diff': f"{diff:.1f}",
+                    'status': 'good' if abs(diff) < 5 else 'warning'
                 }
+        
+        # Limit to top 20 metrics for performance
+        if len(display_metrics) > 20:
+            # Sort by absolute difference and take top 20
+            sorted_metrics = sorted(
+                display_metrics.items(),
+                key=lambda x: abs(float(x[1].get('diff', 0))),
+                reverse=True
+            )[:20]
+            display_metrics = dict(sorted_metrics)
         
         self.set_metrics(display_metrics)
         
-        # Extract recommendations from flaw analysis
+        # Extract recommendations from flaw analysis (limit to top 3)
         flaws = flaw_analysis.get('flaws', [])
         recommendations = []
-        for i, flaw in enumerate(sorted(flaws, key=lambda x: x.get('severity', 0), reverse=True)[:3], 1):
+        sorted_flaws = sorted(flaws, key=lambda x: x.get('severity', 0), reverse=True)[:3]
+        for i, flaw in enumerate(sorted_flaws, 1):
             metric_name = flaw.get('metric', 'Unknown').replace('_', ' ').title()
             recommendation = flaw.get('recommendation', 'No specific recommendation available.')
             recommendations.append((f"Priority {i}", f"{metric_name}: {recommendation}"))

@@ -50,8 +50,10 @@ class PerformanceDashboard(ctk.CTkFrame):
         self.start_updates()
     
     def create_widgets(self):
-        """Create dashboard widgets"""
-        self.pack(fill='both', expand=True, padx=8, pady=8)
+        """Create dashboard widgets - using grid layout for consistency"""
+        # Configure grid
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_columnconfigure(0, weight=1)
         
         # Title
         title = ctk.CTkLabel(
@@ -60,11 +62,15 @@ class PerformanceDashboard(ctk.CTkFrame):
             font=ctk.CTkFont(size=9, weight="bold"),
             text_color=self.colors['text_secondary']
         )
-        title.pack(anchor='w', pady=(0, 12))
+        title.grid(row=0, column=0, sticky='w', padx=8, pady=(8, 4))
         
-        # Metrics grid
+        # Metrics frame - use grid
         metrics_frame = ctk.CTkFrame(self, fg_color="transparent")
-        metrics_frame.pack(fill='both', expand=True)
+        metrics_frame.grid(row=1, column=0, sticky='nsew', padx=8, pady=(0, 8))
+        metrics_frame.grid_columnconfigure(0, weight=1)
+        
+        # Track row for grid placement
+        row = 0
         
         # CPU Usage
         self.cpu_label = ctk.CTkLabel(
@@ -74,7 +80,8 @@ class PerformanceDashboard(ctk.CTkFrame):
             text_color=self.colors['text_secondary'],
             anchor='w'
         )
-        self.cpu_label.pack(fill='x', pady=2)
+        self.cpu_label.grid(row=row, column=0, sticky='ew', pady=2)
+        row += 1
         
         self.cpu_bar = ctk.CTkProgressBar(
             metrics_frame,
@@ -82,8 +89,9 @@ class PerformanceDashboard(ctk.CTkFrame):
             fg_color=self.colors['bg_dark'],
             progress_color=self.colors['accent_red']
         )
-        self.cpu_bar.pack(fill='x', pady=(0, 8))
+        self.cpu_bar.grid(row=row, column=0, sticky='ew', pady=(0, 8))
         self.cpu_bar.set(0)
+        row += 1
         
         # Memory Usage
         self.memory_label = ctk.CTkLabel(
@@ -93,7 +101,8 @@ class PerformanceDashboard(ctk.CTkFrame):
             text_color=self.colors['text_secondary'],
             anchor='w'
         )
-        self.memory_label.pack(fill='x', pady=2)
+        self.memory_label.grid(row=row, column=0, sticky='ew', pady=2)
+        row += 1
         
         self.memory_bar = ctk.CTkProgressBar(
             metrics_frame,
@@ -101,8 +110,9 @@ class PerformanceDashboard(ctk.CTkFrame):
             fg_color=self.colors['bg_dark'],
             progress_color=self.colors['warning']
         )
-        self.memory_bar.pack(fill='x', pady=(0, 8))
+        self.memory_bar.grid(row=row, column=0, sticky='ew', pady=(0, 8))
         self.memory_bar.set(0)
+        row += 1
         
         # GPU Usage (if available)
         self.gpu_label = ctk.CTkLabel(
@@ -112,7 +122,8 @@ class PerformanceDashboard(ctk.CTkFrame):
             text_color=self.colors['text_secondary'],
             anchor='w'
         )
-        self.gpu_label.pack(fill='x', pady=2)
+        self.gpu_label.grid(row=row, column=0, sticky='ew', pady=2)
+        row += 1
         
         self.gpu_bar = ctk.CTkProgressBar(
             metrics_frame,
@@ -120,8 +131,9 @@ class PerformanceDashboard(ctk.CTkFrame):
             fg_color=self.colors['bg_dark'],
             progress_color=self.colors['good']
         )
-        self.gpu_bar.pack(fill='x', pady=(0, 8))
+        self.gpu_bar.grid(row=row, column=0, sticky='ew', pady=(0, 8))
         self.gpu_bar.set(0)
+        row += 1
         
         # FPS
         self.fps_label = ctk.CTkLabel(
@@ -131,7 +143,8 @@ class PerformanceDashboard(ctk.CTkFrame):
             text_color=self.colors['text_secondary'],
             anchor='w'
         )
-        self.fps_label.pack(fill='x', pady=2)
+        self.fps_label.grid(row=row, column=0, sticky='ew', pady=2)
+        row += 1
         
         # Frame Time
         self.frame_time_label = ctk.CTkLabel(
@@ -141,7 +154,8 @@ class PerformanceDashboard(ctk.CTkFrame):
             text_color=self.colors['text_secondary'],
             anchor='w'
         )
-        self.frame_time_label.pack(fill='x', pady=2)
+        self.frame_time_label.grid(row=row, column=0, sticky='ew', pady=2)
+        row += 1
         
         # ETA
         self.eta_label = ctk.CTkLabel(
@@ -151,7 +165,7 @@ class PerformanceDashboard(ctk.CTkFrame):
             text_color=self.colors['text_secondary'],
             anchor='w'
         )
-        self.eta_label.pack(fill='x', pady=2)
+        self.eta_label.grid(row=row, column=0, sticky='ew', pady=2)
     
     def start_updates(self):
         """Start periodic updates"""

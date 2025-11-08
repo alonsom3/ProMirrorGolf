@@ -25,7 +25,8 @@ class ViewerPanel(ctk.CTkFrame):
     
     def create_widgets(self):
         """Create viewer widgets"""
-        self.pack(side='left', fill='both', expand=True, padx=0, pady=0)
+        # Don't pack here - parent will use grid
+        # self.pack(side='left', fill='both', expand=True, padx=0, pady=0)
         
         # Create two viewer panels (User and Pro)
         for i, (label_text, color) in enumerate([("YOU", self.colors['accent_red']), ("PRO", self.colors['good'])]):

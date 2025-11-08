@@ -187,15 +187,20 @@ class MainWindow(ctk.CTk):
             self.on_cancel_processing()
     
     def load_app_icon(self):
-        """Load application icon"""
+        """Load application icon using PIL.Image"""
         try:
+            from PIL import Image
             icon_path = Path(__file__).parent.parent / "assets" / "icons" / "ProMirrorGolf_App_Icon.png"
             if icon_path.exists():
-                self.app_icon = ctk.CTkImage(light_image=str(icon_path), dark_image=str(icon_path))
-                # Note: CustomTkinter doesn't support iconphoto directly, but we can use it for other purposes
+                # Load image using PIL
+                pil_image = Image.open(str(icon_path))
+                # Create CTkImage from PIL Image
+                self.app_icon = ctk.CTkImage(light_image=pil_image, dark_image=pil_image)
                 logger.info(f"Icon loaded from {icon_path}")
             else:
                 logger.warning(f"Icon file not found at {icon_path}")
+        except ImportError:
+            logger.warning("PIL/Pillow not available, cannot load icon as PIL.Image")
         except Exception as e:
             logger.warning(f"Could not load app icon: {e}")
     

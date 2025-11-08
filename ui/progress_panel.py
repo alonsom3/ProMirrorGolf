@@ -29,7 +29,8 @@ class ProgressPanel(ctk.CTkFrame):
     
     def create_widgets(self):
         """Create progress panel widgets"""
-        self.pack(side='bottom', fill='x', padx=0, pady=0)
+        # Don't pack here - parent will use grid
+        # self.pack(side='bottom', fill='x', padx=0, pady=0)
         self.pack_propagate(False)
         
         # Progress bar (hidden by default)
@@ -63,13 +64,37 @@ class ProgressPanel(ctk.CTkFrame):
         self.status_label.pack(side='left', padx=16, pady=4)
     
     def update_progress(self, progress: float, message: str = ""):
-        """Update progress bar"""
+        """Update progress bar (thread-safe)"""
         self.progress = max(0.0, min(1.0, progress))
         
+        # Update status message if provided
+        if message:
+            self.status_message = message
+        
+        # Check if we're in the main thread
+        try:
+            import threading
+            if threading.current_thread() is threading.main_thread():
+                # In main thread, update directly
+                self._update_progress_ui(message)
+            else:
+                # In background thread, schedule update
+                self.after(0, lambda msg=message: self._update_progress_ui(msg))
+        except:
+            # Fallback: always schedule (safer)
+            self.after(0, lambda msg=message: self._update_progress_ui(msg))
+    
+    def _update_progress_ui(self, message: str = ""):
+        """Update progress bar UI (called in main thread)"""
         if self.progress > 0:
             # Show progress bar
             if self.progress_bar:
-                self.progress_bar.pack(side='top', fill='x', padx=0, pady=0, before=self.status_label)
+                try:
+                    if not self.progress_bar.winfo_viewable():
+                        self.progress_bar.pack(side='top', fill='x', padx=0, pady=0, before=self.status_label)
+                except:
+                    # If before doesn't work, just pack
+                    self.progress_bar.pack(side='top', fill='x', padx=0, pady=0)
                 self.progress_bar.set(self.progress)
             
             if self.progress_label:
@@ -77,7 +102,11 @@ class ProgressPanel(ctk.CTkFrame):
                     self.progress_label.configure(text=message)
                 else:
                     self.progress_label.configure(text=f"{int(self.progress * 100)}%")
-                self.progress_label.pack(side='top', padx=16, pady=2, before=self.status_label)
+                try:
+                    if not self.progress_label.winfo_viewable():
+                        self.progress_label.pack(side='top', padx=16, pady=2, before=self.status_label)
+                except:
+                    self.progress_label.pack(side='top', padx=16, pady=2)
         else:
             # Hide progress bar
             if self.progress_bar:
@@ -86,8 +115,24 @@ class ProgressPanel(ctk.CTkFrame):
                 self.progress_label.pack_forget()
     
     def update_status(self, message: str):
-        """Update status message"""
+        """Update status message (thread-safe)"""
         self.status_message = message
+        
+        # Check if we're in the main thread
+        try:
+            import threading
+            if threading.current_thread() is threading.main_thread():
+                # In main thread, update directly
+                self._update_status_ui(message)
+            else:
+                # In background thread, schedule update
+                self.after(0, lambda msg=message: self._update_status_ui(msg))
+        except:
+            # Fallback: always schedule (safer)
+            self.after(0, lambda msg=message: self._update_status_ui(msg))
+    
+    def _update_status_ui(self, message: str):
+        """Update status message UI (called in main thread)"""
         if self.status_label:
             self.status_label.configure(text=message)
     

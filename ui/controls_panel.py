@@ -42,7 +42,8 @@ class ControlsPanel(ctk.CTkFrame):
     
     def create_widgets(self):
         """Create controls widgets"""
-        self.pack(side='bottom', fill='x', padx=0, pady=0)
+        # Don't pack here - parent will use grid
+        # self.pack(side='bottom', fill='x', padx=0, pady=0)
         
         # Top border
         separator = ctk.CTkFrame(self, fg_color=self.colors['border'], height=1)
@@ -198,6 +199,10 @@ class ControlsPanel(ctk.CTkFrame):
         """Handle playback control"""
         if self.on_playback_control:
             self.on_playback_control(action)
+    
+    def _on_playback(self, action: str):
+        """Alias for _on_playback_control for test compatibility"""
+        self._on_playback_control(action)
     
     def _on_quality_change(self, value: str):
         """Handle quality change"""

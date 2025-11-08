@@ -37,7 +37,8 @@ class TopBar(ctk.CTkFrame):
     
     def create_widgets(self):
         """Create top bar widgets"""
-        self.pack(side='top', fill='x', padx=0, pady=0)
+        # Don't pack here - parent will use grid
+        # self.pack(side='top', fill='x', padx=0, pady=0)
         
         # Brand
         brand = ctk.CTkLabel(
