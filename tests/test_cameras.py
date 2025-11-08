@@ -1,91 +1,143 @@
 """
-Test camera detection and capture
-Run: python tests/test_cameras.py
+Camera Test Utility - Test and preview cameras
 """
 
 import cv2
 import sys
+from pathlib import Path
 
-def test_cameras():
-    """Test all connected cameras"""
-    print("\nTesting Cameras...")
-    print("=" * 60)
+def test_cameras(max_cameras=10):
+    """Test all available cameras"""
     
-    found_cameras = []
+    print("="*60)
+    print("Camera Detection Test")
+    print("="*60)
+    print()
     
-    for i in range(10):
+    available = []
+    
+    for i in range(max_cameras):
         cap = cv2.VideoCapture(i)
         if cap.isOpened():
-            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            fps = int(cap.get(cv2.CAP_PROP_FPS))
+            width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+            height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+            fps = cap.get(cv2.CAP_PROP_FPS)
             
-            print(f"OK Camera {i}: {width}x{height} @ {fps}fps")
-            found_cameras.append(i)
+            print(f"Camera {i}: FOUND")
+            print(f"  Resolution: {int(width)}x{int(height)}")
+            print(f"  FPS: {int(fps)}")
+            print()
             
+            available.append(i)
             cap.release()
     
-    print("=" * 60)
+    if not available:
+        print("No cameras detected!")
+        return []
     
-    if len(found_cameras) >= 2:
-        print(f"\nSUCCESS: Found {len(found_cameras)} cameras")
-        print(f"  Camera IDs: {found_cameras}")
-        print(f"\nUpdate config.json:")
-        print(f'  "dtl_id": {found_cameras[0]},')
-        print(f'  "face_id": {found_cameras[1]},')
-        return True
-    else:
-        print(f"\nFAILED: Only found {len(found_cameras)} camera(s)")
-        print("  Need at least 2 cameras")
-        return False
+    print(f"Found {len(available)} camera(s): {available}")
+    print("="*60)
+    
+    return available
 
-def show_camera_preview():
-    """Show live camera preview"""
-    print("\nStarting camera preview...")
-    print("Press 'q' to quit, 's' to save snapshot\n")
+
+def preview_camera(camera_id):
+    """Show live preview of a camera"""
     
-    cap0 = cv2.VideoCapture(0)
-    cap1 = cv2.VideoCapture(1) if True else None
+    print(f"\nOpening camera {camera_id}...")
+    print("Press 'q' to quit, 's' to save screenshot")
+    print()
     
-    if not cap0.isOpened():
-        print("ERROR Cannot open camera 0")
+    cap = cv2.VideoCapture(camera_id)
+    
+    if not cap.isOpened():
+        print(f"ERROR: Cannot open camera {camera_id}")
         return
     
-    use_two = cap1.isOpened() if cap1 else False
+    # Try to set high resolution
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+    cap.set(cv2.CAP_PROP_FPS, 60)
+    
+    actual_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    actual_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    actual_fps = int(cap.get(cv2.CAP_PROP_FPS))
+    
+    print(f"Camera {camera_id} opened:")
+    print(f"  Resolution: {actual_width}x{actual_height}")
+    print(f"  FPS: {actual_fps}")
+    
+    frame_count = 0
     
     while True:
-        ret0, frame0 = cap0.read()
-        if not ret0:
+        ret, frame = cap.read()
+        
+        if not ret:
+            print("Failed to read frame")
             break
         
-        cv2.putText(frame0, "Camera 0 - DTL (Press 'q' to quit)", 
-                   (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-        cv2.imshow('Camera 0 - Down-the-Line', frame0)
+        frame_count += 1
         
-        if use_two:
-            ret1, frame1 = cap1.read()
-            if ret1:
-                cv2.putText(frame1, "Camera 1 - Face", 
-                           (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-                cv2.imshow('Camera 1 - Face-On', frame1)
+        # Add info overlay
+        cv2.putText(frame, f"Camera {camera_id}", (10, 30), 
+                   cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(frame, f"Frame: {frame_count}", (10, 70), 
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        cv2.putText(frame, "Press 'q' to quit, 's' to save", (10, 110), 
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        
+        cv2.imshow(f'Camera {camera_id} Preview', frame)
         
         key = cv2.waitKey(1) & 0xFF
+        
         if key == ord('q'):
             break
         elif key == ord('s'):
-            cv2.imwrite('snapshot_cam0.jpg', frame0)
-            print("OK Saved snapshot_cam0.jpg")
-            if use_two and ret1:
-                cv2.imwrite('snapshot_cam1.jpg', frame1)
-                print("OK Saved snapshot_cam1.jpg")
+            filename = f'camera_{camera_id}_screenshot.jpg'
+            cv2.imwrite(filename, frame)
+            print(f"Saved screenshot: {filename}")
     
-    cap0.release()
-    if cap1:
-        cap1.release()
+    cap.release()
     cv2.destroyAllWindows()
 
-if __name__ == '__main__':
-    if '--preview' in sys.argv:
-        show_camera_preview()
+
+def main():
+    """Main entry point"""
+    
+    # Test all cameras
+    available = test_cameras()
+    
+    if not available:
+        sys.exit(1)
+    
+    # Ask which to preview
+    print("\nWhich camera do you want to preview?")
+    for cam_id in available:
+        print(f"  {cam_id}")
+    print("  a - Preview all cameras")
+    print("  q - Quit")
+    print()
+    
+    choice = input("Enter choice: ").strip().lower()
+    
+    if choice == 'q':
+        return
+    
+    if choice == 'a':
+        # Preview all
+        for cam_id in available:
+            preview_camera(cam_id)
     else:
-        test_cameras()
+        # Preview specific camera
+        try:
+            cam_id = int(choice)
+            if cam_id in available:
+                preview_camera(cam_id)
+            else:
+                print(f"Camera {cam_id} not available")
+        except ValueError:
+            print("Invalid choice")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,21 +1,22 @@
 """
-ProMirrorGolf - Modern Windows GUI
-Professional golf swing analysis interface
+ProMirrorGolf - Main Application with Enhanced UI
 """
 
-import tkinter as tk
-from tkinter import ttk, messagebox, filedialog, scrolledtext
 import asyncio
-import threading
-from pathlib import Path
 import json
-from datetime import datetime
-import cv2
-from PIL import Image, ImageTk
 import logging
 import sys
+import threading
+import tkinter as tk
+from tkinter import ttk, messagebox, scrolledtext
+from pathlib import Path
+from datetime import datetime
 
-# Setup logging
+# Add src to path
+sys.path.insert(0, str(Path(__file__).parent / 'src'))
+
+from swing_ai_core import SwingAIController
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -27,456 +28,414 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-class ModernButton(tk.Button):
-    """Modern styled button"""
-    def __init__(self, parent, text, command, color='#00ff41', **kwargs):
-        super().__init__(
-            parent,
-            text=text,
-            command=command,
-            bg=color,
-            fg='#ffffff',
-            font=('Arial', 11, 'bold'),
-            relief=tk.FLAT,
-            cursor='hand2',
-            padx=20,
-            pady=10,
-            **kwargs
-        )
-        self.default_color = color
-        self.bind('<Enter>', lambda e: self.config(bg=self._lighten_color(color)))
-        self.bind('<Leave>', lambda e: self.config(bg=color))
-
-    def _lighten_color(self, color):
-        """Lighten a hex color"""
-        if color == '#00ff41':
-            return '#33ff66'
-        elif color == '#ff4444':
-            return '#ff6666'
-        else:
-            return color
-
-
 class ProMirrorGolfGUI:
-    """Main GUI Application"""
+    """Enhanced GUI for ProMirrorGolf"""
     
     def __init__(self, root):
         self.root = root
-        self.root.title("⛳ ProMirrorGolf - AI Swing Analysis")
-        self.root.geometry("1600x1000")
-        self.root.configure(bg='#0a0a0a')
+        self.root.title("ProMirrorGolf - AI Swing Analysis")
+        self.root.geometry("800x600")
         
-        # State
-        self.controller = None
-        self.session_active = False
-        self.current_user = None
-        self.swing_count = 0
-        self.camera_previews_active = False
-        self.dtl_cap = None
-        self.face_cap = None
-        self.config = {}
-        
-        # Theme
+        # Set color scheme - Red theme
         self.colors = {
-            'bg_dark': '#0a0a0a',
-            'bg_medium': '#1a1a1a',
-            'bg_light': '#2a2a2a',
-            'accent': '#00ff41',
-            'accent_dim': '#00aa2b',
-            'text': '#ffffff',
-            'text_dim': '#999999',
-            'error': '#ff4444',
-            'warning': '#ffaa00',
-            'success': '#00ff41'
+            'bg': '#1a1a1a',
+            'fg': '#ffffff',
+            'accent': '#dc143c',  # Crimson red
+            'button_bg': '#dc143c',
+            'button_fg': '#ffffff',
+            'entry_bg': '#2d2d2d',
+            'text_bg': '#0d0d0d',
+            'success': '#00ff00',
+            'warning': '#ffa500',
+            'error': '#ff0000'
         }
         
-        # Async setup
+        self.root.configure(bg=self.colors['bg'])
+        
+        # Application state
+        self.app_controller = None
+        self.session_active = False
+        self.current_user_id = None
+        self.swing_count = 0
+        
+        # Async event loop
         self.loop = None
-        self.setup_async()
+        self.loop_thread = None
         
-        # Build UI
-        self.create_ui()
-        
-        # Load config
-        self.load_config()
-        
-        # Status
-        self.update_status("Ready to start", self.colors['success'])
+        self.create_widgets()
+        self.setup_async_loop()
     
-    def setup_async(self):
-        """Setup async event loop in separate thread"""
-        def run_loop():
-            self.loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self.loop)
-            self.loop.run_forever()
-        self.loop_thread = threading.Thread(target=run_loop, daemon=True)
-        self.loop_thread.start()
-    
-    def create_ui(self):
-        """Create the main UI"""
-        self.create_top_bar()
-        main_container = tk.Frame(self.root, bg=self.colors['bg_dark'])
-        main_container.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=20, pady=20)
+    def create_widgets(self):
+        """Create all UI widgets"""
         
-        # Left panel - Camera views
-        left_panel = tk.Frame(main_container, bg=self.colors['bg_medium'], width=800)
-        left_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
-        self.create_camera_panel(left_panel)
+        # Header Frame
+        header_frame = tk.Frame(self.root, bg=self.colors['accent'], height=80)
+        header_frame.pack(fill='x', pady=0)
+        header_frame.pack_propagate(False)
         
-        # Right panel - Controls and stats
-        right_panel = tk.Frame(main_container, bg=self.colors['bg_medium'], width=400)
-        right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, padx=(10, 0))
-        self.create_control_panel(right_panel)
-        
-        # Bottom bar
-        self.create_bottom_bar()
-        
-        # Log panel
-        self.create_log_panel(right_panel)
-    
-    def create_top_bar(self):
-        """Create top navigation bar"""
-        top_bar = tk.Frame(self.root, bg=self.colors['bg_light'], height=80)
-        top_bar.pack(side=tk.TOP, fill=tk.X)
-        top_bar.pack_propagate(False)
-        
-        # Logo/Title
-        title_frame = tk.Frame(top_bar, bg=self.colors['bg_light'])
-        title_frame.pack(side=tk.LEFT, padx=30, pady=15)
-        
-        tk.Label(
-            title_frame,
+        title_label = tk.Label(
+            header_frame,
             text="⛳ ProMirrorGolf",
-            font=('Arial', 28, 'bold'),
-            bg=self.colors['bg_light'],
-            fg=self.colors['accent']
-        ).pack()
+            font=("Arial", 28, "bold"),
+            bg=self.colors['accent'],
+            fg=self.colors['fg']
+        )
+        title_label.pack(pady=20)
+        
+        subtitle_label = tk.Label(
+            header_frame,
+            text="AI-Powered Golf Swing Analysis",
+            font=("Arial", 12),
+            bg=self.colors['accent'],
+            fg=self.colors['fg']
+        )
+        subtitle_label.pack(pady=(0, 10))
+        
+        # Main content frame
+        content_frame = tk.Frame(self.root, bg=self.colors['bg'])
+        content_frame.pack(fill='both', expand=True, padx=20, pady=20)
+        
+        # User Info Section
+        user_frame = tk.LabelFrame(
+            content_frame,
+            text="Session Info",
+            font=("Arial", 12, "bold"),
+            bg=self.colors['bg'],
+            fg=self.colors['fg'],
+            relief='groove',
+            bd=2
+        )
+        user_frame.pack(fill='x', pady=(0, 15))
+        
+        # User ID
+        user_id_frame = tk.Frame(user_frame, bg=self.colors['bg'])
+        user_id_frame.pack(fill='x', padx=10, pady=8)
         
         tk.Label(
-            title_frame,
-            text="AI-Powered Swing Analysis",
-            font=('Arial', 11),
-            bg=self.colors['bg_light'],
-            fg=self.colors['text_dim']
-        ).pack()
-        
-        # Session info
-        session_frame = tk.Frame(top_bar, bg=self.colors['bg_light'])
-        session_frame.pack(side=tk.RIGHT, padx=30)
-        
-        self.session_label = tk.Label(
-            session_frame,
-            text="No Active Session",
-            font=('Arial', 12, 'bold'),
-            bg=self.colors['bg_light'],
-            fg=self.colors['text_dim']
-        )
-        self.session_label.pack()
-        
-        self.swing_counter_label = tk.Label(
-            session_frame,
-            text="0 Swings",
-            font=('Arial', 10),
-            bg=self.colors['bg_light'],
-            fg=self.colors['text_dim']
-        )
-        self.swing_counter_label.pack()
-    
-    def create_camera_panel(self, parent):
-        """Create camera preview panel"""
-        header = tk.Frame(parent, bg=self.colors['bg_medium'])
-        header.pack(side=tk.TOP, fill=tk.X, padx=20, pady=15)
-        
-        tk.Label(
-            header,
-            text="📹 Live Camera Feeds",
-            font=('Arial', 16, 'bold'),
-            bg=self.colors['bg_medium'],
-            fg=self.colors['text']
-        ).pack(side=tk.LEFT)
-        
-        self.preview_btn = ModernButton(
-            header,
-            text="Start Preview",
-            command=self.toggle_camera_preview,
-            color=self.colors['accent_dim']
-        )
-        self.preview_btn.pack(side=tk.RIGHT)
-        
-        cameras_container = tk.Frame(parent, bg=self.colors['bg_dark'])
-        cameras_container.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=20, pady=10)
-        
-        dtl_frame = tk.Frame(cameras_container, bg=self.colors['bg_light'])
-        dtl_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
-        
-        tk.Label(
-            dtl_frame,
-            text="Down-the-Line View",
-            font=('Arial', 12, 'bold'),
-            bg=self.colors['bg_light'],
-            fg=self.colors['text']
-        ).pack(pady=10)
-        
-        self.dtl_canvas = tk.Canvas(
-            dtl_frame,
-            bg='#000000',
-            highlightthickness=0
-        )
-        self.dtl_canvas.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
-        
-        face_frame = tk.Frame(cameras_container, bg=self.colors['bg_light'])
-        face_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(5, 0))
-        
-        tk.Label(
-            face_frame,
-            text="Face-On View",
-            font=('Arial', 12, 'bold'),
-            bg=self.colors['bg_light'],
-            fg=self.colors['text']
-        ).pack(pady=10)
-        
-        self.face_canvas = tk.Canvas(
-            face_frame,
-            bg='#000000',
-            highlightthickness=0
-        )
-        self.face_canvas.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
-    
-    def create_control_panel(self, parent):
-        """Create control panel"""
-        session_frame = tk.LabelFrame(
-            parent,
-            text="Session Control",
-            font=('Arial', 14, 'bold'),
-            bg=self.colors['bg_medium'],
-            fg=self.colors['text'],
-            padx=20,
-            pady=15
-        )
-        session_frame.pack(side=tk.TOP, fill=tk.X, padx=15, pady=15)
-        
-        tk.Label(
-            session_frame,
+            user_id_frame,
             text="User ID:",
-            font=('Arial', 11),
-            bg=self.colors['bg_medium'],
-            fg=self.colors['text']
-        ).grid(row=0, column=0, sticky=tk.W, pady=5)
+            font=("Arial", 10),
+            bg=self.colors['bg'],
+            fg=self.colors['fg'],
+            width=12,
+            anchor='w'
+        ).pack(side='left')
         
+        self.user_id_var = tk.StringVar(value="golfer_1")
         self.user_id_entry = tk.Entry(
-            session_frame,
-            font=('Arial', 11),
-            bg=self.colors['bg_light'],
-            fg=self.colors['text'],
-            insertbackground=self.colors['text'],
-            width=20
+            user_id_frame,
+            textvariable=self.user_id_var,
+            font=("Arial", 10),
+            bg=self.colors['entry_bg'],
+            fg=self.colors['fg'],
+            insertbackground=self.colors['fg'],
+            width=30
         )
-        self.user_id_entry.grid(row=0, column=1, pady=5, sticky=tk.EW)
-        self.user_id_entry.insert(0, "default_user")
+        self.user_id_entry.pack(side='left', padx=5)
+        
+        # Session Name
+        session_frame = tk.Frame(user_frame, bg=self.colors['bg'])
+        session_frame.pack(fill='x', padx=10, pady=8)
         
         tk.Label(
             session_frame,
             text="Session Name:",
-            font=('Arial', 11),
-            bg=self.colors['bg_medium'],
-            fg=self.colors['text']
-        ).grid(row=1, column=0, sticky=tk.W, pady=5)
+            font=("Arial", 10),
+            bg=self.colors['bg'],
+            fg=self.colors['fg'],
+            width=12,
+            anchor='w'
+        ).pack(side='left')
         
+        self.session_name_var = tk.StringVar(value=f"Practice {datetime.now().strftime('%m/%d/%Y')}")
         self.session_name_entry = tk.Entry(
             session_frame,
-            font=('Arial', 11),
-            bg=self.colors['bg_light'],
-            fg=self.colors['text'],
-            insertbackground=self.colors['text'],
-            width=20
+            textvariable=self.session_name_var,
+            font=("Arial", 10),
+            bg=self.colors['entry_bg'],
+            fg=self.colors['fg'],
+            insertbackground=self.colors['fg'],
+            width=30
         )
-        self.session_name_entry.grid(row=1, column=1, pady=5, sticky=tk.EW)
-        self.session_name_entry.insert(0, f"Practice {datetime.now().strftime('%m/%d')}")
+        self.session_name_entry.pack(side='left', padx=5)
         
-        self.session_btn = ModernButton(
-            session_frame,
-            text="▶ Start Session",
+        # Control Buttons
+        button_frame = tk.Frame(content_frame, bg=self.colors['bg'])
+        button_frame.pack(pady=15)
+        
+        self.start_button = tk.Button(
+            button_frame,
+            text="▶ START SESSION",
             command=self.toggle_session,
-            color=self.colors['accent']
+            font=("Arial", 14, "bold"),
+            bg=self.colors['button_bg'],
+            fg=self.colors['button_fg'],
+            activebackground='#b00000',
+            activeforeground=self.colors['button_fg'],
+            width=20,
+            height=2,
+            relief='raised',
+            bd=3,
+            cursor='hand2'
         )
-        self.session_btn.grid(row=2, column=0, columnspan=2, pady=15, sticky=tk.EW)
-    
-    def create_bottom_bar(self):
-        """Create bottom status bar"""
-        bottom_bar = tk.Frame(self.root, bg=self.colors['bg_light'], height=40)
-        bottom_bar.pack(side=tk.BOTTOM, fill=tk.X)
-        bottom_bar.pack_propagate(False)
+        self.start_button.pack(pady=10)
         
+        # Status Section
+        status_frame = tk.LabelFrame(
+            content_frame,
+            text="Status",
+            font=("Arial", 12, "bold"),
+            bg=self.colors['bg'],
+            fg=self.colors['fg'],
+            relief='groove',
+            bd=2
+        )
+        status_frame.pack(fill='both', expand=True, pady=(15, 0))
+        
+        # Status label
         self.status_label = tk.Label(
-            bottom_bar,
-            text="Ready",
-            font=('Arial', 10),
-            bg=self.colors['bg_light'],
-            fg=self.colors['text_dim'],
-            anchor=tk.W
+            status_frame,
+            text="⚫ Ready to start",
+            font=("Arial", 11, "bold"),
+            bg=self.colors['bg'],
+            fg=self.colors['warning'],
+            anchor='w',
+            justify='left'
         )
-        self.status_label.pack(side=tk.LEFT, padx=20, fill=tk.X, expand=True)
+        self.status_label.pack(fill='x', padx=10, pady=10)
         
-        self.connection_label = tk.Label(
-            bottom_bar,
-            text="● MLM2PRO: Disconnected",
-            font=('Arial', 10),
-            bg=self.colors['bg_light'],
-            fg=self.colors['error']
+        # Swing counter
+        self.swing_counter_label = tk.Label(
+            status_frame,
+            text="Swings Analyzed: 0",
+            font=("Arial", 10),
+            bg=self.colors['bg'],
+            fg=self.colors['fg'],
+            anchor='w'
         )
-        self.connection_label.pack(side=tk.RIGHT, padx=20)
-    
-    def create_log_panel(self, parent):
-        """Create a scrollable log panel"""
-        log_frame = tk.LabelFrame(
-            parent,
-            text="Logs",
-            font=('Arial', 12, 'bold'),
-            bg=self.colors['bg_medium'],
-            fg=self.colors['text'],
-            padx=10,
-            pady=10
+        self.swing_counter_label.pack(fill='x', padx=10, pady=5)
+        
+        # Log display
+        log_label = tk.Label(
+            status_frame,
+            text="Activity Log:",
+            font=("Arial", 10, "bold"),
+            bg=self.colors['bg'],
+            fg=self.colors['fg'],
+            anchor='w'
         )
-        log_frame.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=True, padx=15, pady=15)
+        log_label.pack(fill='x', padx=10, pady=(10, 5))
         
         self.log_text = scrolledtext.ScrolledText(
-            log_frame,
-            font=('Consolas', 10),
-            bg=self.colors['bg_light'],
-            fg=self.colors['text'],
-            state=tk.NORMAL,
-            height=10
+            status_frame,
+            height=10,
+            font=("Consolas", 9),
+            bg=self.colors['text_bg'],
+            fg='#00ff00',
+            insertbackground=self.colors['fg'],
+            wrap='word',
+            state='disabled'
         )
-        self.log_text.pack(fill=tk.BOTH, expand=True)
+        self.log_text.pack(fill='both', expand=True, padx=10, pady=(0, 10))
+        
+        # Info footer
+        info_frame = tk.Frame(content_frame, bg=self.colors['bg'])
+        info_frame.pack(fill='x', pady=(10, 0))
+        
+        info_text = "💡 Start GSPro and hit balls. Analysis appears automatically after each shot!"
+        info_label = tk.Label(
+            info_frame,
+            text=info_text,
+            font=("Arial", 9, "italic"),
+            bg=self.colors['bg'],
+            fg='#888888',
+            wraplength=750
+        )
+        info_label.pack()
+    
+    def setup_async_loop(self):
+        """Setup asyncio event loop in separate thread"""
+        
+        def run_loop():
+            self.loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self.loop)
+            self.loop.run_forever()
+        
+        self.loop_thread = threading.Thread(target=run_loop, daemon=True)
+        self.loop_thread.start()
+        
+        # Wait for loop to be ready
+        while self.loop is None:
+            pass
+        
+        self.log_message("System initialized")
     
     def toggle_session(self):
+        """Toggle session start/stop"""
         if not self.session_active:
             self.start_session()
         else:
             self.stop_session()
     
-    # ===== Session Methods =====
     def start_session(self):
-        """Start a new session"""
+        """Start practice session"""
+        user_id = self.user_id_var.get().strip()
+        session_name = self.session_name_var.get().strip()
+        
+        if not user_id:
+            messagebox.showerror("Error", "Please enter a User ID")
+            return
+        
+        self.current_user_id = user_id
         self.session_active = True
         self.swing_count = 0
-        self.session_label.config(text=f"Session: {self.session_name_entry.get()}")
-        self.swing_counter_label.config(text=f"{self.swing_count} Swings")
-        self.session_btn.config(text="■ Stop Session")
-        self.log(f"Session '{self.session_name_entry.get()}' started")
-
-    def stop_session(self):
-        """Stop the current session"""
-        self.session_active = False
-        self.session_label.config(text="No Active Session")
-        self.session_btn.config(text="▶ Start Session")
-        self.log("Session stopped")
-    
-    # ===== Camera Methods =====
-    def toggle_camera_preview(self):
-        """Toggle camera preview on/off"""
-        if not self.camera_previews_active:
-            self.start_camera_previews()
-        else:
-            self.stop_camera_previews()
-    
-    def start_camera_previews(self):
-        """Start showing camera previews"""
-        try:
-            dtl_id = self.config.get('cameras', {}).get('dtl_id', 2)
-            face_id = self.config.get('cameras', {}).get('face_id', 0)
-
-            self.dtl_cap = cv2.VideoCapture(dtl_id, cv2.CAP_DSHOW)
-            self.face_cap = cv2.VideoCapture(face_id, cv2.CAP_DSHOW)
-
-            if not self.dtl_cap.isOpened() or not self.face_cap.isOpened():
-                messagebox.showerror(
-                    "Camera Error",
-                    f"Could not open cameras.\nDTL ID: {dtl_id}\nFace ID: {face_id}\nCheck connections and config.json"
-                )
-                return
-
-            self.camera_previews_active = True
-            self.preview_btn.config(text="Stop Preview")
-            self.update_camera_frames()
-            self.log("Camera previews started")
-
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to start cameras: {str(e)}")
-            logger.error(f"Camera start error: {e}")
-    
-    def stop_camera_previews(self):
-        """Stop camera previews"""
-        self.camera_previews_active = False
-        self.preview_btn.config(text="Start Preview")
-        if self.dtl_cap:
-            self.dtl_cap.release()
-        if self.face_cap:
-            self.face_cap.release()
-        self.dtl_canvas.delete("all")
-        self.face_canvas.delete("all")
-        self.log("Camera previews stopped")
-    
-    def update_camera_frames(self):
-        """Update camera preview frames"""
-        if not self.camera_previews_active:
-            return
-        try:
-            ret1, frame1 = self.dtl_cap.read()
-            ret2, frame2 = self.face_cap.read()
-            if ret1:
-                self.display_frame(frame1, self.dtl_canvas)
-            if ret2:
-                self.display_frame(frame2, self.face_canvas)
-            self.root.after(33, self.update_camera_frames)
-        except Exception as e:
-            logger.error(f"Camera frame update error: {e}")
-            self.stop_camera_previews()
-    
-    def display_frame(self, frame, canvas):
-        """Display a frame on a canvas"""
-        canvas_width = canvas.winfo_width()
-        canvas_height = canvas.winfo_height()
-        if canvas_width <= 1 or canvas_height <= 1:
-            return
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame = cv2.resize(frame, (canvas_width, canvas_height))
-        image = Image.fromarray(frame)
-        photo = ImageTk.PhotoImage(image=image)
-        canvas.delete("all")
-        canvas.create_image(0, 0, image=photo, anchor=tk.NW)
-        canvas.image = photo
-    
-    # ===== Config/Logging =====
-    def load_config(self):
-        """Load configuration"""
-        try:
-            with open('config.json', 'r') as f:
-                self.config = json.load(f)
-            self.log("Configuration loaded")
-        except Exception:
-            self.config = {}
-            self.log("Error loading config - using defaults")
-    
-    def log(self, message):
-        """Log to panel and file"""
-        timestamp = datetime.now().strftime("%H:%M:%S")
-        self.log_text.insert(tk.END, f"[{timestamp}] {message}\n")
-        self.log_text.see(tk.END)
-        logger.info(message)
-    
-    def update_status(self, message, color=None):
-        self.status_label.config(
-            text=message,
-            fg=color or self.colors['text_dim']
+        
+        # Update UI
+        self.start_button.config(
+            text="■ STOP SESSION",
+            bg='#8b0000',
+            activebackground='#dc143c'
         )
+        self.status_label.config(
+            text="🟢 Session Active - Waiting for shots...",
+            fg=self.colors['success']
+        )
+        self.user_id_entry.config(state='disabled')
+        self.session_name_entry.config(state='disabled')
+        
+        self.log_message(f"Started session: {session_name}")
+        self.log_message(f"User: {user_id}")
+        self.log_message("Ready to analyze swings!")
+        
+        # Start session in async loop
+        asyncio.run_coroutine_threadsafe(
+            self.run_session(user_id, session_name),
+            self.loop
+        )
+    
+    def stop_session(self):
+        """Stop practice session"""
+        self.session_active = False
+        
+        # Update UI
+        self.start_button.config(
+            text="▶ START SESSION",
+            bg=self.colors['button_bg'],
+            activebackground='#b00000'
+        )
+        self.status_label.config(
+            text="⚫ Session Stopped",
+            fg=self.colors['warning']
+        )
+        self.user_id_entry.config(state='normal')
+        self.session_name_entry.config(state='normal')
+        
+        self.log_message(f"Session ended. Total swings: {self.swing_count}")
+        
+        # Stop in async loop
+        if self.app_controller:
+            asyncio.run_coroutine_threadsafe(
+                self.app_controller.stop_session(),
+                self.loop
+            )
+    
+    async def run_session(self, user_id: str, session_name: str):
+        """Run the swing analysis session"""
+        try:
+            # Initialize controller if needed
+            if not self.app_controller:
+                self.log_message("Initializing AI system...")
+                from config_and_main import SwingAIApplication
+                app = SwingAIApplication()
+                await app.initialize()
+                self.app_controller = app.controller
+                self.log_message("AI system ready!")
+            
+            # Start session
+            await self.app_controller.start_session(user_id, session_name)
+            
+        except Exception as e:
+            error_msg = f"Session error: {str(e)}"
+            self.log_message(f"ERROR: {error_msg}", level='error')
+            logger.error(error_msg, exc_info=True)
+            
+            # Update UI on main thread
+            self.root.after(0, lambda: messagebox.showerror("Session Error", error_msg))
+            self.root.after(0, self.stop_session)
+    
+    def on_swing_analyzed(self, swing_data: dict):
+        """Callback when a swing is analyzed"""
+        self.swing_count += 1
+        
+        self.root.after(0, lambda: self.swing_counter_label.config(
+            text=f"Swings Analyzed: {self.swing_count}"
+        ))
+        
+        score = swing_data.get('overall_score', 0)
+        self.log_message(f"Swing #{self.swing_count} analyzed - Score: {score:.1f}/100")
+    
+    def log_message(self, message: str, level: str = 'info'):
+        """Add message to log display"""
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        
+        # Color based on level
+        if level == 'error':
+            color = self.colors['error']
+        elif level == 'warning':
+            color = self.colors['warning']
+        elif level == 'success':
+            color = self.colors['success']
+        else:
+            color = '#00ff00'
+        
+        def update_log():
+            self.log_text.config(state='normal')
+            self.log_text.insert('end', f"[{timestamp}] {message}\n", level)
+            self.log_text.tag_config(level, foreground=color)
+            self.log_text.see('end')
+            self.log_text.config(state='disabled')
+        
+        self.root.after(0, update_log)
+    
+    def on_closing(self):
+        """Handle window close"""
+        if self.session_active:
+            if messagebox.askyesno("Confirm Exit", "Session is active. Stop and exit?"):
+                self.stop_session()
+                self.root.after(1000, self.cleanup_and_exit)
+        else:
+            self.cleanup_and_exit()
+    
+    def cleanup_and_exit(self):
+        """Cleanup and exit"""
+        if self.loop:
+            self.loop.call_soon_threadsafe(self.loop.stop)
+        self.root.destroy()
 
 
 def main():
+    """Main entry point"""
+    
+    print("="*60)
+    print("ProMirrorGolf - AI Swing Analysis")
+    print("="*60)
+    print()
+    
+    # Create and run GUI
     root = tk.Tk()
     app = ProMirrorGolfGUI(root)
+    root.protocol("WM_DELETE_WINDOW", app.on_closing)
+    
+    # Center window
+    root.update_idletasks()
+    width = root.winfo_width()
+    height = root.winfo_height()
+    x = (root.winfo_screenwidth() // 2) - (width // 2)
+    y = (root.winfo_screenheight() // 2) - (height // 2)
+    root.geometry(f'{width}x{height}+{x}+{y}')
+    
     root.mainloop()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

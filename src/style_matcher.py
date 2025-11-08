@@ -5,7 +5,7 @@ Uses weighted similarity metrics
 
 import numpy as np
 from typing import Dict, List, Optional
-from database import ProSwingDatabase
+from .database import ProSwingDatabase
 import logging
 
 logger = logging.getLogger(__name__)
@@ -238,3 +238,141 @@ class StyleMatcher:
             tags.append('smooth')
         
         return tags
+
+
+# Pro swing data importer
+class ProSwingImporter:
+    """
+    Imports professional swing data from videos
+    """
+    
+    def __init__(self, pro_db_path: str):
+        self.pro_db = ProSwingDatabase(pro_db_path)
+        self.pose_analyzer = None  # Initialize when needed
+    
+    async def import_pro_swing(self, golfer_name: str, video_dtl_path: str,
+                              video_face_path: str, club_type: str,
+                              style_tags: list, youtube_url: str = None):
+        """
+        Import a professional swing from video files (simplified version)
+        
+        Args:
+            golfer_name: Name of the professional
+            video_dtl_path: Path to down-the-line video
+            video_face_path: Path to face-on video
+            club_type: Type of club (Driver, 7-Iron, etc.)
+            style_tags: Style descriptors (power, smooth, modern, etc.)
+            youtube_url: Original YouTube URL (optional)
+        """
+        from pathlib import Path
+        
+        logger.info(f"Importing pro swing: {golfer_name}")
+        
+        # Verify video files exist
+        if not Path(video_dtl_path).exists():
+            raise ValueError(f"DTL video not found: {video_dtl_path}")
+        if not Path(video_face_path).exists():
+            raise ValueError(f"Face-on video not found: {video_face_path}")
+        
+        logger.info(f"Videos verified: {Path(video_dtl_path).name}, {Path(video_face_path).name}")
+        
+        # For now, use default metrics
+        # TODO: Implement full pose analysis when analyze_swing is available
+        metrics = {
+            'tempo_ratio': 3.0,
+            'hip_rotation_top': 45.0,
+            'shoulder_rotation_top': 95.0,
+            'x_factor': 45.0,
+            'spine_angle_address': 30.0,
+            'spine_angle_change': 0.0,
+            'weight_transfer': 0.10,
+            'backswing_time': 0.9,
+            'downswing_time': 0.3
+        }
+        
+        logger.info(f"Using default metrics (full analysis will be implemented later)")
+        
+        # Generate pro_id
+        pro_id = f"{golfer_name.lower().replace(' ', '_')}_{club_type.lower().replace('-', '_')}"
+        
+        # Save to database
+        self.pro_db.add_pro_swing(
+            pro_id=pro_id,
+            golfer_name=golfer_name,
+            video_paths={'dtl': video_dtl_path, 'face': video_face_path},
+            metrics=metrics,
+            club_type=club_type,
+            style_tags=style_tags,
+            youtube_url=youtube_url,
+            pose_data=None  # Will be populated later when full analysis works
+        )
+        
+        logger.info(f"Pro swing imported successfully: {pro_id}")
+        logger.warning("Note: Using default metrics. Full pose analysis will be added in future update.")
+        
+        return pro_id
+    
+    def _load_video(self, video_path: str) -> list:
+        """Load video frames"""
+        import cv2
+        from pathlib import Path
+        
+        if not Path(video_path).exists():
+            logger.error(f"Video file not found: {video_path}")
+            return []
+        
+        frames = []
+        cap = cv2.VideoCapture(video_path)
+        
+        if not cap.isOpened():
+            logger.error(f"Cannot open video: {video_path}")
+            return []
+        
+        frame_count = 0
+        max_frames = 300  # Limit to ~5 seconds at 60fps
+        
+        while frame_count < max_frames:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            frames.append(frame)
+            frame_count += 1
+            
+            if frame_count % 30 == 0:
+                logger.info(f"Loading frames... {frame_count}/{max_frames}")
+        
+        cap.release()
+        logger.info(f"Loaded {len(frames)} frames from {Path(video_path).name}")
+        return frames
+    
+    async def bulk_import_from_youtube(self, pro_data_list: list):
+        """
+        Bulk import multiple pro swings from YouTube
+        
+        Args:
+            pro_data_list: List of dicts with golfer info and YouTube URLs
+        """
+        from .youtube_downloader import YouTubeDownloader
+        
+        downloader = YouTubeDownloader()
+        
+        for pro_data in pro_data_list:
+            try:
+                # Download video
+                video_path = await downloader.download_video(
+                    url=pro_data['youtube_url'],
+                    output_dir='./data/pro_videos'
+                )
+                
+                # Import
+                await self.import_pro_swing(
+                    golfer_name=pro_data['name'],
+                    video_dtl_path=video_path,
+                    video_face_path=video_path,
+                    club_type=pro_data['club'],
+                    style_tags=pro_data['tags'],
+                    youtube_url=pro_data['youtube_url']
+                )
+                
+            except Exception as e:
+                logger.error(f"Failed to import {pro_data['name']}: {e}")

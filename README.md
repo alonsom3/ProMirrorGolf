@@ -1,314 +1,298 @@
-# ProMirrorGolf
+# ⛳ ProMirrorGolf
 
-<div align="center">
-  <img src="viewer\assets\logo.svg" alt="ProMirrorGolf Logo" width="200"/>
-  
-  **Free, Open-Source Golf Swing Analysis with 3D Skeleton Visualization**
-  
-  [![License: Custom Non-Commercial](https://img.shields.io/badge/License-Non--Commercial-red.svg)](LICENSE)
-  [![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
-  [![GPU](https://img.shields.io/badge/GPU-NVIDIA%20RTX-green.svg)](https://www.nvidia.com/)
-</div>
+**AI-Powered Golf Swing Analysis System**
+
+Automated, real-time swing analysis that integrates with GSPro and your launch monitor. Hit a ball, get instant feedback with pro comparisons, 3D skeleton analysis, and personalized coaching recommendations.
+
+![ProMirrorGolf](https://img.shields.io/badge/Python-3.9+-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Status](https://img.shields.io/badge/status-Active-success.svg)
 
 ---
 
-## Overview
+## 🎯 Features
 
-ProMirrorGolf is a free golf swing analysis system that uses AI-powered pose detection to compare your swing with professional golfers. Get instant 3D skeleton visualization, detailed metrics, and personalized improvement recommendations.
+- ✅ **Zero-Input Automation** - Hit balls, get instant analysis (2-3 seconds)
+- ✅ **Dual Camera Capture** - DTL + Face-on views with circular buffering
+- ✅ **Launch Monitor Integration** - Rapsodo MLM2PRO via OpenGolfSim connector
+- ✅ **AI Pose Analysis** - MediaPipe-based 3D skeletal tracking
+- ✅ **Pro Comparison** - Automatic matching to professional swings
+- ✅ **Flaw Detection** - ML-based swing diagnostics with recommendations
+- ✅ **Side-by-Side Videos** - Compare your swing to matched pros
+- ✅ **Historical Tracking** - Database of all swings for progress monitoring
+- ✅ **Enhanced UI** - Modern red-themed interface
 
-**Key Features:**
-- Real-time 3D skeleton visualization using MediaPipe (33 keypoints)
-- Side-by-side comparison with professional golfers
-- 7 key swing metrics with visual feedback
-- Personalized drill recommendations
-- Multiple export formats (Video, HTML, PDF)
-- Sub-second processing on RTX 3070
-- 100% free forever - no subscriptions, no paid features
+---
 
-## System Requirements
+## 📋 Requirements
 
-### Minimum Requirements
-- **GPU:** NVIDIA GTX 1060 or better (CUDA compatible)
-- **RAM:** 8GB
-- **OS:** Windows 10/11, Ubuntu 20.04+, macOS 11+
-- **Python:** 3.8 or higher
-- **Cameras:** 2x USB webcams (60fps, 720p minimum)
+### Hardware
+- **PC**: Windows 10/11, Intel i5/AMD Ryzen 5 or better
+- **GPU**: NVIDIA RTX 3070 (8GB VRAM) - *Recommended for RTX 3070*
+- **RAM**: 16GB minimum, 32GB recommended
+- **Cameras**: 2x USB webcams, 60fps minimum (120fps recommended)
+- **Launch Monitor**: Rapsodo MLM2PRO
 
-### Recommended Setup
-- **GPU:** NVIDIA RTX 3070 or better
-- **RAM:** 16GB
-- **Cameras:** 2x Logitech C920 or better
-- **Launch Monitor:** Rapsodo MLM2PRO (optional)
+### Software
+- Python 3.9+
+- CUDA 11.8+ (for GPU acceleration)
+- GSPro golf simulator
+- MLM2PRO-OGS-Connector
 
-## Installation
+---
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/alonsom3/ProMirrorGolf.git
-cd ProMirrorGolf
-```
+## 🚀 Quick Start
 
-### 2. Install Python Dependencies
+### 1. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Download Pro Database
-The official pro database (70 swings from  pros) will be available as a separate download:
+### 2. Configure System
+
+Edit `config.json` with your settings:
+- Camera IDs (DTL and Face-on)
+- MLM2PRO connector path
+- GPU settings
+
+### 3. Setup Pro Swings
+
+Split dual-view videos:
 ```bash
-# Download the pro database (when available)
-python scripts/download_pros.py
+python split_video.py "data/pro_videos/Justin_Thomas_DTLandFFO.mp4"
 ```
 
-### 4. Set Up Cameras
-Position two USB webcams:
-- **Camera 1:** Down-the-line (DTL) view - behind and to the side
-- **Camera 2:** Face-on view - directly facing the golfer
-
-### 5. Verify Installation
+Import to database:
 ```bash
-python main.py --test
+python import_pro_swing.py
 ```
 
-## Usage
-
-### Basic Usage
+### 4. Test Cameras
 ```bash
-# Start the analysis server
-python main.py --serve
-
-# The web interface will open automatically at http://localhost:8080
+python test_cameras.py
 ```
 
-### With Launch Monitor Integration
+### 5. Run Application
 ```bash
-# If using Rapsodo MLM2PRO
-python main.py --serve --launch-monitor rapsodo
+python main.py
 ```
-
-### Command Line Options
-```bash
-python main.py [options]
-
-Options:
-  --serve              Start web server and analysis system
-  --port PORT         Web server port (default: 8080)
-  --gpu-device ID     CUDA device ID (default: 0)
-  --launch-monitor    Enable launch monitor integration
-  --test              Run system tests
-  --add-pro PATH      Add custom pro to database
-```
-
-## How It Works
-
-1. **Capture:** When you hit a shot, the system captures the last 5 seconds from both cameras
-2. **Process:** MediaPipe extracts 33 skeletal keypoints from each frame
-3. **Analyze:** The system calculates 7 key metrics from your swing
-4. **Compare:** Your metrics are compared against the selected pro
-5. **Recommend:** AI generates personalized improvement drills
-6. **Visualize:** 3D skeletons show both swings side-by-side
-
-## Metrics Analyzed
-
-| Metric | Ideal Range | What It Measures |
-|--------|------------|------------------|
-| Hip Rotation | 40-50° | Power generation from lower body |
-| Shoulder Rotation | 85-105° | Upper body coil and flexibility |
-| X-Factor | 40-55° | Separation between hips and shoulders |
-| Spine Angle | 28-38° | Posture consistency |
-| Tempo Ratio | 2.7-3.3:1 | Backswing to downswing timing |
-| Weight Shift | 60-85% | Transfer to lead foot at impact |
-| Spine Angle Change | -3 to +3° | Maintaining posture through swing |
-
-## Adding Custom Pros
-
-You can add your own professional swings to the database:
-
-```bash
-# Process a video file
-python scripts/add_custom_pro.py --video path/to/video.mp4 --name "Pro Name" --club "Driver"
-
-# Or capture live from cameras
-python scripts/add_custom_pro.py --capture --name "Pro Name" --club "7-Iron"
-```
-
-**Important Legal Note:** 
-- We do NOT provide video downloading tools
-- You must obtain videos at your own risk
-- We cannot assist with video acquisition
-- Only metrics and pose data are stored, never videos
-
-## Export Options
-
-### Video Export (MP4)
-- Side-by-side 3D comparison
-- Synchronized playback
-- Metrics overlay
-
-### HTML Export
-- Interactive 3D viewer
-- Shareable with coaches
-- Works offline
-
-### PDF Report
-- Detailed metrics
-- Improvement recommendations
-- Practice drills
-
-## Project Structure
-
-```
-ProMirrorGolf/
-├── main.py                 # Main entry point
-├── backend/
-│   ├── analyzer.py        # Swing analysis coordinator
-│   ├── pose_detector.py   # MediaPipe integration
-│   ├── metrics_extractor.py # Metric calculations
-│   ├── database.py        # Pro database management
-│   └── server.py          # Web server
-├── viewer/
-│   ├── index.html         # Web interface
-│   ├── css/
-│   │   └── style.css      # Dark theme styles
-│   └── js/
-│       ├── skeleton-renderer.js # 3D visualization
-│       ├── controls.js    # UI controls
-│       ├── metrics-display.js # Metrics UI
-│       └── main.js        # App coordinator
-├── data/
-│   └── official_pros.json # Pro swing database
-├── scripts/
-│   ├── download_pros.py   # Pro database downloader
-│   └── add_custom_pro.py  # Custom pro tool
-├── config.py              # Configuration
-├── requirements.txt       # Python dependencies
-├── LICENSE               # Non-commercial license
-└── README.md            # This file
-```
-
-## Performance
-
-On NVIDIA RTX 3070:
-- Processing time: 0.8-1.2 seconds per swing
-- Frame rate: 60 fps capture, 300 frames analyzed
-- Pose detection: >90% accuracy
-- File size: ~5MB per swing analysis
-
-## Troubleshooting
-
-### Camera Not Detected
-```bash
-# List available cameras
-python scripts/list_cameras.py
-
-# Test camera capture
-python scripts/test_capture.py --camera 0
-```
-
-### GPU Not Found
-```bash
-# Check CUDA installation
-python -c "import torch; print(torch.cuda.is_available())"
-
-# Use CPU fallback (slower)
-python main.py --serve --cpu-only
-```
-
-### Poor Pose Detection
-- Ensure good lighting (avoid backlighting)
-- Wear contrasting clothing
-- Check camera positioning
-- Verify 60fps capture rate
-
-## Community
-
-### Discord Server
-Join our community Discord for:
-- Sharing custom metrics (NOT videos)
-- Discussing swing improvements
-- Getting help with setup
-- Feature requests
-
-**Note:** The Discord is community-run and not officially managed.
-
-### Contributing
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-Key areas for contribution:
-- Additional metrics algorithms
-- UI/UX improvements
-- Language translations
-- Performance optimizations
-
-## Legal & Safety
-
-### License
-This software is released under a **Non-Commercial License**:
-- ✅ Free to use personally
-- ✅ Free to modify and share
-- ✅ Free to use for coaching (no charge to clients)
-- ❌ Cannot be sold or monetized
-- ❌ Cannot be used in commercial products
-- ❌ Cannot charge for access or features
-
-### Video Rights
-- We do NOT provide or assist with video downloads
-- Users are responsible for obtaining videos legally
-- We only store pose data and metrics, never videos
-- Respect copyright and personality rights
-
-### Disclaimer
-This software is for educational and training purposes only. Not responsible for injury or equipment damage. Always consult a golf professional for personalized instruction.
-
-## Roadmap
-
-### Phase 1 (Current)
-- ✅ Core pose detection
-- ✅ 3D visualization
-- ✅ Metrics analysis
-- ✅ Pro comparison
-- ✅ Web interface
-
-### Phase 2 (Planned)
-- [ ] GSPro overlay integration
-- [ ] Mobile app viewer
-- [ ] Cloud backup (metrics only)
-- [ ] Multi-language support
-- [ ] Advanced biomechanics
-
-### Phase 3 (Future)
-- [ ] AI coaching suggestions
-- [ ] Social features (metric sharing)
-- [ ] Tournament analysis mode
-- [ ] VR viewing support
-
-## Credits
-
-Created with passion for golf and technology.
-
-**Technologies Used:**
-- MediaPipe by Google
-- Three.js for 3D rendering
-- PyTorch for GPU acceleration
-- OpenCV for video processing
-
-## Support
-
-For issues and questions:
-1. Check the [FAQ](docs/FAQ.md)
-2. Search [existing issues](https://github.com/yourusername/ProMirrorGolf/issues)
-3. Create a new issue with details
-
-## Acknowledgments
-
-Special thanks to:
-- The open-source community
-- Golf professionals who inspired this project
-- MediaPipe team for pose detection technology
-- Early testers and contributors
 
 ---
 
-**Remember:** This tool is meant to supplement, not replace, professional golf instruction. Have fun improving your game!
+## 📁 Project Structure
+```
+ProMirrorGolf/
+│
+├── main.py                 # Main application with enhanced UI
+├── config.json             # System configuration
+├── split_video.py          # Video splitter for dual-view videos
+├── import_pro_swing.py     # Pro swing importer
+├── test_cameras.py         # Camera testing utility
+├── requirements.txt        # Python dependencies
+│
+├── src/                    # Core source code
+│   ├── swing_ai_core.py          # Main controller
+│   ├── camera_manager.py         # Dual camera management
+│   ├── mlm2pro_listener.py       # Launch monitor integration
+│   ├── pose_analyzer.py          # AI pose estimation
+│   ├── style_matcher.py          # Pro swing matching
+│   ├── report_generator.py       # Report creation
+│   ├── database.py               # Data persistence
+│   └── youtube_downloader.py     # Video downloader
+│
+├── data/                   # Data storage
+│   ├── pro_videos/               # Professional swing videos
+│   ├── pro_swings.db             # Pro swing database
+│   └── swings.db                 # User swing database
+│
+├── output/                 # Generated outputs
+│   ├── videos/                   # Captured swing videos
+│   └── reports/                  # Analysis reports
+│
+└── docs/                   # Documentation
+    ├── README.md
+    ├── INSTALL.md
+    └── USAGE.md
+```
 
-*ProMirrorGolf - See Your Swing Like Never Before*
+---
+
+## 🎮 Usage
+
+### Starting a Session
+
+1. Launch ProMirrorGolf
+2. Enter your User ID
+3. (Optional) Name your session
+4. Click **START SESSION**
+5. Open GSPro and start hitting balls
+
+### During Practice
+
+- System automatically detects shots via MLM2PRO
+- Cameras capture last 5 seconds when ball is struck
+- AI analyzes swing in 2-3 seconds
+- Results appear automatically:
+  - Overall score (0-100)
+  - Side-by-side comparison with matched pro
+  - Top 3 flaws with recommendations
+  - Launch monitor data
+
+### After Session
+
+- All swings saved to database
+- Review any swing from history
+- Track progress over time
+- Compare swings side-by-side
+
+---
+
+## ⚙️ Configuration
+
+### config.json
+```json
+{
+  "cameras": {
+    "dtl_id": 2,
+    "face_id": 0,
+    "fps": 60,
+    "resolution": [1920, 1080]
+  },
+  "mlm2pro": {
+    "connector_path": "D:\\ProMirrorGolf\\MLM2PRO-OGS-Connector\\connector.exe"
+  },
+  "ai": {
+    "use_gpu": true
+  }
+}
+```
+
+### Camera Setup
+
+- **DTL Camera (Down-the-line)**: Behind golfer, looking at target
+- **Face Camera (Face-on)**: In front of golfer, 90° from target line
+- Both should be at hip height, 10-15 feet away
+
+---
+
+## 🔧 Utilities
+
+### split_video.py
+Automatically detects and splits dual-view videos:
+```bash
+python split_video.py "path/to/video.mp4"
+```
+
+### import_pro_swing.py
+Import professional swings to database:
+```bash
+python import_pro_swing.py
+# Follow interactive prompts
+```
+
+### test_cameras.py
+Test and preview cameras:
+```bash
+python test_cameras.py
+# Shows all available cameras with live preview
+```
+
+---
+
+## 📊 Swing Metrics
+
+The system analyzes:
+
+- **Hip Rotation** (35-50° ideal)
+- **Shoulder Rotation** (80-110° ideal)
+- **X-Factor** (shoulder-hip separation, 35-55° ideal)
+- **Spine Angle** (maintenance through impact)
+- **Weight Transfer** (lateral shift)
+- **Tempo Ratio** (backswing:downswing, 2.5-3.5 ideal)
+- **Club Speed** (from launch monitor)
+- **Ball Speed** (from launch monitor)
+- **Launch Angle** (from launch monitor)
+- **Spin Rate** (from launch monitor)
+
+---
+
+## 🐛 Troubleshooting
+
+### Cameras Not Detected
+```bash
+python test_cameras.py
+# Check device IDs and update config.json
+```
+
+### MLM2PRO Connection Issues
+1. Verify Bluetooth connection
+2. Check connector path in config.json
+3. Test with GSPro first
+
+### Slow Processing
+- Lower camera resolution in config.json
+- Reduce FPS to 60
+- Close other GPU applications
+- Verify CUDA installation: `nvidia-smi`
+
+### Import Errors
+```bash
+# Reinstall dependencies
+pip install --force-reinstall -r requirements.txt
+```
+
+---
+
+## 📈 Roadmap
+
+### Current Version (1.0)
+- ✅ Dual camera capture
+- ✅ MLM2PRO integration
+- ✅ AI pose analysis
+- ✅ Pro matching
+- ✅ Flaw detection
+- ✅ Enhanced UI
+
+### Planned (2.0)
+- 🔲 Real-time 3D avatar
+- 🔲 Mobile companion app
+- 🔲 Cloud sync
+- 🔲 Drill recommendations
+- 🔲 Progress charts
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+---
+
+## 📄 License
+
+MIT License - see LICENSE file for details
+
+---
+
+## 💬 Support
+
+- **Issues**: [GitHub Issues](https://github.com/alonsom3/ProMirrorGolf/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/alonsom3/ProMirrorGolf/discussions)
+
+---
+
+## 🙏 Acknowledgments
+
+- MediaPipe (Google) for pose estimation
+- OpenGolfSim community for MLM2PRO connector
+- All professional golfers whose swings we study
+
+---
+
+**Made with ⛳ by golfers, for golfers**
+
+*For best results, practice with purpose. ProMirrorGolf shows you what to work on, but you still have to do the work!*

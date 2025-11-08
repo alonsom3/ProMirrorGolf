@@ -3,27 +3,17 @@
     "dtl_id": 2,
     "face_id": 0,
     "fps": 60,
-    "resolution": [
-      1280,
-      720
-    ]
-  },
-  "server": {
-    "port": 8080,
-    "host": "localhost"
-  },
-  "paths": {
-    "data": "./data",
-    "viewer": "./viewer"
+    "resolution": [1920, 1080],
+    "buffer_seconds": 10.0
   },
   "mlm2pro": {
-    "connector_path": "D:/ProMirrorGolf/MLM2PRO-OGS-Connector/connector.exe",
+    "connector_path": "D:\\ProMirrorGolf\\MLM2PRO-OGS-Connector\\connector.exe",
     "connector_type": "opengolfsim",
     "listen_port": 5555
   },
   "ai": {
     "pose_model": "mediapipe",
-    "use_gpu": false,
+    "use_gpu": true,
     "min_detection_confidence": 0.5
   },
   "database": {
