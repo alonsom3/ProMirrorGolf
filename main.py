@@ -953,6 +953,38 @@ class ProMirrorGolfUI:
         )
         self.frame_info.pack(pady=(4, 0))
         
+        # Quality/Speed control (between timeline and view controls)
+        quality_frame = tk.Frame(content, bg=self.colors['bg_main'])
+        quality_frame.pack(side='left', padx=16)
+        
+        tk.Label(
+            quality_frame,
+            text="Quality:",
+            font=("Segoe UI", 9),
+            bg=self.colors['bg_main'],
+            fg=self.colors['text_secondary']
+        ).pack(side='left', padx=(0, 8))
+        
+        # Quality dropdown
+        self.quality_var = tk.StringVar(value="Speed")
+        quality_menu = tk.OptionMenu(
+            quality_frame,
+            self.quality_var,
+            "Speed", "Balanced", "Quality",
+            command=self.on_quality_change
+        )
+        quality_menu.config(
+            font=("Segoe UI", 9),
+            bg=self.colors['bg_panel'],
+            fg=self.colors['text_primary'],
+            activebackground=self.colors['accent_red'],
+            activeforeground='#ffffff',
+            relief='flat',
+            bd=0,
+            highlightthickness=0
+        )
+        quality_menu.pack(side='left')
+        
         # View controls
         view_frame = tk.Frame(content, bg=self.colors['bg_main'])
         view_frame.pack(side='right')
