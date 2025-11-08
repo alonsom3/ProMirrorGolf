@@ -63,6 +63,10 @@ class ProMirrorGolfUI:
         
         self.root.configure(bg=self.colors['bg_main'])
         
+        # Load and set app icon
+        self.app_icon = None
+        self.load_app_icon()
+        
         # State
         self.current_frame = 0
         self.total_frames = 0
@@ -116,7 +120,38 @@ class ProMirrorGolfUI:
                 self.initialize_backend(),
                 self.loop
             )
-        
+    
+    def load_app_icon(self):
+        """Load the ProMirrorGolf app icon and set it as window icon"""
+        try:
+            icon_path = Path(__file__).parent / "assets" / "icons" / "ProMirrorGolf_App_Icon.png"
+            
+            if icon_path.exists():
+                # Load icon using PhotoImage (keep reference to prevent garbage collection)
+                self.app_icon = tk.PhotoImage(file=str(icon_path))
+                
+                # Set window icon (title bar icon)
+                # Note: On Windows, we need to use iconbitmap for .ico, but PhotoImage works for .png
+                # For cross-platform, we'll use iconphoto which works with PhotoImage
+                try:
+                    self.root.iconphoto(True, self.app_icon)
+                except Exception as e:
+                    logger.warning(f"Could not set window icon: {e}")
+                    # Fallback: try iconbitmap if available
+                    try:
+                        # Try to use .ico if available
+                        ico_path = icon_path.with_suffix('.ico')
+                        if ico_path.exists():
+                            self.root.iconbitmap(str(ico_path))
+                    except:
+                        pass
+                
+                logger.info(f"App icon loaded successfully from {icon_path}")
+            else:
+                logger.warning(f"Icon file not found at {icon_path}")
+        except Exception as e:
+            logger.error(f"Error loading app icon: {e}", exc_info=True)
+    
     def create_ui(self):
         """Create main UI"""
         
@@ -159,6 +194,22 @@ class ProMirrorGolfUI:
         separator = tk.Frame(top_bar, bg=self.colors['border'], height=1)
         separator.pack(side='bottom', fill='x')
         
+        # App icon (left side, before brand)
+        if self.app_icon:
+            icon_frame = tk.Frame(top_bar, bg=self.colors['bg_main'])
+            icon_frame.pack(side='left', padx=(32, 12), pady=8)
+            
+            # Display icon in header (resize if needed for header size)
+            # Keep original size or resize to fit header height (64px - 16px padding = 48px max)
+            icon_label = tk.Label(
+                icon_frame,
+                image=self.app_icon,
+                bg=self.colors['bg_main']
+            )
+            icon_label.pack()
+            # Keep reference to prevent garbage collection
+            icon_label.image = self.app_icon
+        
         # Brand
         brand = tk.Label(
             top_bar,
@@ -167,7 +218,7 @@ class ProMirrorGolfUI:
             bg=self.colors['bg_main'],
             fg=self.colors['text_primary']
         )
-        brand.pack(side='left', padx=32, pady=16)
+        brand.pack(side='left', padx=(0, 32), pady=16)
         
         # Status indicator
         status_frame = tk.Frame(top_bar, bg=self.colors['bg_main'])
