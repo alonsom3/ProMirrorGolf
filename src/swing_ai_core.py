@@ -17,6 +17,8 @@ from .mlm2pro_listener import LaunchMonitorListener
 from .video_processor import VideoProcessor
 from .ai_coach import AICoach
 from .gamification import GamificationSystem
+from .frame_cache import FrameCache
+from .performance_logger import PerformanceLogger
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -73,6 +75,8 @@ class SwingAIController:
         self.metrics_extractor = MetricsExtractor()
         self.flaw_detector = FlawDetector()
         self.video_processor = VideoProcessor()
+        self.frame_cache = FrameCache(max_size=1000)  # Cache up to 1000 frames
+        self.performance_logger = PerformanceLogger()  # Performance logging
         
         db_path = self.config.get("database", {}).get("swing_db_path", "./data/swings.db")
         self.db = SwingDatabase(db_path)
@@ -388,6 +392,15 @@ class SwingAIController:
             
             # Yield control to event loop periodically to keep GUI responsive
             # This allows other async tasks and UI updates to run
+            frame_idx, dtl_frame, face_frame = frame_info
+            
+            # Check cache first
+            cached_data = self.frame_cache.get(video_id, frame_idx) if self.frame_cache else None
+            if cached_data:
+                all_pose_data.append(cached_data)
+                processed_count += 1
+                continue  # Skip processing if cached
+            
             frame_count += 1
             if frame_count % 5 == 0:  # Every 5 frames
                 await asyncio.sleep(0)  # Yield to event loop
@@ -399,6 +412,13 @@ class SwingAIController:
                 batch_results = await self._process_frame_batch_parallel(
                     frame_batch, processing_times, quality_mode
                 )
+                
+                # Cache processed frames
+                if self.frame_cache:
+                    for pose_data in batch_results:
+                        frame_idx = pose_data.get('frame_index', processed_count)
+                        self.frame_cache.set(video_id, frame_idx, pose_data)
+                
                 all_pose_data.extend(batch_results)
                 processed_count += len(frame_batch)
                 
@@ -439,6 +459,13 @@ class SwingAIController:
             batch_results = await self._process_frame_batch_parallel(
                 frame_batch, processing_times, quality_mode
             )
+            
+            # Cache processed frames
+            if self.frame_cache:
+                for pose_data in batch_results:
+                    frame_idx = pose_data.get('frame_index', processed_count)
+                    self.frame_cache.set(video_id, frame_idx, pose_data)
+            
             all_pose_data.extend(batch_results)
             processed_count += len(frame_batch)
             
@@ -460,6 +487,10 @@ class SwingAIController:
             
             if avg_time > 100:
                 logger.warning(f"Average processing time ({avg_time:.1f}ms) exceeds target (100ms)")
+            
+            # Log to performance CSV
+            if self.performance_logger:
+                self.performance_logger.end_session(processed_count)
         
         if not all_pose_data:
             return {"success": False, "error": "No swings detected in videos"}
@@ -543,8 +574,8 @@ class SwingAIController:
                 face_frame = cv2.resize(face_frame, (target_width, new_height), interpolation=cv2.INTER_LINEAR)
             
             # Create parallel tasks for DTL and Face pose detection
-            dtl_task = asyncio.create_task(self._analyze_dtl_pose(dtl_frame))
-            face_task = asyncio.create_task(self._analyze_face_pose(face_frame))
+            dtl_task = asyncio.create_task(self._analyze_dtl_pose(dtl_frame, quality_mode))
+            face_task = asyncio.create_task(self._analyze_face_pose(face_frame, quality_mode))
             
             # Wait for both to complete
             dtl_result, face_result = await asyncio.gather(dtl_task, face_task)
@@ -552,8 +583,15 @@ class SwingAIController:
             # Combine results
             pose_data = self._combine_pose_results(dtl_result, face_result, dtl_frame, face_frame)
             
+            # Add frame index to pose data for caching
+            pose_data['frame_index'] = frame_idx
+            
             elapsed_ms = (time.time() - start_time) * 1000
             processing_times.append(elapsed_ms)
+            
+            # Log frame time to performance logger
+            if hasattr(self, 'performance_logger') and self.performance_logger:
+                self.performance_logger.log_frame_time(elapsed_ms)
             
             if elapsed_ms > 100:
                 logger.warning(f"Frame {frame_idx} processing took {elapsed_ms:.1f}ms (target: <100ms)")
@@ -572,7 +610,7 @@ class SwingAIController:
         
         return batch_results
     
-    async def _analyze_dtl_pose(self, dtl_frame):
+    async def _analyze_dtl_pose(self, dtl_frame, quality_mode: str = "balanced"):
         """Analyze DTL frame pose (for parallel processing)"""
         if dtl_frame is None:
             return None
@@ -581,7 +619,7 @@ class SwingAIController:
         result = self.pose_analyzer.pose_dtl.process(dtl_rgb)
         return self.pose_analyzer._extract_landmarks(result)
     
-    async def _analyze_face_pose(self, face_frame):
+    async def _analyze_face_pose(self, face_frame, quality_mode: str = "balanced"):
         """Analyze Face frame pose (for parallel processing)"""
         if face_frame is None:
             return None

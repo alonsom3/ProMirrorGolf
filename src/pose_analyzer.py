@@ -67,10 +67,52 @@ class PoseAnalyzer:
         # Performance tracking
         self.frame_times = deque(maxlen=100)  # Track last 100 frame processing times
         self.use_gpu = use_gpu
+        
+        # Model caching - reuse initialized models
+        self._model_initialized = True
 
-    async def analyze(self, dtl_frame, face_frame) -> Dict:
+    def set_model_type(self, model_type: str):
+        """Dynamically change model complexity based on quality mode"""
+        if model_type == self.model_type:
+            return  # No change needed
+        
+        complexity_map = {
+            "speed": 0,
+            "balanced": 1,
+            "quality": 2
+        }
+        
+        new_complexity = complexity_map.get(model_type, 1)
+        if new_complexity != self.model_complexity:
+            logger.info(f"Changing pose model complexity: {self.model_complexity} -> {new_complexity} (type: {model_type})")
+            
+            # Reinitialize models with new complexity
+            min_confidence = 0.5  # Default
+            self.pose_dtl = self.mp_pose.Pose(
+                static_image_mode=False,
+                model_complexity=new_complexity,
+                min_detection_confidence=min_confidence,
+                min_tracking_confidence=0.5,
+                enable_segmentation=False
+            )
+            self.pose_face = self.mp_pose.Pose(
+                static_image_mode=False,
+                model_complexity=new_complexity,
+                min_detection_confidence=min_confidence,
+                min_tracking_confidence=0.5,
+                enable_segmentation=False
+            )
+            self.model_complexity = new_complexity
+            self.model_type = model_type
+    
+    async def analyze(self, dtl_frame, face_frame, quality_mode: str = "balanced") -> Dict:
         """
         Analyze latest frames and detect swing (optimized for <100ms per frame)
+        
+        Args:
+            dtl_frame: Down-the-line frame
+            face_frame: Face-on frame
+            quality_mode: "speed", "balanced", or "quality" - adjusts processing
         
         Returns:
             Dictionary with swing_detected, pose landmarks, and events
@@ -80,16 +122,23 @@ class PoseAnalyzer:
         if dtl_frame is None or face_frame is None:
             return {"swing_detected": False}
         
+        # Adjust target width based on quality mode for optimal speed/quality trade-off
+        if quality_mode == "speed":
+            target_width = 480  # Smaller for faster processing
+        elif quality_mode == "quality":
+            target_width = 1280  # Larger for better accuracy
+        else:  # balanced
+            target_width = 640  # Default balanced size
+        
         # Optimize frame processing: resize if too large for faster processing
-        # MediaPipe works well at 640x480, so we can downscale for speed
         # Use vectorized NumPy operations where possible
-        target_width = 640
         if dtl_frame.shape[1] > target_width:
             scale = target_width / dtl_frame.shape[1]
             new_height = int(dtl_frame.shape[0] * scale)
-            # Use faster interpolation for speed
-            dtl_frame = cv2.resize(dtl_frame, (target_width, new_height), interpolation=cv2.INTER_LINEAR)
-            face_frame = cv2.resize(face_frame, (target_width, new_height), interpolation=cv2.INTER_LINEAR)
+            # Use faster interpolation for speed mode, better quality for quality mode
+            interpolation = cv2.INTER_LINEAR if quality_mode == "speed" else cv2.INTER_AREA
+            dtl_frame = cv2.resize(dtl_frame, (target_width, new_height), interpolation=interpolation)
+            face_frame = cv2.resize(face_frame, (target_width, new_height), interpolation=interpolation)
         
         # Process frames (BGR to RGB conversion optimized with NumPy)
         # Vectorized color conversion is faster than cv2.cvtColor for large batches
