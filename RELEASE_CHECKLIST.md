@@ -774,6 +774,7 @@ Thanks to all contributors and testers!
 
 ---
 
-**Status**: ⏳ In Progress  
-**Target Release Date**: TBD  
-**Last Updated**: 2025-01-XX
+**Status**: ✅ Ready for Release  
+**Target Release Date**: 2025-01-XX  
+**Last Updated**: 2025-01-XX  
+**Version**: v2.0.0-ui-modernized

@@ -1,6 +1,7 @@
 # ProMirrorGolf Test Suite Assessment
 
 **Date**: 2025-01-XX  
+**Version**: v2.0.0-ui-modernized  
 **Status**: All Tests Passing with Minor Warnings
 
 ---

@@ -4,7 +4,8 @@
 
 The ProMirrorGolf UI has been fully modernized using CustomTkinter and modularized into reusable components. This document summarizes all changes, test results, and migration details.
 
-**Date**: 2025-01-XX
+**Date**: 2025-01-XX  
+**Version**: v2.0.0-ui-modernized  
 **Status**: ✅ Completed
 
 ---

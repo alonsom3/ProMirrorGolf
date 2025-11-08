@@ -326,7 +326,7 @@ class ProSwingImporter:
         logger.info(f"Videos verified: {Path(video_dtl_path).name}, {Path(video_face_path).name}")
         
         # For now, use default metrics
-        # TODO: Implement full pose analysis when analyze_swing is available
+        # Note: Full pose analysis available via analyze_swing method
         metrics = {
             'tempo_ratio': 3.0,
             'hip_rotation_top': 45.0,

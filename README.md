@@ -22,7 +22,10 @@ Automated, real-time swing analysis that integrates with GSPro and your launch m
 - ✅ **Flaw Detection** - ML-based swing diagnostics with recommendations
 - ✅ **Side-by-Side Videos** - Compare your swing to matched pros
 - ✅ **Historical Tracking** - Database of all swings for progress monitoring
-- ✅ **Enhanced UI** - Modern red-themed interface
+- ✅ **Modern CustomTkinter UI** - Modular, responsive interface with real-time performance dashboard
+- ✅ **Video Upload Support** - Process offline videos with quality modes (Speed/Balanced/Quality)
+- ✅ **Performance Logging** - Comprehensive metrics tracking and CSV export
+- ✅ **Mobile API** - REST endpoints for companion apps
 
 ---
 
@@ -85,12 +88,10 @@ python main.py
 ```
 ProMirrorGolf/
 │
-├── main.py                 # Main application entry point with full UI
+├── main.py                 # Main application entry point (CustomTkinter UI)
 ├── config.json             # System configuration
-├── split_video.py          # Video splitter for dual-view videos
-├── import_pro_swing.py     # Pro swing importer
-├── test_cameras.py         # Camera testing utility
 ├── requirements.txt        # Python dependencies
+├── sanity_test.py          # Automated sanity test script
 │
 ├── src/                    # Core source code
 │   ├── swing_ai_core.py          # Main controller
@@ -98,23 +99,50 @@ ProMirrorGolf/
 │   ├── mlm2pro_listener.py       # Launch monitor integration
 │   ├── pose_analyzer.py          # AI pose estimation
 │   ├── style_matcher.py          # Pro swing matching
-│   ├── report_generator.py       # Report creation
+│   ├── metrics_extractor.py      # Biomechanical metrics
+│   ├── flaw_detector.py          # Swing flaw detection
+│   ├── report_generator.py      # Report creation
+│   ├── video_processor.py       # Video processing pipeline
+│   ├── performance_logger.py    # Performance metrics logging
+│   ├── mobile_api.py             # REST API for mobile apps
 │   ├── database.py               # Data persistence
 │   └── youtube_downloader.py     # Video downloader
+│
+├── ui/                     # Modular UI components (CustomTkinter)
+│   ├── main_window.py            # Main application window
+│   ├── top_bar.py                # Top navigation bar
+│   ├── viewer_panel.py           # 3D skeleton viewer
+│   ├── metrics_panel.py            # Swing metrics display
+│   ├── controls_panel.py          # Playback and quality controls
+│   ├── progress_panel.py          # Progress bar and status
+│   ├── performance_dashboard.py   # Real-time performance metrics
+│   └── dialogs.py                # File dialogs and message boxes
 │
 ├── data/                   # Data storage
 │   ├── pro_videos/               # Professional swing videos
 │   ├── pro_swings.db             # Pro swing database
-│   └── swings.db                 # User swing database
+│   ├── swings.db                 # User swing database
+│   ├── cache/                    # Frame cache
+│   ├── exports/                  # Exported reports and videos
+│   └── analytics/                # Analytics data
 │
-├── output/                 # Generated outputs
-│   ├── videos/                   # Captured swing videos
-│   └── reports/                  # Analysis reports
+├── logs/                   # Log files
+│   └── performance_log.csv       # Performance metrics log
+│
+├── tests/                  # Test files
+│   ├── test_ui_modernization.py  # UI component tests
+│   ├── test_stress_ui.py         # Stress tests
+│   ├── test_e2e_swing_pipeline.py # End-to-end tests
+│   └── test_cameras.py           # Camera tests
 │
 └── docs/                   # Documentation
-    ├── README.md
-    ├── INSTALL.md
-    └── USAGE.md
+    ├── README.md                 # This file
+    ├── INSTALL.md                # Installation guide
+    ├── RELEASE_CHECKLIST.md      # Release checklist
+    ├── SANITY_TEST_PLAN.md       # Sanity test procedures
+    ├── TEST_ASSESSMENT.md        # Test suite assessment
+    ├── UI_MODERNIZATION_SUMMARY.md # UI modernization details
+    └── ENHANCEMENT_SUMMARY.md    # Enhancement implementation summary
 ```
 
 ---
@@ -480,20 +508,27 @@ pip install --force-reinstall -r requirements.txt
 
 ## 📈 Roadmap
 
-### Current Version (1.0)
+### Version 2.0 (Current) ✅
 - ✅ Dual camera capture
 - ✅ MLM2PRO integration
 - ✅ AI pose analysis
 - ✅ Pro matching
 - ✅ Flaw detection
-- ✅ Enhanced UI
+- ✅ Modern CustomTkinter UI
+- ✅ Video upload support
+- ✅ Performance dashboard
+- ✅ Performance logging
+- ✅ Mobile API (REST endpoints)
+- ✅ Batch processing
+- ✅ Enhanced export features
 
-### Planned (2.0)
+### Planned (Future)
 - 🔲 Real-time 3D avatar
-- 🔲 Mobile companion app
+- 🔲 Mobile companion app (UI)
 - 🔲 Cloud sync
 - 🔲 Drill recommendations
 - 🔲 Progress charts
+- 🔲 Advanced analytics dashboard
 
 ---
 
