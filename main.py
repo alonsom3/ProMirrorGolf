@@ -1148,7 +1148,8 @@ class ProMirrorGolfUI:
                     errors = result.get('errors', [])
                     if errors:
                         error_msg = f"{error_msg}\n\nDetails:\n" + "\n".join(errors)
-                    self.root.after(0, lambda: messagebox.showerror("Processing Error", f"Failed to process videos:\n{error_msg}"))
+                    error_msg_final = error_msg  # Capture for lambda
+                    self.root.after(0, lambda: messagebox.showerror("Processing Error", f"Failed to process videos:\n{error_msg_final}"))
             except asyncio.TimeoutError:
                 logger.error("Video processing timed out after 600 seconds")
                 self.root.after(0, lambda: messagebox.showerror(
