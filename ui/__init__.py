@@ -1,9 +1,10 @@
 """
 ProMirrorGolf UI Modules
-Modular UI components for maintainability
+Modular UI components for maintainability using CustomTkinter
 """
 
 from .main_window import MainWindow
+from .top_bar import TopBar
 from .viewer_panel import ViewerPanel
 from .controls_panel import ControlsPanel
 from .metrics_panel import MetricsPanel
@@ -13,6 +14,7 @@ from .dialogs import Dialogs
 
 __all__ = [
     'MainWindow',
+    'TopBar',
     'ViewerPanel',
     'ControlsPanel',
     'MetricsPanel',

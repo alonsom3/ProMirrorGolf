@@ -1,9 +1,17 @@
 """
 Dialogs Module - File dialogs and message boxes
+Compatible with both tkinter and CustomTkinter
 """
 
+try:
+    import customtkinter as ctk
+    from customtkinter import filedialog
+    CTK_AVAILABLE = True
+except ImportError:
+    CTK_AVAILABLE = False
+
 import tkinter as tk
-from tkinter import messagebox, filedialog
+from tkinter import messagebox, filedialog as tk_filedialog
 from pathlib import Path
 from typing import Optional, Tuple, List
 import logging
@@ -22,7 +30,8 @@ class Dialogs:
         Returns:
             Tuple of (dtl_path, face_path) or (None, None) if cancelled
         """
-        dtl_path = filedialog.askopenfilename(
+        # Use tkinter filedialog (works with both tkinter and CustomTkinter)
+        dtl_path = tk_filedialog.askopenfilename(
             parent=parent,
             title="Select DTL (Down-the-Line) Video",
             filetypes=[
@@ -37,7 +46,7 @@ class Dialogs:
         if not dtl_path:
             return None, None
         
-        face_path = filedialog.askopenfilename(
+        face_path = tk_filedialog.askopenfilename(
             parent=parent,
             title="Select Face-on Video",
             filetypes=[
@@ -57,7 +66,7 @@ class Dialogs:
     @staticmethod
     def ask_save_video(parent, default_name: str = "swing_video.mp4") -> Optional[str]:
         """Ask user where to save exported video"""
-        return filedialog.asksaveasfilename(
+        return tk_filedialog.asksaveasfilename(
             parent=parent,
             title="Export Swing Video",
             defaultextension=".mp4",
@@ -72,7 +81,7 @@ class Dialogs:
     @staticmethod
     def ask_save_html(parent, default_name: str = "swing_report.html") -> Optional[str]:
         """Ask user where to save HTML report"""
-        return filedialog.asksaveasfilename(
+        return tk_filedialog.asksaveasfilename(
             parent=parent,
             title="Save HTML Report",
             defaultextension=".html",
@@ -86,7 +95,7 @@ class Dialogs:
     @staticmethod
     def ask_save_csv(parent, default_name: str = "swing_data.csv") -> Optional[str]:
         """Ask user where to save CSV export"""
-        return filedialog.asksaveasfilename(
+        return tk_filedialog.asksaveasfilename(
             parent=parent,
             title="Export CSV Data",
             defaultextension=".csv",
@@ -100,7 +109,7 @@ class Dialogs:
     @staticmethod
     def ask_save_pdf(parent, default_name: str = "swing_report.pdf") -> Optional[str]:
         """Ask user where to save PDF report"""
-        return filedialog.asksaveasfilename(
+        return tk_filedialog.asksaveasfilename(
             parent=parent,
             title="Export PDF Report",
             defaultextension=".pdf",
@@ -114,7 +123,7 @@ class Dialogs:
     @staticmethod
     def ask_batch_videos(parent) -> List[str]:
         """Ask user to select multiple video files for batch processing"""
-        files = filedialog.askopenfilenames(
+        files = tk_filedialog.askopenfilenames(
             parent=parent,
             title="Select Videos for Batch Processing",
             filetypes=[
