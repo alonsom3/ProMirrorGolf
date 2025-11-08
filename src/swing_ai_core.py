@@ -379,11 +379,18 @@ class SwingAIController:
         batch_size = 10  # Process 10 frames before checking for cancellation
         
         frame_batch = []
+        frame_count = 0
         for frame_info in frame_generator:
             # Check if session was stopped or cancelled
             if not self.session_active or self.processing_cancelled:
                 logger.warning("Processing cancelled by user")
                 return {"success": False, "error": "Processing cancelled - session stopped"}
+            
+            # Yield control to event loop periodically to keep GUI responsive
+            # This allows other async tasks and UI updates to run
+            frame_count += 1
+            if frame_count % 5 == 0:  # Every 5 frames
+                await asyncio.sleep(0)  # Yield to event loop
             
             frame_batch.append(frame_info)
             
