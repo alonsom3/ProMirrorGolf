@@ -1122,52 +1122,14 @@ class ProMirrorGolfUI:
                 self.controller.process_uploaded_videos(dtl_path, face_path, downsample_factor=2, quality_mode="speed"),
                 self.loop
             )
-            try:
-                result = future.result(timeout=600)  # 600 second timeout for processing (10 minutes)
-                if result.get('success'):
-                    swing_data = result.get('swing_data', {})
-                    self.current_swing_id = result.get('swing_id')
-                    self.current_swing_data = swing_data
-                    self.swing_count += 1
-                    
-                    frames_processed = result.get('frames_processed', 0)
-                    swings_detected = result.get('swings_detected', 0)
-                    
-                    # Update UI with results (thread-safe)
-                    def update_ui():
-                        self.update_ui_with_swing_data(swing_data)
-                        self.update_status(f"Video processed! {frames_processed} frames, {swings_detected} swings detected")
-                    
-                    self.root.after(0, update_ui)
-                    
-                    messagebox.showinfo(
-                        "Success", 
-                        f"Video processed successfully!\n\n"
-                        f"Frames processed: {frames_processed}\n"
-                        f"Swings detected: {swings_detected}\n"
-                        f"Swing analyzed and saved."
-                    )
-                else:
-                    error_msg = result.get('error', 'Unknown error')
-                    errors = result.get('errors', [])
-                    if errors:
-                        error_msg = f"{error_msg}\n\nDetails:\n" + "\n".join(errors)
-                    error_msg_final = error_msg  # Capture for lambda
-                    self.root.after(0, lambda: messagebox.showerror("Processing Error", f"Failed to process videos:\n{error_msg_final}"))
-            except asyncio.TimeoutError:
-                logger.error("Video processing timed out after 600 seconds")
-                self.root.after(0, lambda: messagebox.showerror(
-                    "Timeout Error",
-                    "Video processing timed out after 10 minutes.\n\n"
-                    "This may occur with very long videos. Try:\n"
-                    "- Using shorter video clips\n"
-                    "- Ensuring videos are properly formatted\n"
-                    "- Checking system resources"
-                ))
-            except Exception as e:
-                error_msg = str(e)
-                logger.error(f"Error processing videos: {error_msg}", exc_info=True)
-                self.root.after(0, lambda err=error_msg: messagebox.showerror("Error", f"Failed to process videos:\n{err}"))
+            
+            # Store future for non-blocking check
+            self.processing_future = future
+            self.processing_start_time = time.time()
+            self.processing_timeout = 600  # 10 minutes
+            
+            # Start non-blocking check loop
+            self._check_processing_complete()
     
     def export_video(self):
         """Export current swing video"""
