@@ -4,7 +4,7 @@ import asyncio
 import logging
 import uuid
 import time
-from typing import Dict, Optional
+from typing import Dict, Optional, List, Tuple
 from .camera_manager import DualCameraManager
 from .pose_analyzer import PoseAnalyzer
 from .database import SwingDatabase
@@ -39,6 +39,8 @@ class SwingAIController:
         self.gamification = None
         
         self.session_active = False
+        self.processing_cancelled = False  # Flag for cancel button
+        self.processing_start_time = None  # For ETA calculation
         self.current_user = None
         self.session_name = None
         self.current_session_id = None
@@ -309,7 +311,8 @@ class SwingAIController:
         
         return shot_data
     
-    async def process_uploaded_videos(self, dtl_path: str, face_path: str, downsample_factor: int = 1) -> Dict:
+    async def process_uploaded_videos(self, dtl_path: str, face_path: str, downsample_factor: int = 1, 
+                                     quality_mode: str = "balanced") -> Dict:
         """
         Process uploaded videos for swing analysis
         
@@ -355,48 +358,83 @@ class SwingAIController:
         
         logger.info(f"Processing {total_frames_to_process} frame pairs (downsampled from {min(dtl_frames, face_frames)})...")
         
-        # Use generator for lazy loading (memory efficient)
-        frame_generator = self.video_processor.get_frame_generator(downsample_factor=downsample_factor)
+        # Use generator for lazy loading with parallel extraction
+        frame_generator = self.video_processor.get_frame_generator(
+            downsample_factor=downsample_factor, 
+            use_parallel=True
+        )
         
         # Analyze frames with threaded processing for UI responsiveness
         all_pose_data = []
         processed_count = 0
         processing_times = []
+        best_swing_so_far = None  # For progressive display
         
         # Process frames in batches for better performance
         batch_size = 10  # Process 10 frames before checking for cancellation
         
         frame_batch = []
         for frame_info in frame_generator:
-            # Check if session was stopped
-            if not self.session_active:
-                logger.warning("Session stopped during video processing")
+            # Check if session was stopped or cancelled
+            if not self.session_active or self.processing_cancelled:
+                logger.warning("Processing cancelled by user")
                 return {"success": False, "error": "Processing cancelled - session stopped"}
             
             frame_batch.append(frame_info)
             
             # Process batch when full or at end
             if len(frame_batch) >= batch_size:
-                batch_results = await self._process_frame_batch(frame_batch, processing_times)
+                batch_results = await self._process_frame_batch_parallel(
+                    frame_batch, processing_times, quality_mode
+                )
                 all_pose_data.extend(batch_results)
                 processed_count += len(frame_batch)
                 
-                # Update progress callback (thread-safe)
+                # Update best swing for progressive display
+                if batch_results:
+                    current_best = max(batch_results, key=lambda x: len(x.get("dtl_poses", [])))
+                    if not best_swing_so_far or len(current_best.get("dtl_poses", [])) > len(best_swing_so_far.get("dtl_poses", [])):
+                        best_swing_so_far = current_best
+                        # Progressive callback for preview
+                        if hasattr(self, 'on_progressive_result') and callable(self.on_progressive_result):
+                            self.on_progressive_result(best_swing_so_far, processed_count, total_frames_to_process)
+                
+                # Calculate ETA
+                elapsed_time = time.time() - self.processing_start_time
+                if processed_count > 0 and elapsed_time > 0:
+                    avg_time_per_frame = elapsed_time / processed_count
+                    remaining_frames = total_frames_to_process - processed_count
+                    eta_seconds = remaining_frames * avg_time_per_frame
+                    eta_minutes = int(eta_seconds // 60)
+                    eta_secs = int(eta_seconds % 60)
+                    eta_str = f"{eta_minutes}m {eta_secs}s" if eta_minutes > 0 else f"{eta_secs}s"
+                else:
+                    eta_str = "Calculating..."
+                
+                # Update progress callback (thread-safe) with ETA
                 if hasattr(self, 'on_progress_update') and callable(self.on_progress_update):
                     progress = processed_count / total_frames_to_process
                     avg_time = np.mean(processing_times[-batch_size:]) if processing_times else 0
                     self.on_progress_update(
                         progress, 
-                        f"Processing frame {processed_count}/{total_frames_to_process} (avg: {avg_time:.1f}ms/frame)"
+                        f"Frame {processed_count}/{total_frames_to_process} | Avg: {avg_time:.1f}ms | ETA: {eta_str}"
                     )
                 
                 frame_batch = []
         
         # Process remaining frames
-        if frame_batch:
-            batch_results = await self._process_frame_batch(frame_batch, processing_times)
+        if frame_batch and not self.processing_cancelled:
+            batch_results = await self._process_frame_batch_parallel(
+                frame_batch, processing_times, quality_mode
+            )
             all_pose_data.extend(batch_results)
             processed_count += len(frame_batch)
+            
+            # Update best swing
+            if batch_results:
+                current_best = max(batch_results, key=lambda x: len(x.get("dtl_poses", [])))
+                if not best_swing_so_far or len(current_best.get("dtl_poses", [])) > len(best_swing_so_far.get("dtl_poses", [])):
+                    best_swing_so_far = current_best
         
         # Log performance statistics
         if processing_times:
@@ -449,6 +487,121 @@ class SwingAIController:
             "swing_data": swing_data,
             "frames_processed": processed_count,
             "swings_detected": len(all_pose_data)
+        }
+    
+    def cancel_processing(self):
+        """Cancel ongoing video processing"""
+        self.processing_cancelled = True
+        logger.info("Processing cancellation requested by user")
+    
+    async def _process_frame_batch_parallel(self, frame_batch: List[Tuple], processing_times: List[float], 
+                                           quality_mode: str = "balanced") -> List[Dict]:
+        """
+        Process a batch of frames with parallel pose detection for faster analysis
+        
+        Args:
+            frame_batch: List of (frame_index, dtl_frame, face_frame) tuples
+            processing_times: List to append processing times to
+            quality_mode: "speed", "balanced", or "quality"
+            
+        Returns:
+            List of pose data dictionaries for frames with detected swings
+        """
+        batch_results = []
+        
+        # Process DTL and Face poses in parallel for each frame
+        async def process_frame_parallel(frame_idx, dtl_frame, face_frame):
+            start_time = time.time()
+            
+            # Adjust processing based on quality mode
+            if quality_mode == "speed":
+                # Speed mode: resize frames smaller for faster processing
+                target_width = 480
+            elif quality_mode == "quality":
+                # Quality mode: keep original size or minimal resize
+                target_width = 1280
+            else:  # balanced
+                target_width = 640
+            
+            # Resize if needed
+            if dtl_frame.shape[1] > target_width:
+                scale = target_width / dtl_frame.shape[1]
+                new_height = int(dtl_frame.shape[0] * scale)
+                dtl_frame = cv2.resize(dtl_frame, (target_width, new_height), interpolation=cv2.INTER_LINEAR)
+                face_frame = cv2.resize(face_frame, (target_width, new_height), interpolation=cv2.INTER_LINEAR)
+            
+            # Create parallel tasks for DTL and Face pose detection
+            dtl_task = asyncio.create_task(self._analyze_dtl_pose(dtl_frame))
+            face_task = asyncio.create_task(self._analyze_face_pose(face_frame))
+            
+            # Wait for both to complete
+            dtl_result, face_result = await asyncio.gather(dtl_task, face_task)
+            
+            # Combine results
+            pose_data = self._combine_pose_results(dtl_result, face_result, dtl_frame, face_frame)
+            
+            elapsed_ms = (time.time() - start_time) * 1000
+            processing_times.append(elapsed_ms)
+            
+            if elapsed_ms > 100:
+                logger.warning(f"Frame {frame_idx} processing took {elapsed_ms:.1f}ms (target: <100ms)")
+            
+            return pose_data
+        
+        # Process all frames in batch
+        tasks = [process_frame_parallel(frame_idx, dtl_frame, face_frame) 
+                 for frame_idx, dtl_frame, face_frame in frame_batch]
+        results = await asyncio.gather(*tasks)
+        
+        # Filter for detected swings
+        for pose_data in results:
+            if pose_data.get("swing_detected"):
+                batch_results.append(pose_data)
+        
+        return batch_results
+    
+    async def _analyze_dtl_pose(self, dtl_frame):
+        """Analyze DTL frame pose (for parallel processing)"""
+        if dtl_frame is None:
+            return None
+        # Use pose analyzer's DTL pose detector
+        dtl_rgb = cv2.cvtColor(dtl_frame, cv2.COLOR_BGR2RGB)
+        result = self.pose_analyzer.pose_dtl.process(dtl_rgb)
+        return self.pose_analyzer._extract_landmarks(result)
+    
+    async def _analyze_face_pose(self, face_frame):
+        """Analyze Face frame pose (for parallel processing)"""
+        if face_frame is None:
+            return None
+        # Use pose analyzer's Face pose detector
+        face_rgb = cv2.cvtColor(face_frame, cv2.COLOR_BGR2RGB)
+        result = self.pose_analyzer.pose_face.process(face_rgb)
+        return self.pose_analyzer._extract_landmarks(result)
+    
+    def _combine_pose_results(self, dtl_landmarks, face_landmarks, dtl_frame, face_frame):
+        """Combine DTL and Face pose results into full pose data"""
+        # This mimics the pose_analyzer.analyze() method but with pre-processed landmarks
+        swing_detected = bool(dtl_landmarks) and bool(face_landmarks)
+        
+        if dtl_landmarks:
+            self.pose_analyzer.dtl_pose_buffer.append(dtl_landmarks)
+        if face_landmarks:
+            self.pose_analyzer.face_pose_buffer.append(face_landmarks)
+        
+        dtl_poses = list(self.pose_analyzer.dtl_pose_buffer)
+        face_poses = list(self.pose_analyzer.face_pose_buffer)
+        
+        events = {}
+        if len(dtl_poses) >= 30 and swing_detected:
+            events = self.pose_analyzer._detect_swing_events(dtl_poses)
+        
+        return {
+            "swing_detected": swing_detected,
+            "dtl_poses": dtl_poses,
+            "face_poses": face_poses,
+            "events": events,
+            "dtl_landmarks": dtl_landmarks,
+            "face_landmarks": face_landmarks
         }
     
     def get_mlm2pro_status(self) -> Dict:
