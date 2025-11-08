@@ -713,6 +713,10 @@ class TestSwingPipeline:
             passed = await self.test_edge_cases()
             test_results['edge_cases'] = passed
             
+            # Test 9: Video upload processing
+            passed = await self.test_video_upload_processing()
+            test_results['video_upload_processing'] = passed
+            
             # Summary
             logger.info("\n" + "=" * 60)
             logger.info("TEST SUMMARY")
