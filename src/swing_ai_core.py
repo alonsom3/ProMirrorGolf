@@ -4,6 +4,7 @@ import asyncio
 import logging
 import uuid
 import time
+import cv2
 from typing import Dict, Optional, List, Tuple
 from .camera_manager import DualCameraManager
 from .pose_analyzer import PoseAnalyzer
