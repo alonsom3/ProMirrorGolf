@@ -330,12 +330,23 @@ class ProSwingDatabase:
         
         cursor.execute('''
             CREATE INDEX IF NOT EXISTS idx_pro_club 
-            ON pro_swings(club_type)
+                ON pro_swings(club_type)
         ''')
         
         cursor.execute('''
-            CREATE INDEX IF NOT EXISTS idx_pro_tags 
-            ON pro_swings(style_tags)
+            CREATE INDEX IF NOT EXISTS idx_pro_tags
+                ON pro_swings(style_tags)
+        ''')
+        
+        # Additional performance indexes
+        cursor.execute('''
+            CREATE INDEX IF NOT EXISTS idx_pro_golfer 
+                ON pro_swings(golfer_name)
+        ''')
+        
+        cursor.execute('''
+            CREATE INDEX IF NOT EXISTS idx_pro_club_golfer 
+                ON pro_swings(club_type, golfer_name)
         ''')
         
         self.conn.commit()

@@ -64,12 +64,19 @@ class ProMirrorGolfUI:
         self.root.configure(bg=self.colors['bg_main'])
         
         # State
-        self.current_frame = 105
-        self.total_frames = 300
+        self.current_frame = 0
+        self.total_frames = 0
+        self.is_playing = False
+        self.playback_speed = 1.0
+        self.video_frames = []  # Store frames for playback
         self.current_pro = "Rory McIlroy"
         self.current_pro_id = None  # Store selected pro ID
         self.current_club = "Driver"
         self.current_view = "Side"  # Current view: Side, Front, Top, Overlay
+        
+        # Video processing state
+        self.processing_progress = 0.0
+        self.processing_active = False
         
         # Backend integration
         self.controller = None
@@ -511,28 +518,85 @@ class ProMirrorGolfUI:
             'ankle_r': (cx + 40*scale, cy + 100*scale),
         }
     
-    def _draw_overlay_indicators(self, canvas, cx, cy, scale, color):
-        """Draw additional indicators for overlay view"""
-        # Draw angle arcs
-        # Spine angle indicator
-        canvas.create_arc(
-            cx - 50*scale, cy - 50*scale,
-            cx + 50*scale, cy + 50*scale,
-            start=0, extent=30,
-            outline=color,
-            width=2,
-            style='arc'
-        )
+    def _draw_overlay_differences(self, canvas, cx, cy, scale, color):
+        """Draw overlay differences between user and pro swings"""
+        if not self.current_swing_data:
+            return
         
-        # Rotation indicator
-        canvas.create_line(
-            cx, cy,
-            cx + int(50*scale * np.cos(np.radians(45))),
-            cy - int(50*scale * np.sin(np.radians(45))),
-            fill=color,
-            width=2,
-            arrow=tk.LAST
-        )
+        # Get user and pro metrics
+        user_metrics = self.current_swing_data.get('metrics', {})
+        pro_match = self.current_swing_data.get('pro_match', {})
+        
+        if not user_metrics or not pro_match:
+            return
+        
+        # Get pro metrics from database if available
+        pro_id = pro_match.get('pro_id')
+        pro_metrics = {}
+        
+        if pro_id and self.controller and self.controller.style_matcher:
+            try:
+                pro_swing = self.controller.style_matcher.pro_db.get_pro_swing(pro_id)
+                if pro_swing:
+                    pro_metrics = pro_swing.get('metrics', {})
+            except:
+                pass
+        
+        # Draw difference indicators
+        differences = []
+        key_metrics = ['hip_rotation_top', 'shoulder_rotation_top', 'x_factor', 'spine_angle_address']
+        
+        for metric in key_metrics:
+            user_val = user_metrics.get(metric, 0)
+            pro_val = pro_metrics.get(metric, 0)
+            
+            if pro_val != 0:
+                diff = user_val - pro_val
+                differences.append({
+                    'metric': metric,
+                    'diff': diff
+                })
+        
+        # Draw visual indicators
+        y_offset = -100 * scale
+        for i, diff_info in enumerate(differences[:4]):  # Show top 4 differences
+            diff = diff_info['diff']
+            metric_name = diff_info['metric'].replace('_', ' ').title()
+            
+            # Color based on difference magnitude
+            if abs(diff) < 5:
+                diff_color = self.colors['good']
+            elif abs(diff) < 15:
+                diff_color = self.colors['warning']
+            else:
+                diff_color = self.colors['bad']
+            
+            # Draw indicator line
+            line_length = min(100 * scale, abs(diff) * 2 * scale)
+            direction = 1 if diff > 0 else -1
+            
+            x_start = cx
+            x_end = cx + (line_length * direction)
+            
+            canvas.create_line(
+                x_start, cy + y_offset,
+                x_end, cy + y_offset,
+                fill=diff_color,
+                width=3,
+                arrow='last' if abs(diff) > 5 else None
+            )
+            
+            # Draw label
+            canvas.create_text(
+                cx + (line_length * direction) + (20 * direction),
+                cy + y_offset,
+                text=f"{metric_name}: {diff:+.1f}°",
+                fill=diff_color,
+                font=("Segoe UI", 8),
+                anchor='w' if direction > 0 else 'e'
+            )
+            
+            y_offset += 30 * scale
     
     def create_metrics_sidebar(self, parent):
         """Create metrics sidebar"""
@@ -1281,28 +1345,106 @@ class ProMirrorGolfUI:
         """Handle playback controls"""
         logger.info(f"Playback control: {control}")
         
-        if not self.current_swing_data:
+        if not self.current_swing_data and not self.video_frames:
             self.update_status("No swing data available for playback")
             return
         
         if control == "◄◄":
             # Rewind to start
             self.current_frame = 0
+            self.is_playing = False
             self.update_timeline()
+            self.update_skeleton_display()
             self.update_status("Rewound to start")
         elif control == "►":
             # Play/Pause toggle
-            self.update_status("Play/Pause - Video playback coming soon")
+            if self.total_frames > 0:
+                self.is_playing = not self.is_playing
+                if self.is_playing:
+                    self.start_playback()
+                    self.update_status("Playing...")
+                else:
+                    self.update_status("Paused")
+            else:
+                self.update_status("No video frames available")
         elif control == "►►":
             # Fast forward to end
-            self.current_frame = self.total_frames
+            self.current_frame = max(0, self.total_frames - 1)
+            self.is_playing = False
             self.update_timeline()
+            self.update_skeleton_display()
             self.update_status("Fast forwarded to end")
         elif control == "⟲":
             # Reset to current swing start
             self.current_frame = 0
+            self.is_playing = False
             self.update_timeline()
+            self.update_skeleton_display()
             self.update_status("Reset to swing start")
+    
+    def frame_step(self, direction):
+        """Step forward or backward one frame"""
+        if self.total_frames == 0:
+            return
+        
+        self.is_playing = False
+        self.current_frame = max(0, min(self.total_frames - 1, self.current_frame + direction))
+        self.update_timeline()
+        self.update_skeleton_display()
+        self.update_status(f"Frame {self.current_frame + 1} / {self.total_frames}")
+    
+    def start_playback(self):
+        """Start video playback animation"""
+        if not self.is_playing or self.total_frames == 0:
+            return
+        
+        if self.current_frame >= self.total_frames - 1:
+            self.current_frame = 0
+            self.is_playing = False
+            return
+        
+        self.current_frame += 1
+        self.update_timeline()
+        self.update_skeleton_display()
+        
+        # Schedule next frame (adjust delay for playback speed)
+        delay_ms = int(1000 / (30 * self.playback_speed))  # 30 fps base
+        self.root.after(delay_ms, self.start_playback)
+    
+    def update_progress_bar(self, progress: float, message: str = ""):
+        """Update progress bar for video processing"""
+        if not hasattr(self, 'progress_bar'):
+            return
+        
+        self.processing_progress = max(0.0, min(1.0, progress))
+        
+        def update():
+            self.progress_bar.delete("all")
+            w = self.progress_bar.winfo_width()
+            if w > 1:
+                # Draw background
+                self.progress_bar.create_rectangle(
+                    0, 0, w, 8,
+                    fill=self.colors['bg_dark'],
+                    outline=''
+                )
+                # Draw progress
+                progress_width = int(w * self.processing_progress)
+                if progress_width > 0:
+                    self.progress_bar.create_rectangle(
+                        0, 0, progress_width, 8,
+                        fill=self.colors['accent_red'],
+                        outline=''
+                    )
+                # Update label
+                if message:
+                    self.progress_label.config(text=message)
+                elif self.processing_progress > 0:
+                    self.progress_label.config(text=f"{int(self.processing_progress * 100)}%")
+                else:
+                    self.progress_label.config(text="")
+        
+        self.root.after(0, update)
     
     def change_view(self, view):
         """Change camera view - updates skeleton display"""
@@ -1515,6 +1657,10 @@ class ProMirrorGolfUI:
             self.update_mlm2pro_status()
             self.root.after(5000, self._periodic_mlm2pro_update)  # Update every 5 seconds
     
+    def on_video_progress_update(self, progress: float, message: str):
+        """Callback for video processing progress updates"""
+        self.root.after(0, lambda: self.update_progress_bar(progress, message))
+    
     def update_status(self, message):
         """Update status bar message"""
         if self.status_message:
@@ -1545,6 +1691,8 @@ class ProMirrorGolfUI:
                 
                 # Set callback for swing detection
                 self.controller.on_swing_detected = self.on_swing_detected
+                # Add progress callback for video processing
+                self.controller.on_progress_update = self.on_video_progress_update
                 
                 logger.info("Backend initialized successfully")
                 self.root.after(0, lambda: self.update_status("Backend initialized - Ready to start session"))

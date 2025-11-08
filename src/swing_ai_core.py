@@ -14,6 +14,8 @@ from .metrics_extractor import MetricsExtractor
 from .flaw_detector import FlawDetector
 from .mlm2pro_listener import LaunchMonitorListener
 from .video_processor import VideoProcessor
+from .ai_coach import AICoach
+from .gamification import GamificationSystem
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +34,8 @@ class SwingAIController:
         self.flaw_detector = None
         self.launch_monitor = None
         self.video_processor = None
+        self.ai_coach = None
+        self.gamification = None
         
         self.session_active = False
         self.current_user = None
@@ -72,6 +76,10 @@ class SwingAIController:
         self.style_matcher = StyleMatcher(pro_db_path)
         output_dir = self.config.get("reports", {}).get("output_dir", "./data/reports")
         self.report_generator = ReportGenerator(output_dir)
+        
+        # Initialize AI Coach and Gamification
+        self.ai_coach = AICoach(self.db)
+        self.gamification = GamificationSystem(self.db)
         
         # Initialize MLM2Pro listener if configured
         mlm2pro_cfg = self.config.get("mlm2pro", {})
@@ -350,7 +358,7 @@ class SwingAIController:
         
         logger.info(f"Processing {total_frames} frame pairs (downsampled from {min(dtl_frames, face_frames)})...")
         
-        # Analyze each frame pair
+        # Analyze each frame pair (with progress updates)
         all_pose_data = []
         processed_count = 0
         
@@ -365,6 +373,11 @@ class SwingAIController:
             
             if pose_data.get("swing_detected"):
                 all_pose_data.append(pose_data)
+            
+            # Update progress callback if available
+            if hasattr(self, 'on_progress_update') and callable(self.on_progress_update):
+                progress = (idx + 1) / total_frames
+                self.on_progress_update(progress, f"Processing frame {idx + 1}/{total_frames}")
             
             # Log progress every 100 frames
             if (idx + 1) % 100 == 0:
