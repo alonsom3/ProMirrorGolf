@@ -1,6 +1,8 @@
-# <img src="assets/icons/ProMirrorGolf_App_Icon.png" alt="ProMirrorGolf" width="64" height="64"> ProMirrorGolf
+# ProMirrorGolf
 
 **AI-Powered Golf Swing Analysis System**
+
+<img src="assets/icons/ProMirrorGolf_App_Icon.png" alt="ProMirrorGolf" width="100" height="100"> 
 
 Automated, real-time swing analysis that integrates with GSPro and your launch monitor. Hit a ball, get instant feedback with pro comparisons, 3D skeleton analysis, and personalized coaching recommendations.
 
