@@ -194,22 +194,6 @@ class ProMirrorGolfUI:
         separator = tk.Frame(top_bar, bg=self.colors['border'], height=1)
         separator.pack(side='bottom', fill='x')
         
-        # App icon (left side, before brand)
-        if self.app_icon:
-            icon_frame = tk.Frame(top_bar, bg=self.colors['bg_main'])
-            icon_frame.pack(side='left', padx=(32, 12), pady=8)
-            
-            # Display icon in header (resize if needed for header size)
-            # Keep original size or resize to fit header height (64px - 16px padding = 48px max)
-            icon_label = tk.Label(
-                icon_frame,
-                image=self.app_icon,
-                bg=self.colors['bg_main']
-            )
-            icon_label.pack()
-            # Keep reference to prevent garbage collection
-            icon_label.image = self.app_icon
-        
         # Brand
         brand = tk.Label(
             top_bar,
@@ -218,7 +202,7 @@ class ProMirrorGolfUI:
             bg=self.colors['bg_main'],
             fg=self.colors['text_primary']
         )
-        brand.pack(side='left', padx=(0, 32), pady=16)
+        brand.pack(side='left', padx=32, pady=16)
         
         # Status indicator
         status_frame = tk.Frame(top_bar, bg=self.colors['bg_main'])
