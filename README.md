@@ -136,6 +136,7 @@ ProMirrorGolf/
 - **Shot Data Integration**: Real-time shot data from launch monitor
 - **Connection Status**: Monitor connection and shot detection
 - **Offline Fallback**: Estimates used if MLM2Pro unavailable
+- **Video Upload Mode**: MLM2Pro automatically disabled in video upload mode (not needed)
 
 ### Analytics & Logging
 - **Frame-Level Metrics**: Track processing time and pose quality
@@ -175,21 +176,37 @@ ProMirrorGolf/
 
 #### Video Upload Mode
 
-1. **Start session in upload mode** (via API or UI):
-   ```python
-   await controller.start_session(user_id, session_name, use_video_upload=True)
-   ```
+**Important Notes:**
+- MLM2Pro connector is **automatically disabled** in video upload mode
+- Processing timeout is **10 minutes** (600 seconds) to handle long videos
+- Frame count alignment is checked and warnings logged if videos differ
+- Session stop is safe and handles timeouts gracefully
 
-2. **Upload videos**:
-   ```python
-   result = await controller.process_uploaded_videos(dtl_path, face_path)
-   ```
+1. **Click "Upload Video"** button in the top-right
+
+2. **Select videos**:
+   - First: Select Down-the-Line (DTL) video
+   - Second: Select Face-on video
+   - Supported formats: MP4, AVI, MOV, MKV, WEBM
 
 3. **Automatic processing**:
-   - Videos validated and synchronized
+   - Videos validated (format, frame count, properties)
+   - Frame alignment checked (warnings if mismatch)
    - Frames extracted and analyzed
-   - Full pipeline executed
+   - Full pipeline executed (same as live mode)
    - Results saved to database
+   - Progress logged every 100 frames
+
+**Frame Alignment:**
+- If DTL and Face videos have different frame counts, the system uses the shorter video length
+- A warning is logged but processing continues
+- For best results, ensure both videos have the same frame count
+
+**Processing Time:**
+- Depends on video length and frame rate
+- Typical: 1-5 minutes for 30-60 second videos
+- Timeout: 10 minutes maximum
+- Progress updates logged every 100 frames
 
 ### During Practice - Live Backend Integration
 

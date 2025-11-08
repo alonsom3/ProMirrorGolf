@@ -1007,31 +1007,58 @@ class ProMirrorGolfUI:
                     messagebox.showerror("Error", f"Failed to start session: {e}")
                     return
         
-        # Process videos
-        self.update_status("Processing uploaded videos...")
+        # Process videos with increased timeout for long videos
+        self.update_status("Processing uploaded videos... (this may take several minutes)")
         if self.loop:
+            # Use 600 second timeout (10 minutes) for processing long videos
             future = asyncio.run_coroutine_threadsafe(
-                self.controller.process_uploaded_videos(dtl_path, face_path),
+                self.controller.process_uploaded_videos(dtl_path, face_path, downsample_factor=1),
                 self.loop
             )
             try:
-                result = future.result(timeout=60)  # 60 second timeout for processing
+                result = future.result(timeout=600)  # 600 second timeout for processing (10 minutes)
                 if result.get('success'):
                     swing_data = result.get('swing_data', {})
                     self.current_swing_id = result.get('swing_id')
                     self.current_swing_data = swing_data
                     self.swing_count += 1
                     
-                    # Update UI with results
-                    self.root.after(0, lambda: self.update_ui_with_swing_data(swing_data))
-                    self.update_status(f"Video processed successfully! Swing #{self.swing_count} analyzed.")
-                    messagebox.showinfo("Success", f"Video processed successfully!\n\nSwing analyzed and saved.")
+                    frames_processed = result.get('frames_processed', 0)
+                    swings_detected = result.get('swings_detected', 0)
+                    
+                    # Update UI with results (thread-safe)
+                    def update_ui():
+                        self.update_ui_with_swing_data(swing_data)
+                        self.update_status(f"Video processed! {frames_processed} frames, {swings_detected} swings detected")
+                    
+                    self.root.after(0, update_ui)
+                    
+                    messagebox.showinfo(
+                        "Success", 
+                        f"Video processed successfully!\n\n"
+                        f"Frames processed: {frames_processed}\n"
+                        f"Swings detected: {swings_detected}\n"
+                        f"Swing analyzed and saved."
+                    )
                 else:
                     error_msg = result.get('error', 'Unknown error')
-                    messagebox.showerror("Processing Error", f"Failed to process videos:\n{error_msg}")
+                    errors = result.get('errors', [])
+                    if errors:
+                        error_msg = f"{error_msg}\n\nDetails:\n" + "\n".join(errors)
+                    self.root.after(0, lambda: messagebox.showerror("Processing Error", f"Failed to process videos:\n{error_msg}"))
+            except asyncio.TimeoutError:
+                logger.error("Video processing timed out after 600 seconds")
+                self.root.after(0, lambda: messagebox.showerror(
+                    "Timeout Error",
+                    "Video processing timed out after 10 minutes.\n\n"
+                    "This may occur with very long videos. Try:\n"
+                    "- Using shorter video clips\n"
+                    "- Ensuring videos are properly formatted\n"
+                    "- Checking system resources"
+                ))
             except Exception as e:
                 logger.error(f"Error processing videos: {e}", exc_info=True)
-                messagebox.showerror("Error", f"Failed to process videos:\n{str(e)}")
+                self.root.after(0, lambda: messagebox.showerror("Error", f"Failed to process videos:\n{str(e)}"))
     
     def export_video(self):
         """Export current swing video"""
@@ -1630,11 +1657,12 @@ class ProMirrorGolfUI:
             self.update_status("Session start failed")
     
     def stop_session(self):
-        """Stop the current session"""
+        """Stop current session safely with timeout handling"""
         if not self.session_active:
             return
         
-        self.session_active = False
+        logger.info("Stopping session...")
+        self.session_active = False  # Set flag first to cancel any ongoing processing
         
         if self.controller:
             try:
@@ -1642,19 +1670,31 @@ class ProMirrorGolfUI:
                     self.controller.stop_session(),
                     self.loop
                 )
-                future.result(timeout=5)
+                # Wait with timeout, but don't crash if it times out
+                try:
+                    future.result(timeout=10)  # Increased timeout for video processing cleanup
+                    logger.info("Session stopped successfully")
+                except asyncio.TimeoutError:
+                    logger.warning("Session stop timed out, but session flag is set - continuing...")
+                    # Session flag is already False, so processing will stop
                 
-                logger.info("Session stopped")
-                self.update_session_status(False)
-                self.update_status(f"Session stopped - {self.swing_count} swings analyzed")
+                # Update UI (thread-safe)
+                def update_ui():
+                    self.update_session_status(False)
+                    self.update_status(f"Session stopped - {self.swing_count} swings analyzed")
                 
-                messagebox.showinfo(
+                self.root.after(0, update_ui)
+                
+                # Show message (thread-safe)
+                self.root.after(0, lambda: messagebox.showinfo(
                     "Session Stopped", 
                     f"Session ended.\n\nTotal swings analyzed: {self.swing_count}"
-                )
+                ))
             except Exception as e:
                 logger.error(f"Error stopping session: {e}", exc_info=True)
-                messagebox.showerror("Error", f"Error stopping session:\n{str(e)}")
+                # Still update UI even if there was an error
+                self.root.after(0, lambda: self.update_session_status(False))
+                self.root.after(0, lambda: messagebox.showerror("Error", f"Error stopping session:\n{str(e)}"))
     
     def update_session_status(self, active):
         """Update UI to reflect session status"""

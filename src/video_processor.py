@@ -101,14 +101,25 @@ class VideoProcessor:
             # Use shorter video as reference
             self.total_frames = min(dtl_frames, face_frames)
             
+            # Check frame count alignment
+            frame_diff = abs(dtl_frames - face_frames)
+            if frame_diff > 0:
+                logger.warning(f"Frame count mismatch detected: DTL={dtl_frames}, Face={face_frames}, "
+                             f"Difference={frame_diff} frames")
+                logger.warning(f"  Using shorter video length: {self.total_frames} frames")
+                result['frame_alignment_warning'] = f"Frame count mismatch: {frame_diff} frames difference"
+            
             # Auto-sync: find best alignment (simple approach: use first frame)
             # In production, could use more sophisticated sync (audio, motion, etc.)
             self.sync_offset = 0
             result['sync_offset'] = self.sync_offset
             
             result['success'] = True
-            logger.info(f"Videos loaded: DTL ({dtl_frames} frames @ {dtl_fps}fps), "
-                       f"Face ({face_frames} frames @ {face_fps}fps)")
+            logger.info(f"Videos loaded successfully:")
+            logger.info(f"  DTL: {dtl_frames} frames @ {dtl_fps:.1f} fps, {dtl_width}x{dtl_height}")
+            logger.info(f"  Face: {face_frames} frames @ {face_fps:.1f} fps, {face_width}x{face_height}")
+            if frame_diff > 0:
+                logger.info(f"  Alignment: Using {self.total_frames} frames (shorter video)")
             
         except Exception as e:
             result['errors'].append(f"Error loading videos: {e}")
@@ -146,9 +157,13 @@ class VideoProcessor:
         self.current_frame = frame_number
         return dtl_frame, face_frame
     
-    def get_all_frames(self) -> List[Tuple[np.ndarray, np.ndarray]]:
+    def get_all_frames(self, downsample_factor: int = 1) -> List[Tuple[np.ndarray, np.ndarray]]:
         """
-        Extract all frames from both videos (for batch processing)
+        Extract frames from both videos (for batch processing)
+        
+        Args:
+            downsample_factor: Process every Nth frame (1=all frames, 2=every other, etc.)
+                              Use >1 for faster processing of long videos
         
         Returns:
             List of (dtl_frame, face_frame) tuples
@@ -163,6 +178,8 @@ class VideoProcessor:
         self.face_cap.set(cv2.CAP_PROP_POS_FRAMES, self.sync_offset)
         
         frame_count = 0
+        extracted_count = 0
+        
         while frame_count < self.total_frames:
             dtl_ret, dtl_frame = self.dtl_cap.read()
             face_ret, face_frame = self.face_cap.read()
@@ -170,10 +187,15 @@ class VideoProcessor:
             if not dtl_ret or not face_ret:
                 break
             
-            frames.append((dtl_frame, face_frame))
+            # Downsample: only add every Nth frame
+            if frame_count % downsample_factor == 0:
+                frames.append((dtl_frame, face_frame))
+                extracted_count += 1
+            
             frame_count += 1
         
-        logger.info(f"Extracted {len(frames)} frame pairs")
+        logger.info(f"Extracted {extracted_count} frame pairs from {frame_count} total frames "
+                   f"(downsample factor: {downsample_factor})")
         return frames
     
     def release(self):

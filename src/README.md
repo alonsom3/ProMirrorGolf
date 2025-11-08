@@ -48,8 +48,16 @@ When a swing is detected, `_analyze_swing()` runs:
 1. **Metrics Extraction** → `MetricsExtractor.extract_metrics_from_pose()`
 2. **Flaw Detection** → `FlawDetector.detect_flaws()`
 3. **Pro Matching** → `StyleMatcher.find_best_match()`
-4. **Shot Data** → From launch monitor or estimated
+4. **Shot Data** → From launch monitor or estimated (MLM2Pro skipped in video upload mode)
 5. **Return Complete Data** → All results combined in swing_data dict
+
+**Video Upload Mode:**
+- `start_session(..., use_video_upload=True)` - Starts session without cameras or MLM2Pro
+- `process_uploaded_videos(dtl_path, face_path, downsample_factor=1)` - Processes uploaded videos
+- **Timeout**: 600 seconds (10 minutes) for long videos
+- **Frame alignment**: Automatically handles mismatched frame counts with warnings
+- **Session stop**: Safe timeout handling, won't crash if processing is ongoing
+- **MLM2Pro**: Automatically disabled in video upload mode (not needed)
 
 **Dependencies**: All other modules in `src/`
 
@@ -550,6 +558,18 @@ if result['success']:
 ```
 
 **Supported Formats**: MP4, AVI, MOV, MKV, WEBM
+
+**Frame Alignment:**
+- Automatically checks if DTL and Face videos have matching frame counts
+- Logs warnings if frame counts differ
+- Uses shorter video length for processing
+- Returns alignment warnings in result dictionary
+
+**Downsampling:**
+- Optional `downsample_factor` parameter for faster processing
+- `downsample_factor=1`: Process all frames (default)
+- `downsample_factor=2`: Process every other frame (2x faster)
+- Useful for long videos or pro swing analysis
 
 ---
 

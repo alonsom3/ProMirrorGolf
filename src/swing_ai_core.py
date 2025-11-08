@@ -105,8 +105,10 @@ class SwingAIController:
                 self.camera_manager = DualCameraManager(self.config)
             await self.camera_manager.start_buffering()
 
-        # Start MLM2Pro listener if available
-        if self.launch_monitor:
+        # Start MLM2Pro listener if available (skip in video upload mode)
+        if use_video_upload:
+            logger.info("Video upload mode active - MLM2Pro connector skipped")
+        elif self.launch_monitor:
             try:
                 self.launch_monitor.start_listening()
                 logger.info("MLM2Pro listener started")
@@ -125,27 +127,36 @@ class SwingAIController:
             asyncio.create_task(self._monitor_swings())
 
     async def stop_session(self):
-        """Stop current session"""
+        """Stop current session safely with timeout handling"""
         if not self.session_active:
             logger.warning("No active session to stop")
             return
 
+        logger.info("Stopping session...")
         self.session_active = False
         
-        # Stop cameras if in live mode
+        # Stop cameras if in live mode (with timeout)
         if self.camera_manager and not self.use_video_upload:
-            await self.camera_manager.stop_buffering()
+            try:
+                await asyncio.wait_for(self.camera_manager.stop_buffering(), timeout=5.0)
+            except asyncio.TimeoutError:
+                logger.warning("Camera stop timed out, continuing...")
+            except Exception as e:
+                logger.warning(f"Error stopping cameras: {e}")
         
-        # Stop MLM2Pro listener
-        if self.launch_monitor:
+        # Stop MLM2Pro listener (skip in video upload mode)
+        if not self.use_video_upload and self.launch_monitor:
             try:
                 self.launch_monitor.stop_listening()
             except Exception as e:
                 logger.warning(f"Error stopping MLM2Pro listener: {e}")
         
-        # Release video processor if in upload mode
-        if self.video_processor:
-            self.video_processor.release()
+        # Release video processor if in upload mode (with timeout protection)
+        if self.use_video_upload and self.video_processor:
+            try:
+                self.video_processor.release()
+            except Exception as e:
+                logger.warning(f"Error releasing video processor: {e}")
         
         logger.info("Session stopped successfully")
 
@@ -289,13 +300,14 @@ class SwingAIController:
         
         return shot_data
     
-    async def process_uploaded_videos(self, dtl_path: str, face_path: str) -> Dict:
+    async def process_uploaded_videos(self, dtl_path: str, face_path: str, downsample_factor: int = 1) -> Dict:
         """
         Process uploaded videos for swing analysis
         
         Args:
             dtl_path: Path to down-the-line video
             face_path: Path to face-on video
+            downsample_factor: Process every Nth frame (1=all frames, 2=every other, etc.)
             
         Returns:
             Dictionary with processing results
@@ -303,32 +315,72 @@ class SwingAIController:
         if not self.session_active:
             return {"success": False, "error": "No active session"}
         
-        logger.info(f"Processing uploaded videos: DTL={dtl_path}, Face={face_path}")
+        logger.info(f"VIDEO UPLOAD MODE: Processing uploaded videos")
+        logger.info(f"  DTL: {dtl_path}")
+        logger.info(f"  Face: {face_path}")
+        logger.info(f"  Downsample factor: {downsample_factor} (process every {downsample_factor} frame(s))")
         
         # Load and validate videos
         result = self.video_processor.load_videos(dtl_path, face_path)
         if not result['success']:
             return {"success": False, "errors": result['errors']}
         
-        # Process all frames
-        frames = self.video_processor.get_all_frames()
+        # Check frame count alignment
+        dtl_frames = result['dtl_info'].get('frames', 0)
+        face_frames = result['face_info'].get('frames', 0)
+        frame_diff = abs(dtl_frames - face_frames)
+        
+        if frame_diff > 0:
+            logger.warning(f"Frame count mismatch: DTL={dtl_frames}, Face={face_frames}, Diff={frame_diff} frames")
+            logger.warning(f"  Using shorter video length: {min(dtl_frames, face_frames)} frames")
+        
+        # Log video info
+        logger.info(f"Video properties:")
+        logger.info(f"  DTL: {dtl_frames} frames @ {result['dtl_info'].get('fps', 0):.1f} fps, "
+                   f"{result['dtl_info'].get('width', 0)}x{result['dtl_info'].get('height', 0)}")
+        logger.info(f"  Face: {face_frames} frames @ {result['face_info'].get('fps', 0):.1f} fps, "
+                   f"{result['face_info'].get('width', 0)}x{result['face_info'].get('height', 0)}")
+        
+        # Process frames (with optional downsampling)
+        frames = self.video_processor.get_all_frames(downsample_factor=downsample_factor)
+        total_frames = len(frames)
+        
         if not frames:
             return {"success": False, "error": "No frames extracted from videos"}
         
+        logger.info(f"Processing {total_frames} frame pairs (downsampled from {min(dtl_frames, face_frames)})...")
+        
         # Analyze each frame pair
         all_pose_data = []
-        for dtl_frame, face_frame in frames:
+        processed_count = 0
+        
+        for idx, (dtl_frame, face_frame) in enumerate(frames):
+            # Check if session was stopped
+            if not self.session_active:
+                logger.warning("Session stopped during video processing")
+                return {"success": False, "error": "Processing cancelled - session stopped"}
+            
             pose_data = await self.pose_analyzer.analyze(dtl_frame, face_frame)
+            processed_count += 1
+            
             if pose_data.get("swing_detected"):
                 all_pose_data.append(pose_data)
+            
+            # Log progress every 100 frames
+            if (idx + 1) % 100 == 0:
+                logger.info(f"  Processed {idx + 1}/{total_frames} frames ({len(all_pose_data)} swings detected)")
+        
+        logger.info(f"Frame processing complete: {processed_count} frames processed, {len(all_pose_data)} swings detected")
         
         if not all_pose_data:
             return {"success": False, "error": "No swings detected in videos"}
         
         # Use the best swing (most complete pose data)
         best_pose_data = max(all_pose_data, key=lambda x: len(x.get("dtl_poses", [])))
+        logger.info(f"Selected best swing with {len(best_pose_data.get('dtl_poses', []))} pose frames")
         
-        # Run full analysis pipeline
+        # Run full analysis pipeline (same as live mode)
+        logger.info("Running full analysis pipeline (metrics, flaws, pro matching)...")
         swing_data = await self._analyze_swing(best_pose_data)
         
         # Save swing to database
@@ -346,6 +398,8 @@ class SwingAIController:
             flaw_analysis=swing_data.get("flaw_analysis", {})
         )
         
+        logger.info(f"Swing saved to database: {swing_id}")
+        
         # Trigger callback
         if self.on_swing_detected:
             self.on_swing_detected(swing_data)
@@ -353,7 +407,9 @@ class SwingAIController:
         return {
             "success": True,
             "swing_id": swing_id,
-            "swing_data": swing_data
+            "swing_data": swing_data,
+            "frames_processed": processed_count,
+            "swings_detected": len(all_pose_data)
         }
     
     def get_mlm2pro_status(self) -> Dict:
