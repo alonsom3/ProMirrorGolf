@@ -210,14 +210,16 @@ class VideoProcessor:
                    f"(downsample factor: {downsample_factor})")
         return frames
     
-    def get_frame_generator(self, downsample_factor: int = 1, use_parallel: bool = True):
+    def get_frame_generator(self, downsample_factor: int = 1, use_parallel: bool = False):
         """
         Generator for lazy frame loading - more memory efficient for large videos
-        Supports parallel frame extraction for DTL and Face videos
+        
+        Note: use_parallel is disabled by default because OpenCV VideoCapture is not thread-safe.
+        Parallel extraction can cause FFmpeg/libavcodec assertion errors.
         
         Args:
             downsample_factor: Process every Nth frame
-            use_parallel: Use parallel threads for frame extraction (default: True)
+            use_parallel: Use parallel threads for frame extraction (default: False - not thread-safe)
         
         Yields:
             Tuple of (frame_index, dtl_frame, face_frame)
@@ -231,22 +233,13 @@ class VideoProcessor:
         
         frame_count = 0
         
-        # Use ThreadPoolExecutor for parallel frame extraction
-        if use_parallel:
-            executor = ThreadPoolExecutor(max_workers=2)
-        
+        # Sequential extraction (OpenCV VideoCapture is not thread-safe)
+        # Parallel extraction causes FFmpeg/libavcodec assertion errors
         while frame_count < self.total_frames:
             if frame_count % downsample_factor == 0:
-                if use_parallel:
-                    # Extract frames in parallel
-                    dtl_future = executor.submit(self.dtl_cap.read)
-                    face_future = executor.submit(self.face_cap.read)
-                    dtl_ret, dtl_frame = dtl_future.result()
-                    face_ret, face_frame = face_future.result()
-                else:
-                    # Sequential extraction
-                    dtl_ret, dtl_frame = self.dtl_cap.read()
-                    face_ret, face_frame = self.face_cap.read()
+                # Sequential extraction (thread-safe)
+                dtl_ret, dtl_frame = self.dtl_cap.read()
+                face_ret, face_frame = self.face_cap.read()
                 
                 if not dtl_ret or not face_ret:
                     break
@@ -254,17 +247,10 @@ class VideoProcessor:
                 yield (frame_count, dtl_frame, face_frame)
             else:
                 # Skip frame but advance counters
-                if use_parallel:
-                    executor.submit(self.dtl_cap.read)
-                    executor.submit(self.face_cap.read)
-                else:
-                    self.dtl_cap.read()
-                    self.face_cap.read()
+                self.dtl_cap.read()
+                self.face_cap.read()
             
             frame_count += 1
-        
-        if use_parallel:
-            executor.shutdown(wait=True)
     
     def release(self):
         """Release video resources"""

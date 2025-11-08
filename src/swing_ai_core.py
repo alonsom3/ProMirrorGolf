@@ -363,10 +363,10 @@ class SwingAIController:
         self.processing_start_time = time.time()
         self.processing_cancelled = False  # Reset cancellation flag
         
-        # Use generator for lazy loading with parallel extraction
+        # Use generator for lazy loading (sequential extraction - OpenCV VideoCapture is not thread-safe)
         frame_generator = self.video_processor.get_frame_generator(
             downsample_factor=downsample_factor, 
-            use_parallel=True
+            use_parallel=False  # Disabled: OpenCV VideoCapture is not thread-safe
         )
         
         # Analyze frames with threaded processing for UI responsiveness
