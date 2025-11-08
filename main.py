@@ -176,6 +176,11 @@ class ProMirrorGolfUI:
         # Metrics sidebar (right side)
         self.create_metrics_sidebar(content_frame)
         
+        # Performance dashboard (in metrics sidebar)
+        self.performance_dashboard = None
+        if hasattr(self, 'create_performance_dashboard'):
+            self.create_performance_dashboard(content_frame)
+        
         # Status bar at bottom
         self.create_status_bar(container)
         

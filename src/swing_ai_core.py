@@ -20,6 +20,9 @@ from .ai_coach import AICoach
 from .gamification import GamificationSystem
 from .frame_cache import FrameCache
 from .performance_logger import PerformanceLogger
+from .analytics import SwingAnalytics
+from .batch_processor import BatchProcessor
+from .export_manager import ExportManager
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -78,6 +81,8 @@ class SwingAIController:
         self.video_processor = VideoProcessor()
         self.frame_cache = FrameCache(max_size=1000)  # Cache up to 1000 frames
         self.performance_logger = PerformanceLogger()  # Performance logging
+        self.analytics = SwingAnalytics()  # Analytics tracking
+        self.export_manager = ExportManager()  # Export functionality
         
         db_path = self.config.get("database", {}).get("swing_db_path", "./data/swings.db")
         self.db = SwingDatabase(db_path)
@@ -223,6 +228,16 @@ class SwingAIController:
                     pro_match_id=swing_data.get("pro_match", {}).get("pro_id", ""),
                     flaw_analysis=swing_data.get("flaw_analysis", {})
                 )
+                
+                # Log to analytics
+                if self.analytics:
+                    self.analytics.log_swing(
+                        swing_id=swing_id,
+                        metrics=swing_data.get("metrics", {}),
+                        flaw_analysis=swing_data.get("flaw_analysis", {}),
+                        pro_match=swing_data.get("pro_match", {}),
+                        shot_data=swing_data.get("shot_data", {})
+                    )
 
                 # Trigger callback in GUI if set
                 if hasattr(self, "on_swing_detected") and callable(self.on_swing_detected):
@@ -401,7 +416,7 @@ class SwingAIController:
             frame_idx, dtl_frame, face_frame = frame_info
             
             # Check cache first
-            cached_data = self.frame_cache.get(video_id, frame_idx) if self.frame_cache else None
+            cached_data = self.frame_cache.get(video_name, frame_idx) if self.frame_cache else None
             if cached_data:
                 all_pose_data.append(cached_data)
                 processed_count += 1
@@ -421,9 +436,10 @@ class SwingAIController:
                 
                 # Cache processed frames
                 if self.frame_cache:
-                    for pose_data in batch_results:
-                        frame_idx = pose_data.get('frame_index', processed_count)
-                        self.frame_cache.set(video_id, frame_idx, pose_data)
+                    for idx, pose_data in enumerate(batch_results):
+                        # Get frame index from pose data or use batch index
+                        frame_idx = pose_data.get('frame_index', processed_count - len(batch_results) + idx)
+                        self.frame_cache.set(video_name, frame_idx, pose_data)
                 
                 all_pose_data.extend(batch_results)
                 processed_count += len(frame_batch)
@@ -468,9 +484,10 @@ class SwingAIController:
             
             # Cache processed frames
             if self.frame_cache:
-                for pose_data in batch_results:
-                    frame_idx = pose_data.get('frame_index', processed_count)
-                    self.frame_cache.set(video_id, frame_idx, pose_data)
+                for idx, pose_data in enumerate(batch_results):
+                    # Get frame index from pose data or use batch index
+                    frame_idx = pose_data.get('frame_index', processed_count - len(batch_results) + idx)
+                    self.frame_cache.set(video_name, frame_idx, pose_data)
             
             all_pose_data.extend(batch_results)
             processed_count += len(frame_batch)
@@ -525,6 +542,16 @@ class SwingAIController:
         )
         
         logger.info(f"Swing saved to database: {swing_id}")
+        
+        # Log to analytics
+        if self.analytics:
+            self.analytics.log_swing(
+                swing_id=swing_id,
+                metrics=swing_data.get("metrics", {}),
+                flaw_analysis=swing_data.get("flaw_analysis", {}),
+                pro_match=swing_data.get("pro_match", {}),
+                shot_data=swing_data.get("shot_data", {})
+            )
         
         # Trigger callback
         if self.on_swing_detected:

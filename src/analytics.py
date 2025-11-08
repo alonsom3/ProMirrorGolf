@@ -8,7 +8,7 @@ import json
 import logging
 from typing import Dict, List, Optional
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 from collections import deque
 
 logger = logging.getLogger(__name__)
@@ -381,4 +381,125 @@ class SwingAnalytics:
         self.similarity_history.clear()
         self.frame_metrics.clear()
         logger.info("Analytics session cleared")
+    
+    def get_best_swings(self, limit: int = 5) -> List[Dict]:
+        """
+        Get best swings based on overall score
+        
+        Args:
+            limit: Number of best swings to return
+            
+        Returns:
+            List of swing dictionaries sorted by score (highest first)
+        """
+        if not self.swing_history:
+            return []
+        
+        sorted_swings = sorted(
+            self.swing_history,
+            key=lambda x: x.get('overall_score', 0),
+            reverse=True
+        )
+        return sorted_swings[:limit]
+    
+    def get_improvement_trends(self, metric_name: str, days: int = 30) -> Dict:
+        """
+        Get improvement trends for a specific metric over time
+        
+        Args:
+            metric_name: Name of metric to track
+            days: Number of days to look back
+            
+        Returns:
+            Dictionary with trend data
+        """
+        if not self.swing_history:
+            return {'trend': 'insufficient_data', 'data': []}
+        
+        # Filter swings by date
+        cutoff_date = datetime.now() - timedelta(days=days)
+        recent_swings = [
+            s for s in self.swing_history
+            if datetime.fromisoformat(s['timestamp']) >= cutoff_date
+        ]
+        
+        if len(recent_swings) < 2:
+            return {'trend': 'insufficient_data', 'data': []}
+        
+        # Extract metric values
+        metric_values = []
+        for swing in recent_swings:
+            if metric_name == 'overall_score':
+                value = swing.get('overall_score', 0)
+            elif metric_name == 'similarity_score':
+                value = swing.get('similarity_score', 0)
+            else:
+                value = swing.get('metrics', {}).get(metric_name, 0)
+            
+            metric_values.append({
+                'timestamp': swing['timestamp'],
+                'value': value
+            })
+        
+        # Calculate trend
+        if len(metric_values) >= 2:
+            first_half = metric_values[:len(metric_values)//2]
+            second_half = metric_values[len(metric_values)//2:]
+            
+            first_avg = sum(m['value'] for m in first_half) / len(first_half)
+            second_avg = sum(m['value'] for m in second_half) / len(second_half)
+            
+            if second_avg > first_avg * 1.05:
+                trend = 'improving'
+            elif second_avg < first_avg * 0.95:
+                trend = 'declining'
+            else:
+                trend = 'stable'
+        else:
+            trend = 'insufficient_data'
+        
+        return {
+            'metric': metric_name,
+            'trend': trend,
+            'data': metric_values,
+            'first_half_avg': first_avg if len(metric_values) >= 2 else 0,
+            'second_half_avg': second_avg if len(metric_values) >= 2 else 0
+        }
+    
+    def compare_sessions(self, session1_id: str, session2_id: str) -> Dict:
+        """
+        Compare two sessions
+        
+        Args:
+            session1_id: First session identifier
+            session2_id: Second session identifier
+            
+        Returns:
+            Comparison dictionary
+        """
+        # This would need session tracking - simplified version
+        swings1 = [s for s in self.swing_history if s.get('session_id') == session1_id]
+        swings2 = [s for s in self.swing_history if s.get('session_id') == session2_id]
+        
+        if not swings1 or not swings2:
+            return {'error': 'One or both sessions not found'}
+        
+        scores1 = [s.get('overall_score', 0) for s in swings1]
+        scores2 = [s.get('overall_score', 0) for s in swings2]
+        
+        return {
+            'session1': {
+                'id': session1_id,
+                'swing_count': len(swings1),
+                'avg_score': sum(scores1) / len(scores1) if scores1 else 0,
+                'max_score': max(scores1) if scores1 else 0
+            },
+            'session2': {
+                'id': session2_id,
+                'swing_count': len(swings2),
+                'avg_score': sum(scores2) / len(scores2) if scores2 else 0,
+                'max_score': max(scores2) if scores2 else 0
+            },
+            'improvement': (sum(scores2) / len(scores2) if scores2 else 0) - (sum(scores1) / len(scores1) if scores1 else 0)
+        }
 
