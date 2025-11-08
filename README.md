@@ -21,6 +21,13 @@ Automated, real-time swing analysis that integrates with GSPro and your launch m
 - ✅ **Side-by-Side Videos** - Compare your swing to matched pros
 - ✅ **Historical Tracking** - Database of all swings for progress monitoring
 - ✅ **Enhanced UI** - Modern red-themed interface
+- ✅ **Application Icon** - Branded window icon displayed in title bar
+
+---
+
+## 🎨 Application Icon
+
+The ProMirrorGolf application icon is automatically loaded and displayed in the window title bar when you run the application. The icon file is located at `assets/icons/ProMirrorGolf_App_Icon.png` and is part of the application branding.
 
 ---
 
