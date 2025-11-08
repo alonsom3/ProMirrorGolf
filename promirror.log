@@ -1,0 +1,130 @@
+2025-11-07 23:44:35,392 - __main__ - INFO - Initializing SwingAIController...
+2025-11-07 23:44:35,393 - src.swing_ai_core - INFO - SwingAIController config loaded
+2025-11-07 23:44:35,393 - src.swing_ai_core - INFO - Initializing Swing AI modules...
+2025-11-07 23:44:35,432 - src.database - INFO - Database initialized: ./data/swings.db
+2025-11-07 23:44:35,433 - src.database - INFO - Pro database initialized: ./data/pro_swings.db
+2025-11-07 23:44:35,433 - src.style_matcher - INFO - StyleMatcher initialized
+2025-11-07 23:44:35,434 - src.report_generator - INFO - ReportGenerator initialized: ./data/reports
+2025-11-07 23:44:35,434 - src.swing_ai_core - INFO - All Swing AI components initialized
+2025-11-07 23:44:35,434 - __main__ - INFO - Backend initialized successfully
+2025-11-07 23:44:51,315 - src.swing_ai_core - INFO - Starting session for default_user - Session 2025-11-07 23:44
+2025-11-07 23:44:51,315 - __main__ - INFO - Session started: Session 2025-11-07 23:44
+2025-11-07 23:44:56,607 - src.database - INFO - Session created: default_user_20251107_234456
+2025-11-07 23:44:56,607 - src.swing_ai_core - INFO - Database session created: default_user_20251107_234456
+2025-11-07 23:44:56,607 - src.swing_ai_core - INFO - Monitoring swings...
+2025-11-07 23:44:56,675 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-3' coro=<SwingAIController._monitor_swings() done, defined at D:\ProMirrorGolf-1\src\swing_ai_core.py:87> exception=error("OpenCV(4.11.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\imgproc\\src\\color.cpp:199: error: (-215:Assertion failed) !_src.empty() in function 'cv::cvtColor'\n")>
+Traceback (most recent call last):
+  File "D:\ProMirrorGolf-1\src\swing_ai_core.py", line 101, in _monitor_swings
+    pose_data = await self.pose_analyzer.analyze(dtl_frame, face_frame)
+  File "D:\ProMirrorGolf-1\src\pose_analyzer.py", line 22, in analyze
+    face_result = self.pose_face.process(cv2.cvtColor(face_frame, cv2.COLOR_BGR2RGB))
+cv2.error: OpenCV(4.11.0) D:\a\opencv-python\opencv-python\opencv\modules\imgproc\src\color.cpp:199: error: (-215:Assertion failed) !_src.empty() in function 'cv::cvtColor'
+
+2025-11-07 23:45:02,576 - __main__ - INFO - Session stopped
+2025-11-07 23:45:03,752 - src.swing_ai_core - INFO - Session stopped successfully
+2025-11-07 23:51:30,468 - __main__ - INFO - Initializing SwingAIController...
+2025-11-07 23:51:30,468 - src.swing_ai_core - INFO - SwingAIController config loaded
+2025-11-07 23:51:30,468 - src.swing_ai_core - INFO - Initializing Swing AI modules...
+2025-11-07 23:51:30,504 - src.database - INFO - Database initialized: ./data/swings.db
+2025-11-07 23:51:30,505 - src.database - INFO - Pro database initialized: ./data/pro_swings.db
+2025-11-07 23:51:30,505 - src.style_matcher - INFO - StyleMatcher initialized
+2025-11-07 23:51:30,506 - src.report_generator - INFO - ReportGenerator initialized: ./data/reports
+2025-11-07 23:51:30,506 - src.swing_ai_core - INFO - All Swing AI components initialized
+2025-11-07 23:51:30,506 - __main__ - INFO - Backend initialized successfully
+2025-11-07 23:51:46,959 - __main__ - INFO - Session started: Session 2025-11-07 23:51
+2025-11-07 23:51:46,959 - src.swing_ai_core - INFO - Starting session for default_user - Session 2025-11-07 23:51
+2025-11-07 23:51:51,776 - src.database - INFO - Session created: default_user_20251107_235151
+2025-11-07 23:51:51,777 - src.swing_ai_core - INFO - Database session created: default_user_20251107_235151
+2025-11-07 23:51:51,777 - src.swing_ai_core - INFO - Monitoring swings...
+2025-11-07 23:51:51,830 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-3' coro=<SwingAIController._monitor_swings() done, defined at D:\ProMirrorGolf-1\src\swing_ai_core.py:88> exception=error("OpenCV(4.11.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\imgproc\\src\\color.cpp:199: error: (-215:Assertion failed) !_src.empty() in function 'cv::cvtColor'\n")>
+Traceback (most recent call last):
+  File "D:\ProMirrorGolf-1\src\swing_ai_core.py", line 102, in _monitor_swings
+    pose_data = await self.pose_analyzer.analyze(dtl_frame, face_frame)
+  File "D:\ProMirrorGolf-1\src\pose_analyzer.py", line 21, in analyze
+    face_result = self.pose_face.process(cv2.cvtColor(face_frame, cv2.COLOR_BGR2RGB))
+cv2.error: OpenCV(4.11.0) D:\a\opencv-python\opencv-python\opencv\modules\imgproc\src\color.cpp:199: error: (-215:Assertion failed) !_src.empty() in function 'cv::cvtColor'
+
+2025-11-07 23:51:58,329 - __main__ - INFO - Session stopped
+2025-11-07 23:51:59,655 - src.swing_ai_core - INFO - Session stopped successfully
+2025-11-08 00:01:09,788 - __main__ - INFO - Initializing SwingAIController...
+2025-11-08 00:01:09,788 - src.swing_ai_core - INFO - SwingAIController config loaded
+2025-11-08 00:01:09,788 - src.swing_ai_core - INFO - Initializing Swing AI modules...
+2025-11-08 00:01:09,824 - src.database - INFO - Database initialized: ./data/swings.db
+2025-11-08 00:01:09,825 - src.database - INFO - Pro database initialized: ./data/pro_swings.db
+2025-11-08 00:01:09,825 - src.style_matcher - INFO - StyleMatcher initialized
+2025-11-08 00:01:09,825 - src.report_generator - INFO - ReportGenerator initialized: ./data/reports
+2025-11-08 00:01:09,825 - src.swing_ai_core - INFO - All Swing AI components initialized
+2025-11-08 00:01:09,825 - __main__ - INFO - Backend initialized successfully
+2025-11-08 00:01:21,115 - __main__ - INFO - View changed to: Front
+2025-11-08 00:01:21,939 - __main__ - INFO - View changed to: Top
+2025-11-08 00:01:24,004 - src.swing_ai_core - INFO - Starting session for default_user - Session 2025-11-08 00:01
+2025-11-08 00:01:28,874 - src.database - INFO - Session created: default_user_20251108_000128
+2025-11-08 00:01:28,874 - src.swing_ai_core - INFO - Database session created: default_user_20251108_000128
+2025-11-08 00:01:28,874 - src.swing_ai_core - INFO - Monitoring swings...
+2025-11-08 00:01:28,928 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-3' coro=<SwingAIController._monitor_swings() done, defined at D:\ProMirrorGolf-1\src\swing_ai_core.py:88> exception=error("OpenCV(4.11.0) D:\\a\\opencv-python\\opencv-python\\opencv\\modules\\imgproc\\src\\color.cpp:199: error: (-215:Assertion failed) !_src.empty() in function 'cv::cvtColor'\n")>
+Traceback (most recent call last):
+  File "D:\ProMirrorGolf-1\src\swing_ai_core.py", line 102, in _monitor_swings
+    pose_data = await self.pose_analyzer.analyze(dtl_frame, face_frame)
+  File "D:\ProMirrorGolf-1\src\pose_analyzer.py", line 21, in analyze
+    face_result = self.pose_face.process(cv2.cvtColor(face_frame, cv2.COLOR_BGR2RGB))
+cv2.error: OpenCV(4.11.0) D:\a\opencv-python\opencv-python\opencv\modules\imgproc\src\color.cpp:199: error: (-215:Assertion failed) !_src.empty() in function 'cv::cvtColor'
+
+2025-11-08 00:01:28,930 - __main__ - INFO - Session started: Session 2025-11-08 00:01
+2025-11-08 00:01:50,486 - src.swing_ai_core - INFO - Session stopped successfully
+2025-11-08 00:01:50,486 - __main__ - INFO - Session stopped
+2025-11-08 00:17:13,210 - __main__ - INFO - Initializing SwingAIController...
+2025-11-08 00:17:13,212 - src.swing_ai_core - INFO - SwingAIController config loaded
+2025-11-08 00:17:13,212 - src.swing_ai_core - INFO - Initializing Swing AI modules...
+2025-11-08 00:17:13,249 - src.flaw_detector - INFO - FlawDetector initialized
+2025-11-08 00:17:13,298 - src.database - INFO - Database initialized: ./data/swings.db
+2025-11-08 00:17:13,331 - src.database - INFO - Pro database initialized: ./data/pro_swings.db
+2025-11-08 00:17:13,448 - src.style_matcher - INFO - StyleMatcher initialized
+2025-11-08 00:17:13,464 - src.report_generator - INFO - ReportGenerator initialized: ./data/reports
+2025-11-08 00:17:13,477 - src.swing_ai_core - INFO - All Swing AI components initialized
+2025-11-08 00:17:13,479 - __main__ - INFO - Backend initialized successfully
+2025-11-08 00:17:39,776 - src.swing_ai_core - INFO - Starting session for default_user - Session 2025-11-08 00:17
+2025-11-08 00:17:44,537 - src.database - INFO - Session created: default_user_20251108_001744
+2025-11-08 00:17:44,537 - src.swing_ai_core - INFO - Database session created: default_user_20251108_001744
+2025-11-08 00:17:44,537 - src.swing_ai_core - INFO - Monitoring swings...
+2025-11-08 00:17:44,629 - __main__ - INFO - Session started: Session 2025-11-08 00:17
+2025-11-08 00:17:55,132 - __main__ - INFO - View changed to: Front
+2025-11-08 00:17:56,384 - __main__ - INFO - View changed to: Top
+2025-11-08 00:17:57,243 - __main__ - INFO - View changed to: Overlay
+2025-11-08 00:17:58,410 - __main__ - INFO - View changed to: Side
+2025-11-08 00:17:58,873 - __main__ - INFO - View changed to: Front
+2025-11-08 00:17:59,353 - __main__ - INFO - View changed to: Top
+2025-11-08 00:17:59,857 - __main__ - INFO - View changed to: Overlay
+2025-11-08 00:18:05,017 - src.swing_ai_core - INFO - Session stopped successfully
+2025-11-08 00:18:05,018 - __main__ - INFO - Session stopped
+2025-11-08 00:28:04,810 - __main__ - INFO - Initializing SwingAIController...
+2025-11-08 00:28:04,819 - src.swing_ai_core - INFO - SwingAIController config loaded
+2025-11-08 00:28:04,822 - src.swing_ai_core - INFO - Initializing Swing AI modules...
+2025-11-08 00:28:04,878 - src.flaw_detector - INFO - FlawDetector initialized
+2025-11-08 00:28:04,907 - src.database - INFO - Database initialized: ./data/swings.db
+2025-11-08 00:28:04,951 - src.database - INFO - Pro database initialized: ./data/pro_swings.db
+2025-11-08 00:28:04,975 - src.style_matcher - INFO - StyleMatcher initialized
+2025-11-08 00:28:05,083 - src.report_generator - INFO - ReportGenerator initialized: ./data/reports
+2025-11-08 00:28:05,099 - src.swing_ai_core - INFO - All Swing AI components initialized
+2025-11-08 00:28:05,099 - __main__ - INFO - Backend initialized successfully
+2025-11-08 00:28:05,101 - __main__ - INFO - Loaded 5 pros for selection
+2025-11-08 00:28:13,480 - __main__ - INFO - View changed to: Front
+2025-11-08 00:28:14,706 - __main__ - INFO - View changed to: Top
+2025-11-08 00:28:16,426 - __main__ - INFO - View changed to: Overlay
+2025-11-08 00:28:30,489 - __main__ - INFO - Pro selection changed to: JT - 7-Iron
+2025-11-08 00:28:34,108 - __main__ - INFO - Club changed to: 5-Iron
+2025-11-08 00:28:42,751 - __main__ - INFO - Pro selection changed to: Auto Match
+2025-11-08 00:28:44,410 - __main__ - INFO - Club changed to: Driver
+2025-11-08 00:28:54,811 - __main__ - INFO - Initializing SwingAIController...
+2025-11-08 00:28:54,811 - src.swing_ai_core - INFO - SwingAIController config loaded
+2025-11-08 00:28:54,812 - src.swing_ai_core - INFO - Initializing Swing AI modules...
+2025-11-08 00:28:54,852 - src.flaw_detector - INFO - FlawDetector initialized
+2025-11-08 00:28:54,854 - src.database - INFO - Database initialized: ./data/swings.db
+2025-11-08 00:28:54,855 - src.database - INFO - Pro database initialized: ./data/pro_swings.db
+2025-11-08 00:28:54,855 - src.style_matcher - INFO - StyleMatcher initialized
+2025-11-08 00:28:54,856 - src.report_generator - INFO - ReportGenerator initialized: ./data/reports
+2025-11-08 00:28:54,856 - src.swing_ai_core - INFO - All Swing AI components initialized
+2025-11-08 00:28:54,856 - __main__ - INFO - Backend initialized successfully
+2025-11-08 00:28:54,860 - __main__ - INFO - Loaded 5 pros for selection

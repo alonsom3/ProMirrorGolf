@@ -2,16 +2,23 @@
 
 import asyncio
 import logging
-from backend.camera_manager import CameraManager
-from backend.pose_analyzer import PoseAnalyzer
-from backend.database import Database
-from backend.style_matcher import StyleMatcher
-from backend.report_generator import ReportGenerator
+import uuid
+import time
+from typing import Dict, Optional
+from .camera_manager import DualCameraManager
+from .pose_analyzer import PoseAnalyzer
+from .database import SwingDatabase
+from .style_matcher import StyleMatcher
+from .report_generator import ReportGenerator
+from .metrics_extractor import MetricsExtractor
+from .flaw_detector import FlawDetector
+from .mlm2pro_listener import LaunchMonitorListener
+from .video_processor import VideoProcessor
 
 logger = logging.getLogger(__name__)
 
 class SwingAIController:
-    """Main controller for Swing AI"""
+    """Main controller for Swing AI - Production-ready with MLM2Pro integration and video upload"""
 
     def __init__(self, config_path="config.json"):
         self.config_path = config_path
@@ -21,10 +28,22 @@ class SwingAIController:
         self.db = None
         self.style_matcher = None
         self.report_generator = None
+        self.metrics_extractor = None
+        self.flaw_detector = None
+        self.launch_monitor = None
+        self.video_processor = None
+        
         self.session_active = False
         self.current_user = None
         self.session_name = None
-
+        self.current_session_id = None
+        self.current_club = "Driver"
+        self.on_swing_detected = None  # Callback for UI updates
+        
+        # Video upload mode
+        self.use_video_upload = False
+        self.pending_shot_data = None  # Shot data waiting for swing analysis
+        
         self.load_config()
 
     def load_config(self):
@@ -41,34 +60,69 @@ class SwingAIController:
         """Initialize all AI components"""
         logger.info("Initializing Swing AI modules...")
 
-        self.camera_manager = CameraManager(self.config)
+        self.camera_manager = DualCameraManager(self.config)
         self.pose_analyzer = PoseAnalyzer(self.config)
-        self.db = Database(self.config)
-        self.style_matcher = StyleMatcher(self.config)
-        self.report_generator = ReportGenerator(self.config)
+        self.metrics_extractor = MetricsExtractor()
+        self.flaw_detector = FlawDetector()
+        self.video_processor = VideoProcessor()
+        
+        db_path = self.config.get("database", {}).get("swing_db_path", "./data/swings.db")
+        self.db = SwingDatabase(db_path)
+        pro_db_path = self.config.get("database", {}).get("pro_db_path", "./data/pro_swings.db")
+        self.style_matcher = StyleMatcher(pro_db_path)
+        output_dir = self.config.get("reports", {}).get("output_dir", "./data/reports")
+        self.report_generator = ReportGenerator(output_dir)
+        
+        # Initialize MLM2Pro listener if configured
+        mlm2pro_cfg = self.config.get("mlm2pro", {})
+        if mlm2pro_cfg.get("connector_path"):
+            try:
+                self.launch_monitor = LaunchMonitorListener(
+                    connector_path=mlm2pro_cfg.get("connector_path"),
+                    connector_type=mlm2pro_cfg.get("connector_type", "opengolfsim")
+                )
+                logger.info("MLM2Pro listener initialized")
+            except Exception as e:
+                logger.warning(f"Failed to initialize MLM2Pro listener: {e}")
 
         logger.info("All Swing AI components initialized")
 
-    async def start_session(self, user_id: str, session_name: str):
-        """Start a practice session"""
+    async def start_session(self, user_id: str, session_name: str, use_video_upload: bool = False):
+        """Start a practice session (live camera or video upload mode)"""
         self.current_user = user_id
         self.session_name = session_name
         self.session_active = True
+        self.use_video_upload = use_video_upload
 
-        logger.info(f"Starting session for {user_id} - {session_name}")
+        logger.info(f"Starting session for {user_id} - {session_name} (mode: {'video_upload' if use_video_upload else 'live_camera'})")
 
-        if not self.camera_manager:
-            self.camera_manager = CameraManager(self.config)
+        if use_video_upload:
+            # Video upload mode - don't start cameras
+            logger.info("Video upload mode - cameras disabled")
+        else:
+            # Live camera mode
+            if not self.camera_manager:
+                self.camera_manager = DualCameraManager(self.config)
+            await self.camera_manager.start_buffering()
 
-        # Start camera buffering
-        await self.camera_manager.start_buffering()
+        # Start MLM2Pro listener if available
+        if self.launch_monitor:
+            try:
+                self.launch_monitor.start_listening()
+                logger.info("MLM2Pro listener started")
+            except Exception as e:
+                logger.warning(f"Failed to start MLM2Pro listener: {e}")
 
         # Create DB session
-        self.db.create_session(user_id, session_name)
-        logger.info("Database session created")
+        self.current_session_id = self.db.create_session(user_id, session_name)
+        logger.info(f"Database session created: {self.current_session_id}")
 
         # Start monitoring swings
-        asyncio.create_task(self._monitor_swings())
+        if use_video_upload:
+            # For video upload, monitoring is triggered manually via process_uploaded_videos
+            pass
+        else:
+            asyncio.create_task(self._monitor_swings())
 
     async def stop_session(self):
         """Stop current session"""
@@ -77,44 +131,245 @@ class SwingAIController:
             return
 
         self.session_active = False
-        await self.camera_manager.stop_buffering()
+        
+        # Stop cameras if in live mode
+        if self.camera_manager and not self.use_video_upload:
+            await self.camera_manager.stop_buffering()
+        
+        # Stop MLM2Pro listener
+        if self.launch_monitor:
+            try:
+                self.launch_monitor.stop_listening()
+            except Exception as e:
+                logger.warning(f"Error stopping MLM2Pro listener: {e}")
+        
+        # Release video processor if in upload mode
+        if self.video_processor:
+            self.video_processor.release()
+        
         logger.info("Session stopped successfully")
 
     async def _monitor_swings(self):
         """Monitor frames for swing detection"""
         logger.info("Monitoring swings...")
+        
+        last_swing_time = 0
+        min_shot_interval = self.config.get("processing", {}).get("min_shot_interval", 3.0)
 
         while self.session_active:
             # Grab latest frames from camera manager
             frames = await self.camera_manager.get_latest_frames()
-            if not frames:
+            if not frames or frames[0] is None or frames[1] is None:
                 await asyncio.sleep(0.01)
                 continue
 
             dtl_frame, face_frame = frames
 
             # Run pose analysis
-            pose_data = self.pose_analyzer.analyze(dtl_frame, face_frame)
+            pose_data = await self.pose_analyzer.analyze(dtl_frame, face_frame)
 
-            # Check if swing detected
-            if pose_data.get("swing_detected"):
-                swing_data = self._analyze_swing(pose_data)
-                self.db.store_swing(self.current_user, swing_data)
+            # Check if swing detected (with debouncing)
+            current_time = time.time()
+            
+            if pose_data.get("swing_detected") and (current_time - last_swing_time) >= min_shot_interval:
+                logger.info("Swing detected! Analyzing...")
+                last_swing_time = current_time
+                
+                # Analyze swing with full pipeline
+                swing_data = await self._analyze_swing(pose_data)
+                
+                # Clear pose buffer after processing
+                self.pose_analyzer.clear_buffer()
+                
+                # Save swing to database
+                swing_id = str(uuid.uuid4())
+                swing_data['swing_id'] = swing_id
+                
+                self.db.save_swing(
+                    session_id=self.current_session_id,
+                    swing_id=swing_id,
+                    swing_metrics=swing_data.get("metrics", {}),
+                    shot_data=swing_data.get("shot_data", {}),
+                    video_paths={"dtl": "", "face": ""},  # Will be populated when videos are saved
+                    report_path="",  # Will be populated when report is generated
+                    pro_match_id=swing_data.get("pro_match", {}).get("pro_id", ""),
+                    flaw_analysis=swing_data.get("flaw_analysis", {})
+                )
 
                 # Trigger callback in GUI if set
                 if hasattr(self, "on_swing_detected") and callable(self.on_swing_detected):
                     self.on_swing_detected(swing_data)
 
-            await asyncio.sleep(self.config.get("processing", {}).get("min_shot_interval", 0.5))
+            await asyncio.sleep(0.01)  # Small delay to avoid CPU spinning
 
-    def _analyze_swing(self, pose_data):
-        """Analyze pose and return swing stats"""
-        # Example mock data; replace with real processing
+    async def _analyze_swing(self, pose_data):
+        """
+        Full swing analysis pipeline:
+        1. Extract metrics from pose data
+        2. Detect flaws
+        3. Find pro match
+        4. Return complete swing data
+        """
+        logger.info("Starting full swing analysis...")
+        
+        # Get FPS from config
+        fps = self.config.get("cameras", {}).get("fps", 60)
+        
+        # Step 1: Extract metrics from pose data
+        metrics = self.metrics_extractor.extract_metrics_from_pose(pose_data, fps)
+        logger.info(f"Extracted metrics: {metrics}")
+        
+        # Step 2: Detect flaws
+        flaw_analysis = self.flaw_detector.detect_flaws(metrics)
+        overall_score = flaw_analysis.get("overall_score", 75.0)
+        logger.info(f"Flaw analysis complete: {flaw_analysis.get('flaw_count', 0)} flaws, score: {overall_score}")
+        
+        # Step 3: Find pro match
+        club_type = getattr(self, 'current_club', 'Driver')  # Default to Driver
+        pro_match = await self.style_matcher.find_best_match(metrics, club_type)
+        logger.info(f"Pro match found: {pro_match.get('golfer_name', 'Unknown')} (similarity: {pro_match.get('similarity_score', 0):.2f})")
+        
+        # Step 4: Get shot data (from launch monitor if available, otherwise use defaults)
+        shot_data = self._get_shot_data(metrics)
+        
+        # Step 5: Build complete swing data
         swing_data = {
-            "shot_data": {
-                "ClubSpeed": 85.0,
-                "BallSpeed": 120.0
-            },
-            "overall_score": 75.0
+            "swing_id": None,  # Will be set by caller
+            "metrics": metrics,
+            "shot_data": shot_data,
+            "flaw_analysis": flaw_analysis,
+            "pro_match": pro_match,
+            "overall_score": overall_score,
+            "pose_data": pose_data  # Include for potential future use
         }
+        
+        logger.info("Swing analysis complete")
         return swing_data
+    
+    def _get_shot_data(self, metrics: Dict) -> Dict:
+        """
+        Get shot data from launch monitor or estimate from metrics
+        
+        Priority:
+        1. Pending shot data from MLM2Pro (if available)
+        2. Latest shot from MLM2Pro listener
+        3. Estimate from metrics
+        """
+        # Check for pending shot data (from MLM2Pro)
+        if self.pending_shot_data:
+            shot_data = self.pending_shot_data.copy()
+            self.pending_shot_data = None  # Clear after use
+            logger.info("Using pending shot data from MLM2Pro")
+            return shot_data
+        
+        # Try to get latest shot from MLM2Pro listener (non-blocking)
+        if self.launch_monitor and self.launch_monitor.is_listening:
+            try:
+                # Check if there's a shot in the queue (non-blocking)
+                if not self.launch_monitor.shot_queue.empty():
+                    shot_data = self.launch_monitor.shot_queue.get_nowait()
+                    logger.info("Using shot data from MLM2Pro listener")
+                    return shot_data
+            except Exception as e:
+                logger.debug(f"No shot data available from MLM2Pro: {e}")
+        
+        # Fallback: estimate from metrics or use defaults
+        shot_data = {
+            "ClubSpeed": metrics.get("club_speed", 95.0),  # mph
+            "BallSpeed": metrics.get("ball_speed", 140.0),  # mph (estimated from club speed)
+            "LaunchAngle": 12.0,  # degrees (typical driver)
+            "SpinRate": 2500,  # rpm
+            "CarryDistance": 220,  # yards (estimated)
+            "TotalDistance": 250  # yards (estimated)
+        }
+        
+        # Estimate ball speed from club speed if not available
+        if "ball_speed" not in metrics and "club_speed" in metrics:
+            shot_data["BallSpeed"] = shot_data["ClubSpeed"] * 1.45  # Typical smash factor
+        
+        return shot_data
+    
+    async def process_uploaded_videos(self, dtl_path: str, face_path: str) -> Dict:
+        """
+        Process uploaded videos for swing analysis
+        
+        Args:
+            dtl_path: Path to down-the-line video
+            face_path: Path to face-on video
+            
+        Returns:
+            Dictionary with processing results
+        """
+        if not self.session_active:
+            return {"success": False, "error": "No active session"}
+        
+        logger.info(f"Processing uploaded videos: DTL={dtl_path}, Face={face_path}")
+        
+        # Load and validate videos
+        result = self.video_processor.load_videos(dtl_path, face_path)
+        if not result['success']:
+            return {"success": False, "errors": result['errors']}
+        
+        # Process all frames
+        frames = self.video_processor.get_all_frames()
+        if not frames:
+            return {"success": False, "error": "No frames extracted from videos"}
+        
+        # Analyze each frame pair
+        all_pose_data = []
+        for dtl_frame, face_frame in frames:
+            pose_data = await self.pose_analyzer.analyze(dtl_frame, face_frame)
+            if pose_data.get("swing_detected"):
+                all_pose_data.append(pose_data)
+        
+        if not all_pose_data:
+            return {"success": False, "error": "No swings detected in videos"}
+        
+        # Use the best swing (most complete pose data)
+        best_pose_data = max(all_pose_data, key=lambda x: len(x.get("dtl_poses", [])))
+        
+        # Run full analysis pipeline
+        swing_data = await self._analyze_swing(best_pose_data)
+        
+        # Save swing to database
+        swing_id = str(uuid.uuid4())
+        swing_data['swing_id'] = swing_id
+        
+        self.db.save_swing(
+            session_id=self.current_session_id,
+            swing_id=swing_id,
+            swing_metrics=swing_data.get("metrics", {}),
+            shot_data=swing_data.get("shot_data", {}),
+            video_paths={"dtl": dtl_path, "face": face_path},
+            report_path="",
+            pro_match_id=swing_data.get("pro_match", {}).get("pro_id", ""),
+            flaw_analysis=swing_data.get("flaw_analysis", {})
+        )
+        
+        # Trigger callback
+        if self.on_swing_detected:
+            self.on_swing_detected(swing_data)
+        
+        return {
+            "success": True,
+            "swing_id": swing_id,
+            "swing_data": swing_data
+        }
+    
+    def get_mlm2pro_status(self) -> Dict:
+        """Get MLM2Pro connection status"""
+        if not self.launch_monitor:
+            return {
+                "connected": False,
+                "status": "not_configured",
+                "message": "MLM2Pro not configured"
+            }
+        
+        status = self.launch_monitor.get_status()
+        return {
+            "connected": status.get("is_listening", False),
+            "connector_running": status.get("connector_running", False),
+            "last_shot_time": status.get("last_shot_time", 0),
+            "pending_shots": status.get("pending_shots", 0),
+            "status": "connected" if status.get("is_listening") else "disconnected"
+        }

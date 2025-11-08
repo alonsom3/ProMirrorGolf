@@ -1,6 +1,28 @@
 """
 ProMirrorGolf - Comprehensive Project Verification Script
-Run this to verify your entire project setup
+
+This utility verifies your ProMirrorGolf installation by checking:
+- Project directory structure
+- Python environment and version
+- Required dependencies installation
+- Configuration file validity
+- Source file presence and imports
+- Database setup
+- Hardware detection (cameras, GPU)
+
+Usage:
+    python verify_project.py
+
+The script will:
+- Check all required files exist
+- Verify imports work correctly
+- Validate config.json structure
+- Test database connections
+- Detect available cameras
+- Provide detailed feedback on any issues
+
+After verification passes (8/8 checks), you can run:
+    python main.py
 """
 
 import os
@@ -409,7 +431,7 @@ class ProjectVerifier:
             print_info("1. Review and update config.json with your settings")
             print_info("2. Build the pro swing database (if not done)")
             print_info("3. Test cameras: python tests/test_cameras.py")
-            print_info("4. Run the application: python src/main.py")
+            print_info("4. Run the application: python main.py")
         else:
             print_error("✗ Some checks failed. Please fix the issues above.")
             print_info("\nCommon fixes:")

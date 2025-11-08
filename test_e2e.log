@@ -1,0 +1,413 @@
+2025-11-08 00:23:00,119 - __main__ - INFO - Test directory: C:\Users\PC\AppData\Local\Temp\promirror_test_3qsko6cf
+2025-11-08 00:23:00,119 - __main__ - INFO - 
+============================================================
+2025-11-08 00:23:00,119 - __main__ - INFO - RUNNING END-TO-END TEST SUITE
+2025-11-08 00:23:00,119 - __main__ - INFO - ============================================================
+2025-11-08 00:23:00,119 - __main__ - INFO - ============================================================
+2025-11-08 00:23:00,120 - __main__ - INFO - SETTING UP TEST ENVIRONMENT
+2025-11-08 00:23:00,120 - __main__ - INFO - ============================================================
+2025-11-08 00:23:00,133 - src.swing_ai_core - INFO - SwingAIController config loaded
+2025-11-08 00:23:00,152 - src.database - INFO - Pro database initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_3qsko6cf\test_data\pro_swings.db
+2025-11-08 00:23:00,156 - src.database - INFO - Pro swing added: Rory McIlroy - test_rory_driver
+2025-11-08 00:23:00,162 - src.database - INFO - Pro swing added: Tiger Woods - test_tiger_driver
+2025-11-08 00:23:00,166 - src.database - INFO - Pro swing added: Fred Couples - test_fred_7iron
+2025-11-08 00:23:00,167 - __main__ - INFO - Added 3 test pro swings to database
+2025-11-08 00:23:00,167 - __main__ - INFO - Test environment setup complete
+2025-11-08 00:23:00,167 - src.swing_ai_core - INFO - Initializing Swing AI modules...
+2025-11-08 00:23:00,194 - src.flaw_detector - INFO - FlawDetector initialized
+2025-11-08 00:23:00,227 - src.database - INFO - Database initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_3qsko6cf\test_data\swings.db
+2025-11-08 00:23:00,229 - src.database - INFO - Pro database initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_3qsko6cf\test_data\pro_swings.db
+2025-11-08 00:23:00,229 - src.style_matcher - INFO - StyleMatcher initialized
+2025-11-08 00:23:00,229 - src.report_generator - INFO - ReportGenerator initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_3qsko6cf\test_data\reports
+2025-11-08 00:23:00,229 - src.swing_ai_core - INFO - All Swing AI components initialized
+2025-11-08 00:23:00,229 - __main__ - INFO - 
+============================================================
+2025-11-08 00:23:00,229 - __main__ - INFO - TEST 1: POSE DETECTION
+2025-11-08 00:23:00,229 - __main__ - INFO - ============================================================
+2025-11-08 00:23:00,230 - src.swing_ai_core - INFO - Initializing Swing AI modules...
+2025-11-08 00:23:00,257 - src.flaw_detector - INFO - FlawDetector initialized
+2025-11-08 00:23:00,261 - src.database - INFO - Database initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_3qsko6cf\test_data\swings.db
+2025-11-08 00:23:00,262 - src.database - INFO - Pro database initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_3qsko6cf\test_data\pro_swings.db
+2025-11-08 00:23:00,263 - src.style_matcher - INFO - StyleMatcher initialized
+2025-11-08 00:23:00,263 - src.report_generator - INFO - ReportGenerator initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_3qsko6cf\test_data\reports
+2025-11-08 00:23:00,263 - src.swing_ai_core - INFO - All Swing AI components initialized
+2025-11-08 00:23:00,629 - __main__ - INFO -   Swing detected: False
+2025-11-08 00:23:00,629 - __main__ - INFO -   DTL poses: 1
+2025-11-08 00:23:00,629 - __main__ - INFO - 
+============================================================
+2025-11-08 00:23:00,630 - __main__ - INFO - TEST 2: METRICS EXTRACTION
+2025-11-08 00:23:00,630 - __main__ - INFO - ============================================================
+2025-11-08 00:23:00,630 - __main__ - INFO -   Extracted 10 metrics
+2025-11-08 00:23:00,631 - __main__ - INFO -     hip_rotation_top: 42.00
+2025-11-08 00:23:00,631 - __main__ - INFO -     shoulder_rotation_top: 89.00
+2025-11-08 00:23:00,631 - __main__ - INFO -     x_factor: 47.00
+2025-11-08 00:23:00,631 - __main__ - INFO -     spine_angle_address: 31.00
+2025-11-08 00:23:00,631 - __main__ - INFO -     spine_angle_impact: 31.00
+2025-11-08 00:23:00,631 - __main__ - INFO -     spine_angle_change: 0.00
+2025-11-08 00:23:00,631 - __main__ - INFO -     backswing_time: 0.90
+2025-11-08 00:23:00,631 - __main__ - INFO -     downswing_time: 0.30
+2025-11-08 00:23:00,631 - __main__ - INFO -     tempo_ratio: 3.00
+2025-11-08 00:23:00,631 - __main__ - INFO -     weight_transfer: 0.08
+2025-11-08 00:23:00,631 - __main__ - INFO - 
+============================================================
+2025-11-08 00:23:00,631 - __main__ - INFO - TEST 3: FLAW DETECTION
+2025-11-08 00:23:00,631 - __main__ - INFO - ============================================================
+2025-11-08 00:23:00,631 - src.flaw_detector - INFO - FlawDetector initialized
+2025-11-08 00:23:00,631 - src.flaw_detector - INFO - Analyzing swing for flaws...
+2025-11-08 00:23:00,631 - src.flaw_detector - INFO - Analysis complete: 0 flaws, score: 100.0/100
+2025-11-08 00:23:00,632 - __main__ - INFO -   Overall score: 100.0/100
+2025-11-08 00:23:00,632 - __main__ - INFO -   Flaws detected: 0
+2025-11-08 00:23:00,632 - __main__ - INFO - 
+============================================================
+2025-11-08 00:23:00,633 - __main__ - INFO - TEST 4: PRO MATCHING
+2025-11-08 00:23:00,633 - __main__ - INFO - ============================================================
+2025-11-08 00:23:00,633 - src.style_matcher - INFO - Finding best match for Driver swing...
+2025-11-08 00:23:00,633 - src.style_matcher - INFO - Best match: Tiger Woods (similarity: 81.61)
+2025-11-08 00:23:00,634 - __main__ - INFO -   Matched pro: Tiger Woods
+2025-11-08 00:23:00,634 - __main__ - INFO -   Similarity: 81.61%
+2025-11-08 00:23:00,634 - __main__ - INFO -   Pro ID: test_tiger_driver
+2025-11-08 00:23:00,634 - __main__ - INFO - 
+============================================================
+2025-11-08 00:23:00,635 - __main__ - INFO - TEST 5: FULL PIPELINE
+2025-11-08 00:23:00,635 - __main__ - INFO - ============================================================
+2025-11-08 00:23:00,636 - src.swing_ai_core - INFO - Starting full swing analysis...
+2025-11-08 00:23:00,636 - src.metrics_extractor - INFO - Extracted metrics: {'hip_rotation_top': 0.0, 'shoulder_rotation_top': 0.0, 'x_factor': 0.0, 'spine_angle_address': 0.0, 'spine_angle_impact': 0.0, 'spine_angle_change': 0.0, 'backswing_time': 0.7833333333333333, 'downswing_time': 0.3333333333333333, 'tempo_ratio': 2.35, 'weight_transfer': 0.0}
+2025-11-08 00:23:00,636 - src.swing_ai_core - INFO - Extracted metrics: {'hip_rotation_top': 0.0, 'shoulder_rotation_top': 0.0, 'x_factor': 0.0, 'spine_angle_address': 0.0, 'spine_angle_impact': 0.0, 'spine_angle_change': 0.0, 'backswing_time': 0.7833333333333333, 'downswing_time': 0.3333333333333333, 'tempo_ratio': 2.35, 'weight_transfer': 0.0}
+2025-11-08 00:23:00,636 - src.flaw_detector - INFO - Analyzing swing for flaws...
+2025-11-08 00:23:00,636 - src.flaw_detector - INFO - Analysis complete: 6 flaws, score: 20.0/100
+2025-11-08 00:23:00,636 - src.swing_ai_core - INFO - Flaw analysis complete: 6 flaws, score: 20.0
+2025-11-08 00:23:00,636 - src.style_matcher - INFO - Finding best match for Driver swing...
+2025-11-08 00:23:00,637 - src.style_matcher - INFO - Best match: Tiger Woods (similarity: 38.25)
+2025-11-08 00:23:00,637 - src.swing_ai_core - INFO - Pro match found: Tiger Woods (similarity: 38.25)
+2025-11-08 00:23:00,637 - src.swing_ai_core - INFO - Swing analysis complete
+2025-11-08 00:23:00,638 - __main__ - INFO -   Metrics: 10
+2025-11-08 00:23:00,638 - __main__ - INFO -   Flaws: 6
+2025-11-08 00:23:00,638 - __main__ - INFO -   Score: 20.0/100
+2025-11-08 00:23:00,638 - __main__ - INFO -   Pro: Tiger Woods
+2025-11-08 00:23:00,639 - __main__ - INFO - 
+============================================================
+2025-11-08 00:23:00,639 - __main__ - INFO - TEST 6: SESSION MANAGEMENT
+2025-11-08 00:23:00,639 - __main__ - INFO - ============================================================
+2025-11-08 00:23:00,639 - src.swing_ai_core - INFO - Starting session for test_user - Test Session
+2025-11-08 00:23:05,218 - src.database - INFO - Session created: test_user_20251108_002305
+2025-11-08 00:23:05,218 - src.swing_ai_core - INFO - Database session created: test_user_20251108_002305
+2025-11-08 00:23:05,218 - __main__ - INFO -   Session started: test_user_20251108_002305
+2025-11-08 00:23:05,929 - src.swing_ai_core - INFO - Session stopped successfully
+2025-11-08 00:23:05,930 - __main__ - INFO - 
+============================================================
+2025-11-08 00:23:05,930 - __main__ - INFO - TEST 7: EXPORT FUNCTIONALITY
+2025-11-08 00:23:05,930 - __main__ - INFO - ============================================================
+2025-11-08 00:23:05,934 - src.database - INFO - Swing saved: test_swing_123
+2025-11-08 00:23:05,935 - __main__ - INFO -   Swing saved and retrieved: test_swing_123
+2025-11-08 00:23:05,935 - src.report_generator - INFO - Generating report for test_swing_123...
+2025-11-08 00:23:05,938 - src.report_generator - WARNING - No pro video available for comparison
+2025-11-08 00:23:06,619 - __main__ - WARNING -   Report generation skipped: 'dtl_poses'
+2025-11-08 00:23:06,620 - __main__ - INFO - 
+============================================================
+2025-11-08 00:23:06,620 - __main__ - INFO - TEST 8: EDGE CASES
+2025-11-08 00:23:06,620 - __main__ - INFO - ============================================================
+2025-11-08 00:23:06,623 - src.flaw_detector - INFO - FlawDetector initialized
+2025-11-08 00:23:06,623 - src.flaw_detector - INFO - Analyzing swing for flaws...
+2025-11-08 00:23:06,623 - src.flaw_detector - INFO - Analysis complete: 0 flaws, score: 100.0/100
+2025-11-08 00:23:06,625 - __main__ - INFO - 
+============================================================
+2025-11-08 00:23:06,625 - __main__ - INFO - TEST SUMMARY
+2025-11-08 00:23:06,626 - __main__ - INFO - ============================================================
+2025-11-08 00:23:06,635 - __main__ - INFO - 
+Total: 8/8 tests passed
+2025-11-08 00:23:06,635 - __main__ - INFO - 
+============================================================
+2025-11-08 00:23:06,635 - __main__ - INFO - CLEANING UP TEST ENVIRONMENT
+2025-11-08 00:23:06,635 - __main__ - INFO - ============================================================
+2025-11-08 00:23:06,637 - __main__ - INFO - Removed test directory: C:\Users\PC\AppData\Local\Temp\promirror_test_3qsko6cf
+2025-11-08 00:23:06,637 - __main__ - INFO - Cleanup complete
+2025-11-08 00:24:57,978 - __main__ - INFO - Test directory: C:\Users\PC\AppData\Local\Temp\promirror_test_zgbofzrv
+2025-11-08 00:24:57,979 - __main__ - INFO - 
+============================================================
+2025-11-08 00:24:57,979 - __main__ - INFO - RUNNING END-TO-END TEST SUITE
+2025-11-08 00:24:57,979 - __main__ - INFO - ============================================================
+2025-11-08 00:24:57,979 - __main__ - INFO - ============================================================
+2025-11-08 00:24:57,979 - __main__ - INFO - SETTING UP TEST ENVIRONMENT
+2025-11-08 00:24:57,979 - __main__ - INFO - ============================================================
+2025-11-08 00:24:57,986 - src.swing_ai_core - INFO - SwingAIController config loaded
+2025-11-08 00:24:58,006 - src.database - INFO - Pro database initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_zgbofzrv\test_data\pro_swings.db
+2025-11-08 00:24:58,011 - src.database - INFO - Pro swing added: Rory McIlroy - test_rory_driver
+2025-11-08 00:24:58,016 - src.database - INFO - Pro swing added: Tiger Woods - test_tiger_driver
+2025-11-08 00:24:58,020 - src.database - INFO - Pro swing added: Fred Couples - test_fred_7iron
+2025-11-08 00:24:58,020 - __main__ - INFO - Added 3 test pro swings to database
+2025-11-08 00:24:58,020 - __main__ - INFO - Test environment setup complete
+2025-11-08 00:24:58,021 - src.swing_ai_core - INFO - Initializing Swing AI modules...
+2025-11-08 00:24:58,040 - src.flaw_detector - INFO - FlawDetector initialized
+2025-11-08 00:24:58,071 - src.database - INFO - Database initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_zgbofzrv\test_data\swings.db
+2025-11-08 00:24:58,074 - src.database - INFO - Pro database initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_zgbofzrv\test_data\pro_swings.db
+2025-11-08 00:24:58,074 - src.style_matcher - INFO - StyleMatcher initialized
+2025-11-08 00:24:58,074 - src.report_generator - INFO - ReportGenerator initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_zgbofzrv\test_data\reports
+2025-11-08 00:24:58,074 - src.swing_ai_core - INFO - All Swing AI components initialized
+2025-11-08 00:24:58,074 - __main__ - INFO - 
+============================================================
+2025-11-08 00:24:58,074 - __main__ - INFO - TEST 1: POSE DETECTION
+2025-11-08 00:24:58,074 - __main__ - INFO - ============================================================
+2025-11-08 00:24:58,075 - src.swing_ai_core - INFO - Initializing Swing AI modules...
+2025-11-08 00:24:58,095 - src.flaw_detector - INFO - FlawDetector initialized
+2025-11-08 00:24:58,098 - src.database - INFO - Database initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_zgbofzrv\test_data\swings.db
+2025-11-08 00:24:58,099 - src.database - INFO - Pro database initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_zgbofzrv\test_data\pro_swings.db
+2025-11-08 00:24:58,099 - src.style_matcher - INFO - StyleMatcher initialized
+2025-11-08 00:24:58,099 - src.report_generator - INFO - ReportGenerator initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_zgbofzrv\test_data\reports
+2025-11-08 00:24:58,099 - src.swing_ai_core - INFO - All Swing AI components initialized
+2025-11-08 00:24:58,299 - __main__ - INFO - [PASS] Pose detection test passed
+2025-11-08 00:24:58,299 - __main__ - INFO -   Swing detected: False
+2025-11-08 00:24:58,299 - __main__ - INFO -   DTL poses: 1
+2025-11-08 00:24:58,299 - __main__ - INFO - 
+============================================================
+2025-11-08 00:24:58,300 - __main__ - INFO - TEST 2: METRICS EXTRACTION
+2025-11-08 00:24:58,300 - __main__ - INFO - ============================================================
+2025-11-08 00:24:58,300 - __main__ - INFO - [PASS] Metrics extraction test passed
+2025-11-08 00:24:58,300 - __main__ - INFO -   Extracted 10 metrics
+2025-11-08 00:24:58,300 - __main__ - INFO -     hip_rotation_top: 42.00
+2025-11-08 00:24:58,300 - __main__ - INFO -     shoulder_rotation_top: 89.00
+2025-11-08 00:24:58,300 - __main__ - INFO -     x_factor: 47.00
+2025-11-08 00:24:58,300 - __main__ - INFO -     spine_angle_address: 31.00
+2025-11-08 00:24:58,300 - __main__ - INFO -     spine_angle_impact: 31.00
+2025-11-08 00:24:58,300 - __main__ - INFO -     spine_angle_change: 0.00
+2025-11-08 00:24:58,300 - __main__ - INFO -     backswing_time: 0.90
+2025-11-08 00:24:58,300 - __main__ - INFO -     downswing_time: 0.30
+2025-11-08 00:24:58,300 - __main__ - INFO -     tempo_ratio: 3.00
+2025-11-08 00:24:58,300 - __main__ - INFO -     weight_transfer: 0.08
+2025-11-08 00:24:58,300 - __main__ - INFO - 
+============================================================
+2025-11-08 00:24:58,300 - __main__ - INFO - TEST 3: FLAW DETECTION
+2025-11-08 00:24:58,300 - __main__ - INFO - ============================================================
+2025-11-08 00:24:58,300 - src.flaw_detector - INFO - FlawDetector initialized
+2025-11-08 00:24:58,300 - src.flaw_detector - INFO - Analyzing swing for flaws...
+2025-11-08 00:24:58,300 - src.flaw_detector - INFO - Analysis complete: 0 flaws, score: 100.0/100
+2025-11-08 00:24:58,300 - __main__ - INFO - [PASS] Flaw detection test passed
+2025-11-08 00:24:58,301 - __main__ - INFO -   Overall score: 100.0/100
+2025-11-08 00:24:58,301 - __main__ - INFO -   Flaws detected: 0
+2025-11-08 00:24:58,301 - __main__ - INFO - 
+============================================================
+2025-11-08 00:24:58,301 - __main__ - INFO - TEST 4: PRO MATCHING
+2025-11-08 00:24:58,301 - __main__ - INFO - ============================================================
+2025-11-08 00:24:58,301 - src.style_matcher - INFO - Finding best match for Driver swing...
+2025-11-08 00:24:58,301 - src.style_matcher - INFO - Best match: Tiger Woods (similarity: 81.61)
+2025-11-08 00:24:58,301 - __main__ - INFO - [PASS] Pro matching test passed
+2025-11-08 00:24:58,301 - __main__ - INFO -   Matched pro: Tiger Woods
+2025-11-08 00:24:58,301 - __main__ - INFO -   Similarity: 81.61%
+2025-11-08 00:24:58,301 - __main__ - INFO -   Pro ID: test_tiger_driver
+2025-11-08 00:24:58,301 - __main__ - INFO - 
+============================================================
+2025-11-08 00:24:58,301 - __main__ - INFO - TEST 5: FULL PIPELINE
+2025-11-08 00:24:58,302 - __main__ - INFO - ============================================================
+2025-11-08 00:24:58,303 - src.swing_ai_core - INFO - Starting full swing analysis...
+2025-11-08 00:24:58,303 - src.metrics_extractor - INFO - Extracted metrics: {'hip_rotation_top': 0.0, 'shoulder_rotation_top': 0.0, 'x_factor': 0.0, 'spine_angle_address': 0.0, 'spine_angle_impact': 0.0, 'spine_angle_change': 0.0, 'backswing_time': 0.7833333333333333, 'downswing_time': 0.3333333333333333, 'tempo_ratio': 2.35, 'weight_transfer': 0.0}
+2025-11-08 00:24:58,303 - src.swing_ai_core - INFO - Extracted metrics: {'hip_rotation_top': 0.0, 'shoulder_rotation_top': 0.0, 'x_factor': 0.0, 'spine_angle_address': 0.0, 'spine_angle_impact': 0.0, 'spine_angle_change': 0.0, 'backswing_time': 0.7833333333333333, 'downswing_time': 0.3333333333333333, 'tempo_ratio': 2.35, 'weight_transfer': 0.0}
+2025-11-08 00:24:58,303 - src.flaw_detector - INFO - Analyzing swing for flaws...
+2025-11-08 00:24:58,303 - src.flaw_detector - INFO - Analysis complete: 6 flaws, score: 20.0/100
+2025-11-08 00:24:58,303 - src.swing_ai_core - INFO - Flaw analysis complete: 6 flaws, score: 20.0
+2025-11-08 00:24:58,303 - src.style_matcher - INFO - Finding best match for Driver swing...
+2025-11-08 00:24:58,303 - src.style_matcher - INFO - Best match: Tiger Woods (similarity: 38.25)
+2025-11-08 00:24:58,303 - src.swing_ai_core - INFO - Pro match found: Tiger Woods (similarity: 38.25)
+2025-11-08 00:24:58,303 - src.swing_ai_core - INFO - Swing analysis complete
+2025-11-08 00:24:58,304 - __main__ - INFO - [PASS] Full pipeline test passed
+2025-11-08 00:24:58,304 - __main__ - INFO -   Metrics: 10
+2025-11-08 00:24:58,304 - __main__ - INFO -   Flaws: 6
+2025-11-08 00:24:58,304 - __main__ - INFO -   Score: 20.0/100
+2025-11-08 00:24:58,304 - __main__ - INFO -   Pro: Tiger Woods
+2025-11-08 00:24:58,304 - __main__ - INFO - 
+============================================================
+2025-11-08 00:24:58,304 - __main__ - INFO - TEST 6: SESSION MANAGEMENT
+2025-11-08 00:24:58,304 - __main__ - INFO - ============================================================
+2025-11-08 00:24:58,304 - src.swing_ai_core - INFO - Starting session for test_user - Test Session
+2025-11-08 00:25:02,895 - src.database - INFO - Session created: test_user_20251108_002502
+2025-11-08 00:25:02,895 - src.swing_ai_core - INFO - Database session created: test_user_20251108_002502
+2025-11-08 00:25:02,895 - __main__ - INFO -   Session started: test_user_20251108_002502
+2025-11-08 00:25:03,606 - src.swing_ai_core - INFO - Session stopped successfully
+2025-11-08 00:25:03,606 - __main__ - INFO - [PASS] Session management test passed
+2025-11-08 00:25:03,607 - __main__ - INFO - 
+============================================================
+2025-11-08 00:25:03,607 - __main__ - INFO - TEST 7: EXPORT FUNCTIONALITY
+2025-11-08 00:25:03,607 - __main__ - INFO - ============================================================
+2025-11-08 00:25:03,612 - src.database - INFO - Swing saved: test_swing_123
+2025-11-08 00:25:03,613 - __main__ - INFO -   Swing saved and retrieved: test_swing_123
+2025-11-08 00:25:03,613 - src.report_generator - INFO - Generating report for test_swing_123...
+2025-11-08 00:25:03,615 - src.report_generator - WARNING - No pro video available for comparison
+2025-11-08 00:25:04,250 - __main__ - WARNING -   Report generation skipped: 'dtl_poses'
+2025-11-08 00:25:04,250 - __main__ - INFO - [PASS] Export functionality test passed
+2025-11-08 00:25:04,250 - __main__ - INFO - 
+============================================================
+2025-11-08 00:25:04,250 - __main__ - INFO - TEST 8: EDGE CASES
+2025-11-08 00:25:04,250 - __main__ - INFO - ============================================================
+2025-11-08 00:25:04,250 - __main__ - INFO -   [PASS] Empty pose data handled
+2025-11-08 00:25:04,250 - __main__ - INFO -   [PASS] Missing frames handled
+2025-11-08 00:25:04,250 - __main__ - INFO -   [PASS] No swings handled
+2025-11-08 00:25:04,250 - src.flaw_detector - INFO - FlawDetector initialized
+2025-11-08 00:25:04,250 - src.flaw_detector - INFO - Analyzing swing for flaws...
+2025-11-08 00:25:04,250 - src.flaw_detector - INFO - Analysis complete: 0 flaws, score: 100.0/100
+2025-11-08 00:25:04,250 - __main__ - INFO -   [PASS] Invalid metrics handled
+2025-11-08 00:25:04,251 - __main__ - INFO - [PASS] Edge cases test: 4/4 passed
+2025-11-08 00:25:04,251 - __main__ - INFO - 
+============================================================
+2025-11-08 00:25:04,251 - __main__ - INFO - TEST SUMMARY
+2025-11-08 00:25:04,251 - __main__ - INFO - ============================================================
+2025-11-08 00:25:04,251 - __main__ - INFO - pose_detection: [PASS]
+2025-11-08 00:25:04,251 - __main__ - INFO - metrics_extraction: [PASS]
+2025-11-08 00:25:04,251 - __main__ - INFO - flaw_detection: [PASS]
+2025-11-08 00:25:04,251 - __main__ - INFO - pro_matching: [PASS]
+2025-11-08 00:25:04,251 - __main__ - INFO - full_pipeline: [PASS]
+2025-11-08 00:25:04,251 - __main__ - INFO - session_management: [PASS]
+2025-11-08 00:25:04,251 - __main__ - INFO - export_functionality: [PASS]
+2025-11-08 00:25:04,251 - __main__ - INFO - edge_cases: [PASS]
+2025-11-08 00:25:04,251 - __main__ - INFO - 
+Total: 8/8 tests passed
+2025-11-08 00:25:04,251 - __main__ - INFO - 
+============================================================
+2025-11-08 00:25:04,251 - __main__ - INFO - CLEANING UP TEST ENVIRONMENT
+2025-11-08 00:25:04,251 - __main__ - INFO - ============================================================
+2025-11-08 00:25:04,253 - __main__ - INFO - Removed test directory: C:\Users\PC\AppData\Local\Temp\promirror_test_zgbofzrv
+2025-11-08 00:25:04,253 - __main__ - INFO - Cleanup complete
+2025-11-08 00:25:04,253 - __main__ - INFO - 
+[SUCCESS] ALL TESTS PASSED
+2025-11-08 00:26:30,619 - __main__ - INFO - Test directory: C:\Users\PC\AppData\Local\Temp\promirror_test_ry67jik3
+2025-11-08 00:26:30,619 - __main__ - INFO - 
+============================================================
+2025-11-08 00:26:30,619 - __main__ - INFO - RUNNING END-TO-END TEST SUITE
+2025-11-08 00:26:30,619 - __main__ - INFO - ============================================================
+2025-11-08 00:26:30,619 - __main__ - INFO - ============================================================
+2025-11-08 00:26:30,619 - __main__ - INFO - SETTING UP TEST ENVIRONMENT
+2025-11-08 00:26:30,619 - __main__ - INFO - ============================================================
+2025-11-08 00:26:30,628 - src.swing_ai_core - INFO - SwingAIController config loaded
+2025-11-08 00:26:30,649 - src.database - INFO - Pro database initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_ry67jik3\test_data\pro_swings.db
+2025-11-08 00:26:30,655 - src.database - INFO - Pro swing added: Rory McIlroy - test_rory_driver
+2025-11-08 00:26:30,659 - src.database - INFO - Pro swing added: Tiger Woods - test_tiger_driver
+2025-11-08 00:26:30,664 - src.database - INFO - Pro swing added: Fred Couples - test_fred_7iron
+2025-11-08 00:26:30,665 - __main__ - INFO - Added 3 test pro swings to database
+2025-11-08 00:26:30,665 - __main__ - INFO - Test environment setup complete
+2025-11-08 00:26:30,665 - src.swing_ai_core - INFO - Initializing Swing AI modules...
+2025-11-08 00:26:30,688 - src.flaw_detector - INFO - FlawDetector initialized
+2025-11-08 00:26:30,719 - src.database - INFO - Database initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_ry67jik3\test_data\swings.db
+2025-11-08 00:26:30,721 - src.database - INFO - Pro database initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_ry67jik3\test_data\pro_swings.db
+2025-11-08 00:26:30,721 - src.style_matcher - INFO - StyleMatcher initialized
+2025-11-08 00:26:30,721 - src.report_generator - INFO - ReportGenerator initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_ry67jik3\test_data\reports
+2025-11-08 00:26:30,721 - src.swing_ai_core - INFO - All Swing AI components initialized
+2025-11-08 00:26:30,721 - __main__ - INFO - 
+============================================================
+2025-11-08 00:26:30,721 - __main__ - INFO - TEST 1: POSE DETECTION
+2025-11-08 00:26:30,721 - __main__ - INFO - ============================================================
+2025-11-08 00:26:30,722 - src.swing_ai_core - INFO - Initializing Swing AI modules...
+2025-11-08 00:26:30,743 - src.flaw_detector - INFO - FlawDetector initialized
+2025-11-08 00:26:30,748 - src.database - INFO - Database initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_ry67jik3\test_data\swings.db
+2025-11-08 00:26:30,749 - src.database - INFO - Pro database initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_ry67jik3\test_data\pro_swings.db
+2025-11-08 00:26:30,749 - src.style_matcher - INFO - StyleMatcher initialized
+2025-11-08 00:26:30,749 - src.report_generator - INFO - ReportGenerator initialized: C:\Users\PC\AppData\Local\Temp\promirror_test_ry67jik3\test_data\reports
+2025-11-08 00:26:30,749 - src.swing_ai_core - INFO - All Swing AI components initialized
+2025-11-08 00:26:30,944 - __main__ - INFO - [PASS] Pose detection test passed
+2025-11-08 00:26:30,944 - __main__ - INFO -   Swing detected: False
+2025-11-08 00:26:30,944 - __main__ - INFO -   DTL poses: 1
+2025-11-08 00:26:30,944 - __main__ - INFO - 
+============================================================
+2025-11-08 00:26:30,944 - __main__ - INFO - TEST 2: METRICS EXTRACTION
+2025-11-08 00:26:30,944 - __main__ - INFO - ============================================================
+2025-11-08 00:26:30,944 - __main__ - INFO - [PASS] Metrics extraction test passed
+2025-11-08 00:26:30,944 - __main__ - INFO -   Extracted 10 metrics
+2025-11-08 00:26:30,944 - __main__ - INFO -     hip_rotation_top: 42.00
+2025-11-08 00:26:30,944 - __main__ - INFO -     shoulder_rotation_top: 89.00
+2025-11-08 00:26:30,944 - __main__ - INFO -     x_factor: 47.00
+2025-11-08 00:26:30,945 - __main__ - INFO -     spine_angle_address: 31.00
+2025-11-08 00:26:30,945 - __main__ - INFO -     spine_angle_impact: 31.00
+2025-11-08 00:26:30,945 - __main__ - INFO -     spine_angle_change: 0.00
+2025-11-08 00:26:30,945 - __main__ - INFO -     backswing_time: 0.90
+2025-11-08 00:26:30,945 - __main__ - INFO -     downswing_time: 0.30
+2025-11-08 00:26:30,945 - __main__ - INFO -     tempo_ratio: 3.00
+2025-11-08 00:26:30,945 - __main__ - INFO -     weight_transfer: 0.08
+2025-11-08 00:26:30,945 - __main__ - INFO - 
+============================================================
+2025-11-08 00:26:30,945 - __main__ - INFO - TEST 3: FLAW DETECTION
+2025-11-08 00:26:30,945 - __main__ - INFO - ============================================================
+2025-11-08 00:26:30,945 - src.flaw_detector - INFO - FlawDetector initialized
+2025-11-08 00:26:30,945 - src.flaw_detector - INFO - Analyzing swing for flaws...
+2025-11-08 00:26:30,945 - src.flaw_detector - INFO - Analysis complete: 0 flaws, score: 100.0/100
+2025-11-08 00:26:30,945 - __main__ - INFO - [PASS] Flaw detection test passed
+2025-11-08 00:26:30,945 - __main__ - INFO -   Overall score: 100.0/100
+2025-11-08 00:26:30,945 - __main__ - INFO -   Flaws detected: 0
+2025-11-08 00:26:30,946 - __main__ - INFO - 
+============================================================
+2025-11-08 00:26:30,946 - __main__ - INFO - TEST 4: PRO MATCHING
+2025-11-08 00:26:30,946 - __main__ - INFO - ============================================================
+2025-11-08 00:26:30,946 - src.style_matcher - INFO - Finding best match for Driver swing...
+2025-11-08 00:26:30,946 - src.style_matcher - INFO - Best match: Tiger Woods (similarity: 81.61)
+2025-11-08 00:26:30,946 - __main__ - INFO - [PASS] Pro matching test passed
+2025-11-08 00:26:30,946 - __main__ - INFO -   Matched pro: Tiger Woods
+2025-11-08 00:26:30,946 - __main__ - INFO -   Similarity: 81.61%
+2025-11-08 00:26:30,946 - __main__ - INFO -   Pro ID: test_tiger_driver
+2025-11-08 00:26:30,947 - __main__ - INFO - 
+============================================================
+2025-11-08 00:26:30,947 - __main__ - INFO - TEST 5: FULL PIPELINE
+2025-11-08 00:26:30,947 - __main__ - INFO - ============================================================
+2025-11-08 00:26:30,947 - src.swing_ai_core - INFO - Starting full swing analysis...
+2025-11-08 00:26:30,947 - src.metrics_extractor - INFO - Extracted metrics: {'hip_rotation_top': 0.0, 'shoulder_rotation_top': 0.0, 'x_factor': 0.0, 'spine_angle_address': 0.0, 'spine_angle_impact': 0.0, 'spine_angle_change': 0.0, 'backswing_time': 0.7833333333333333, 'downswing_time': 0.3333333333333333, 'tempo_ratio': 2.35, 'weight_transfer': 0.0}
+2025-11-08 00:26:30,948 - src.swing_ai_core - INFO - Extracted metrics: {'hip_rotation_top': 0.0, 'shoulder_rotation_top': 0.0, 'x_factor': 0.0, 'spine_angle_address': 0.0, 'spine_angle_impact': 0.0, 'spine_angle_change': 0.0, 'backswing_time': 0.7833333333333333, 'downswing_time': 0.3333333333333333, 'tempo_ratio': 2.35, 'weight_transfer': 0.0}
+2025-11-08 00:26:30,948 - src.flaw_detector - INFO - Analyzing swing for flaws...
+2025-11-08 00:26:30,948 - src.flaw_detector - INFO - Analysis complete: 6 flaws, score: 20.0/100
+2025-11-08 00:26:30,948 - src.swing_ai_core - INFO - Flaw analysis complete: 6 flaws, score: 20.0
+2025-11-08 00:26:30,948 - src.style_matcher - INFO - Finding best match for Driver swing...
+2025-11-08 00:26:30,948 - src.style_matcher - INFO - Best match: Tiger Woods (similarity: 38.25)
+2025-11-08 00:26:30,948 - src.swing_ai_core - INFO - Pro match found: Tiger Woods (similarity: 38.25)
+2025-11-08 00:26:30,949 - src.swing_ai_core - INFO - Swing analysis complete
+2025-11-08 00:26:30,949 - __main__ - INFO - [PASS] Full pipeline test passed
+2025-11-08 00:26:30,949 - __main__ - INFO -   Metrics: 10
+2025-11-08 00:26:30,949 - __main__ - INFO -   Flaws: 6
+2025-11-08 00:26:30,949 - __main__ - INFO -   Score: 20.0/100
+2025-11-08 00:26:30,949 - __main__ - INFO -   Pro: Tiger Woods
+2025-11-08 00:26:30,949 - __main__ - INFO - 
+============================================================
+2025-11-08 00:26:30,949 - __main__ - INFO - TEST 6: SESSION MANAGEMENT
+2025-11-08 00:26:30,949 - __main__ - INFO - ============================================================
+2025-11-08 00:26:30,949 - src.swing_ai_core - INFO - Starting session for test_user - Test Session
+2025-11-08 00:26:35,491 - src.database - INFO - Session created: test_user_20251108_002635
+2025-11-08 00:26:35,491 - src.swing_ai_core - INFO - Database session created: test_user_20251108_002635
+2025-11-08 00:26:35,491 - __main__ - INFO -   Session started: test_user_20251108_002635
+2025-11-08 00:26:36,170 - src.swing_ai_core - INFO - Session stopped successfully
+2025-11-08 00:26:36,170 - __main__ - INFO - [PASS] Session management test passed
+2025-11-08 00:26:36,170 - __main__ - INFO - 
+============================================================
+2025-11-08 00:26:36,170 - __main__ - INFO - TEST 7: EXPORT FUNCTIONALITY
+2025-11-08 00:26:36,170 - __main__ - INFO - ============================================================
+2025-11-08 00:26:36,174 - src.database - INFO - Swing saved: test_swing_123
+2025-11-08 00:26:36,174 - __main__ - INFO -   Swing saved and retrieved: test_swing_123
+2025-11-08 00:26:36,174 - src.report_generator - INFO - Generating report for test_swing_123...
+2025-11-08 00:26:36,177 - src.report_generator - WARNING - No pro video available for comparison
+2025-11-08 00:26:36,825 - __main__ - WARNING -   Report generation skipped: 'dtl_poses'
+2025-11-08 00:26:36,825 - __main__ - INFO - [PASS] Export functionality test passed
+2025-11-08 00:26:36,825 - __main__ - INFO - 
+============================================================
+2025-11-08 00:26:36,825 - __main__ - INFO - TEST 8: EDGE CASES
+2025-11-08 00:26:36,825 - __main__ - INFO - ============================================================
+2025-11-08 00:26:36,825 - __main__ - INFO -   [PASS] Empty pose data handled
+2025-11-08 00:26:36,825 - __main__ - INFO -   [PASS] Missing frames handled
+2025-11-08 00:26:36,825 - __main__ - INFO -   [PASS] No swings handled
+2025-11-08 00:26:36,825 - src.flaw_detector - INFO - FlawDetector initialized
+2025-11-08 00:26:36,825 - src.flaw_detector - INFO - Analyzing swing for flaws...
+2025-11-08 00:26:36,825 - src.flaw_detector - INFO - Analysis complete: 0 flaws, score: 100.0/100
+2025-11-08 00:26:36,825 - __main__ - INFO -   [PASS] Invalid metrics handled
+2025-11-08 00:26:36,825 - __main__ - INFO - [PASS] Edge cases test: 4/4 passed
+2025-11-08 00:26:36,826 - __main__ - INFO - 
+============================================================
+2025-11-08 00:26:36,826 - __main__ - INFO - TEST SUMMARY
+2025-11-08 00:26:36,826 - __main__ - INFO - ============================================================
+2025-11-08 00:26:36,826 - __main__ - INFO - pose_detection: [PASS]
+2025-11-08 00:26:36,826 - __main__ - INFO - metrics_extraction: [PASS]
+2025-11-08 00:26:36,826 - __main__ - INFO - flaw_detection: [PASS]
+2025-11-08 00:26:36,826 - __main__ - INFO - pro_matching: [PASS]
+2025-11-08 00:26:36,826 - __main__ - INFO - full_pipeline: [PASS]
+2025-11-08 00:26:36,826 - __main__ - INFO - session_management: [PASS]
+2025-11-08 00:26:36,826 - __main__ - INFO - export_functionality: [PASS]
+2025-11-08 00:26:36,826 - __main__ - INFO - edge_cases: [PASS]
+2025-11-08 00:26:36,826 - __main__ - INFO - 
+Total: 8/8 tests passed
+2025-11-08 00:26:36,826 - __main__ - INFO - 
+============================================================
+2025-11-08 00:26:36,826 - __main__ - INFO - CLEANING UP TEST ENVIRONMENT
+2025-11-08 00:26:36,826 - __main__ - INFO - ============================================================
+2025-11-08 00:26:36,829 - __main__ - INFO - Removed test directory: C:\Users\PC\AppData\Local\Temp\promirror_test_ry67jik3
+2025-11-08 00:26:36,829 - __main__ - INFO - Cleanup complete
+2025-11-08 00:26:36,829 - __main__ - INFO - 
+[SUCCESS] ALL TESTS PASSED

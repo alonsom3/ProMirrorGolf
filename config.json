@@ -17,12 +17,15 @@
     "min_detection_confidence": 0.5
   },
   "database": {
-    "user_swings_path": "./data/swings.db",
-    "pro_swings_path": "./data/pro_swings.db"
+    "swing_db_path": "./data/swings.db",
+    "pro_db_path": "./data/pro_swings.db"
+  },
+  "reports": {
+    "output_dir": "./data/reports"
   },
   "output": {
     "videos_dir": "./output/videos",
-    "reports_dir": "./output/reports"
+    "reports_dir": "./data/reports"
   },
   "overlay": {
     "enabled": true,

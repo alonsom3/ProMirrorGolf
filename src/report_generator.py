@@ -5,7 +5,7 @@ Overlay System - Displays results in GSPro
 
 import cv2
 import numpy as np
-from typing import Dict, List
+from typing import Dict
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')  # Non-GUI backend
@@ -402,8 +402,4 @@ class ReportGenerator:
         
         return output_path
     
-    def create_comparison_report(self, swing1: Dict, swing2: Dict) -> Dict:
-        """Compare two swings (e.g., before/after)"""
-        # Implementation for swing-to-swing comparison
-        pass
 

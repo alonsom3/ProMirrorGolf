@@ -1,6 +1,18 @@
 """
-Generate All ProMirrorGolf Source Files
-This script creates all 10 required source files for the src/ directory
+ProMirrorGolf - Source File Generator
+
+This utility helps generate source files for the src/ directory.
+It extracts code blocks from Project.txt and creates individual .py files.
+
+Usage:
+    python generate_source_files.py
+
+Note: This script is typically used during initial project setup.
+All source files should already exist in the src/ directory for normal operation.
+
+After generating files, run:
+    python verify_project.py
+    python main.py
 """
 
 import os
@@ -146,7 +158,7 @@ readme = '''# ProMirrorGolf Source Files
 
 4. **Launch the application**
    ```
-   python modern_gui.py
+   python main.py
    ```
 
 ## Note
@@ -173,7 +185,7 @@ print("  - __init__.py")
 print("  - youtube_downloader.py") 
 print("  - README_INSTALL.txt")
 print("\nStill needed (these are BIG files):")
-print("  - main.py (use modern_gui.py)")
+print("  - main.py")
 print("  - swing_ai_core.py")
 print("  - camera_manager.py")
 print("  - mlm2pro_listener.py")

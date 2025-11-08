@@ -2,7 +2,6 @@
 ProMirrorGolf - Main Application
 Entry point for the application
 """
-import os
 import asyncio
 import argparse
 import logging

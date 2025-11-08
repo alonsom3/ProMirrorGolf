@@ -1,6 +1,21 @@
 """
-ProMirrorGolf - Quick Setup Script (Fixed Encoding)
-This will create all missing directories and placeholder files
+ProMirrorGolf - Quick Setup Script
+
+This utility script helps set up a new ProMirrorGolf installation by:
+- Creating necessary directory structure
+- Generating placeholder config.json
+- Creating __init__.py files
+- Generating documentation templates
+
+Usage:
+    python quick_setup.py
+
+This script is typically run once during initial project setup.
+After running, you should:
+1. Copy source files to src/ directory
+2. Update config.json with your camera IDs and paths
+3. Run verify_project.py to check setup
+4. Launch the application with: python main.py
 """
 
 import os
@@ -232,7 +247,7 @@ def create_readme():
 The `src/` directory needs the following files:
 
 1. **__init__.py** - Package initialization
-2. **main.py** - GUI entry point (use modern_gui.py)
+2. **main.py** - GUI entry point
 3. **swing_ai_core.py** - Main controller
 4. **camera_manager.py** - Camera system
 5. **mlm2pro_listener.py** - Launch monitor integration
@@ -258,8 +273,8 @@ Once you have the source files:
 # Test cameras
 python tests/test_cameras.py
 
-# Launch GUI (using the modern_gui.py provided)
-python modern_gui.py
+# Launch GUI
+python main.py
 ```
 
 ## Next Steps
@@ -267,7 +282,7 @@ python modern_gui.py
 1. Copy all source files to src/
 2. Run verification again: `python verify_project.py`
 3. Test cameras: `python tests/test_cameras.py --preview`
-4. Launch GUI: `python modern_gui.py`
+4. Launch GUI: `python main.py`
 '''
     
     with open('src/README.md', 'w', encoding='utf-8') as f:
@@ -308,7 +323,7 @@ def print_next_steps():
     print("   python verify_project.py")
     print("   Target: 8/8 checks passed")
     print("\n5. Launch GUI:")
-    print("   python modern_gui.py")
+    print("   python main.py")
     
     print("\n" + "=" * 60)
 

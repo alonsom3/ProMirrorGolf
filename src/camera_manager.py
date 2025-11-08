@@ -6,7 +6,7 @@ import asyncio
 import threading
 import time
 from collections import deque
-from typing import Tuple, List, Dict
+from typing import Tuple, Optional
 import logging
 
 logger = logging.getLogger(__name__)
@@ -90,5 +90,5 @@ class DualCameraManager:
         if self.face_cam:
             self.face_cam.release()
 
-    async def get_latest_frames(self) -> Tuple[np.ndarray, np.ndarray]:
+    async def get_latest_frames(self) -> Tuple[Optional[np.ndarray], Optional[np.ndarray]]:
         return self.dtl_buffer.get_last_frame(), self.face_buffer.get_last_frame()

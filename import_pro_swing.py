@@ -5,7 +5,6 @@ Pro Swing Importer - Import professional swings into database
 import asyncio
 import sys
 from pathlib import Path
-from src.style_matcher import ProSwingImporter
 import logging
 
 # Add parent directory to path

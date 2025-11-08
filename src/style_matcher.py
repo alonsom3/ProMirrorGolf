@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 class StyleMatcher:
     """
     Matches user swings to professional swings based on style similarity
+    Optimized with in-memory caching for fast lookups
     """
     
     def __init__(self, pro_database_path: str):
@@ -32,11 +33,33 @@ class StyleMatcher:
             'downswing_time': 0.08
         }
         
+        # Cache pro swings in memory for fast access
+        self._pro_cache = {}  # {club_type: [pro_swings]}
+        self._cache_loaded = False
+        
         logger.info("StyleMatcher initialized")
+    
+    def _load_cache(self):
+        """Load all pro swings into memory cache"""
+        if self._cache_loaded:
+            return
+        
+        logger.info("Loading pro swings into memory cache...")
+        all_clubs = ["Driver", "3-Wood", "5-Wood", "3-Iron", "4-Iron", "5-Iron", 
+                     "6-Iron", "7-Iron", "8-Iron", "9-Iron", "PW", "SW", "LW", "Putter"]
+        
+        for club in all_clubs:
+            swings = self.pro_db.get_all_pro_swings(club_type=club)
+            if swings:
+                self._pro_cache[club] = swings
+        
+        self._cache_loaded = True
+        total_swings = sum(len(swings) for swings in self._pro_cache.values())
+        logger.info(f"Loaded {total_swings} pro swings into cache")
     
     async def find_best_match(self, swing_metrics: Dict, club_type: str = "Driver") -> Dict:
         """
-        Find the best matching professional swing
+        Find the best matching professional swing (optimized with caching)
         
         Args:
             swing_metrics: User's swing metrics
@@ -45,38 +68,64 @@ class StyleMatcher:
         Returns:
             Dictionary with matched pro info and similarity score
         """
-        logger.info(f"Finding best match for {club_type} swing...")
+        # Load cache if not already loaded
+        if not self._cache_loaded:
+            self._load_cache()
         
-        # Get all pro swings for this club type
-        pro_swings = self.pro_db.get_all_pro_swings(club_type=club_type)
+        # Get pro swings from cache (fast, no DB query)
+        pro_swings = self._pro_cache.get(club_type, [])
         
         if not pro_swings:
             logger.warning(f"No pro swings found for {club_type}")
             return self._get_default_match()
         
-        # Calculate similarity for each pro
+        # Vectorized similarity calculation for speed
+        similarities = self._calculate_similarities_vectorized(swing_metrics, pro_swings)
+        
+        # Sort by similarity (highest first)
+        similarities.sort(key=lambda x: x['similarity_score'], reverse=True)
+        
+        best_match = similarities[0]
+        logger.debug(f"Best match: {best_match['golfer_name']} (similarity: {best_match['similarity_score']:.2f})")
+        
+        return best_match
+    
+    def _calculate_similarities_vectorized(self, user_metrics: Dict, pro_swings: List[Dict]) -> List[Dict]:
+        """Calculate similarities for all pro swings using vectorized operations"""
         similarities = []
         
+        # Pre-compute user metric array for vectorized operations
+        user_vals = np.array([user_metrics.get(metric, 0) for metric in self.metric_weights.keys()])
+        weights = np.array(list(self.metric_weights.values()))
+        
         for pro in pro_swings:
-            similarity = self._calculate_similarity(swing_metrics, pro['metrics'])
+            pro_vals = np.array([pro['metrics'].get(metric, 0) for metric in self.metric_weights.keys()])
+            
+            # Vectorized similarity calculation
+            # Normalize differences
+            with np.errstate(divide='ignore', invalid='ignore'):
+                diffs = np.abs(user_vals - pro_vals)
+                # Avoid division by zero
+                pro_vals_safe = np.where(pro_vals != 0, np.abs(pro_vals), 1.0)
+                normalized_diffs = diffs / pro_vals_safe
+                # Cap at 1.0 (100% difference)
+                normalized_diffs = np.clip(normalized_diffs, 0, 1.0)
+            
+            # Weighted similarity (1 - normalized_diff)
+            similarities_vals = 1.0 - normalized_diffs
+            weighted_similarity = np.sum(similarities_vals * weights) * 100
             
             similarities.append({
                 'pro_id': pro['pro_id'],
                 'golfer_name': pro['golfer_name'],
-                'similarity_score': similarity,
+                'similarity_score': float(weighted_similarity),
                 'video_dtl_path': pro['video_dtl_path'],
                 'video_face_path': pro['video_face_path'],
                 'metrics': pro['metrics'],
                 'style_tags': pro['style_tags']
             })
         
-        # Sort by similarity (highest first)
-        similarities.sort(key=lambda x: x['similarity_score'], reverse=True)
-        
-        best_match = similarities[0]
-        logger.info(f"Best match: {best_match['golfer_name']} (similarity: {best_match['similarity_score']:.2f})")
-        
-        return best_match
+        return similarities
     
     def _calculate_similarity(self, user_metrics: Dict, pro_metrics: Dict) -> float:
         """
@@ -352,7 +401,7 @@ class ProSwingImporter:
         Args:
             pro_data_list: List of dicts with golfer info and YouTube URLs
         """
-        from .youtube_downloader import YouTubeDownloader
+        from .youtube_downloader import YouTubeDownloader  # This import is fine if youtube_downloader exists in src
         
         downloader = YouTubeDownloader()
         
