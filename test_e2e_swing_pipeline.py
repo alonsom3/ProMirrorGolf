@@ -793,7 +793,7 @@ async def main():
                 import numpy as np
                 from pathlib import Path
                 
-                test_dir = self.test_dir / "test_videos"
+                test_dir = self.temp_dir / "test_videos"
                 test_dir.mkdir(exist_ok=True)
                 
                 dtl_path = test_dir / "test_dtl.mp4"
