@@ -94,29 +94,14 @@ if self.app_icon:
 
 This ensures the icon remains in memory for the lifetime of the application.
 
-## Adding the Icon File
+## Icon File
 
-### Step 1: Place the File
-
-Move or copy `ProMirrorGolf_App_Icon.png` to:
+The icon file is located at:
 ```
 assets/icons/ProMirrorGolf_App_Icon.png
 ```
 
-### Step 2: Commit to Git
-
-```bash
-git add assets/icons/ProMirrorGolf_App_Icon.png
-git commit -m "Add ProMirrorGolf app icon"
-git push origin main
-```
-
-## File Requirements
-
-- **Format:** PNG (recommended) or ICO (for Windows title bar)
-- **Size:** 256x256 pixels or larger (will be scaled as needed)
-- **Background:** Transparent or dark theme compatible
-- **Name:** Must be exactly `ProMirrorGolf_App_Icon.png`
+The icon is part of the application branding and is automatically loaded when the application starts.
 
 ## Cross-Platform Support
 
@@ -159,7 +144,7 @@ After adding the icon file:
 ✅ Window icon setting implemented
 ✅ Header display code implemented
 ✅ Garbage collection prevention implemented
-⏳ Icon file needs to be added to `assets/icons/ProMirrorGolf_App_Icon.png`
+✅ Icon file included in repository
 
-Once the icon file is added, the application will automatically load and display it.
+The application automatically loads and displays the icon on startup.
 
