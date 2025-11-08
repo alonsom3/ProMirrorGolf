@@ -570,6 +570,26 @@ if result['success']:
 - `downsample_factor=1`: Process all frames (default)
 - `downsample_factor=2`: Process every other frame (2x faster)
 - Useful for long videos or pro swing analysis
+- Uses NumPy vectorized operations for efficient frame index calculation
+
+**Threaded Processing:**
+- Frame processing runs in background thread to keep GUI responsive
+- Progress updates use thread-safe callbacks (`root.after()`)
+- Batch processing (10 frames at a time) for better performance
+- Lazy frame loading with generator pattern for memory efficiency
+
+**Performance Optimizations:**
+- GPU acceleration: Automatically uses GPU if available (MediaPipe)
+- NumPy vectorization: Frame index calculations use vectorized operations
+- Frame resizing: Automatically downscales large frames to 640px width
+- Batch processing: Processes frames in batches to reduce overhead
+- Performance logging: Tracks per-frame processing time (warns if >100ms)
+- Memory efficient: Uses generator pattern instead of loading all frames
+
+**Frame Alignment:**
+- Automatically detects frame count mismatches
+- Uses shorter video length for processing
+- Logs warnings if videos differ significantly
 
 ---
 

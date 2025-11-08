@@ -206,7 +206,33 @@ ProMirrorGolf/
 - Depends on video length and frame rate
 - Typical: 1-5 minutes for 30-60 second videos
 - Timeout: 10 minutes maximum
-- Progress updates logged every 100 frames
+- Progress updates in real-time via progress bar
+- **Threaded Processing**: Frame processing runs in background thread, GUI remains responsive
+- **Performance**: Average processing time logged per frame (target: <100ms)
+- **Downsampling**: Use `downsample_factor` parameter to process every Nth frame for faster processing
+
+**Progress Bar & Status:**
+- Real-time progress bar shows processing percentage
+- Status messages update during processing
+- Frame counter shows current/total frames
+- Average processing time per frame displayed
+- Thread-safe updates using `root.after()` for GUI responsiveness
+
+**Playback Controls:**
+- After processing, use playback controls to review swing:
+  - **Play/Pause** (►): Start/stop playback
+  - **Rewind** (◄◄): Go to start
+  - **Fast Forward** (►►): Go to end
+  - **Frame Step** (◄ ►): Step frame-by-frame
+  - **Timeline**: Click to jump to specific frame
+
+**Overlay Differences:**
+- Switch to "Overlay" view to see real-time comparison with pro swing
+- Color-coded indicators:
+  - **Green**: Small difference (<5°)
+  - **Yellow**: Medium difference (5-15°)
+  - **Red**: Large difference (>15°)
+- Shows top 4 metric differences with directional arrows
 
 ### During Practice - Live Backend Integration
 

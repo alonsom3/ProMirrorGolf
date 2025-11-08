@@ -1073,8 +1073,12 @@ class ProMirrorGolfUI:
         
         # Process videos with increased timeout for long videos
         self.update_status("Processing uploaded videos... (this may take several minutes)")
+        self.processing_active = True
+        self.update_progress_bar(0.0, "Loading videos...")
+        
         if self.loop:
             # Use 600 second timeout (10 minutes) for processing long videos
+            # Processing happens in background thread, UI remains responsive
             future = asyncio.run_coroutine_threadsafe(
                 self.controller.process_uploaded_videos(dtl_path, face_path, downsample_factor=1),
                 self.loop

@@ -1,15 +1,18 @@
 """
 Video Processor - Handles offline video upload and processing
 Supports dual video (DTL + Face) upload with auto-sync
+Optimized for speed with lazy frame loading and vectorized operations
 """
 
 import cv2
 import numpy as np
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Callable
 import logging
 from pathlib import Path
 import asyncio
 from collections import deque
+import threading
+from concurrent.futures import ThreadPoolExecutor
 
 logger = logging.getLogger(__name__)
 
@@ -160,6 +163,7 @@ class VideoProcessor:
     def get_all_frames(self, downsample_factor: int = 1) -> List[Tuple[np.ndarray, np.ndarray]]:
         """
         Extract frames from both videos (for batch processing)
+        Optimized with vectorized operations where possible
         
         Args:
             downsample_factor: Process every Nth frame (1=all frames, 2=every other, etc.)
@@ -180,23 +184,66 @@ class VideoProcessor:
         frame_count = 0
         extracted_count = 0
         
-        while frame_count < self.total_frames:
+        # Pre-allocate frame indices for downsampling (vectorized approach)
+        if downsample_factor > 1:
+            frame_indices = np.arange(0, self.total_frames, downsample_factor)
+        else:
+            frame_indices = np.arange(self.total_frames)
+        
+        # Process frames
+        for target_frame in frame_indices:
+            # Seek to target frame
+            self.dtl_cap.set(cv2.CAP_PROP_POS_FRAMES, target_frame)
+            self.face_cap.set(cv2.CAP_PROP_POS_FRAMES, target_frame + self.sync_offset)
+            
             dtl_ret, dtl_frame = self.dtl_cap.read()
             face_ret, face_frame = self.face_cap.read()
             
             if not dtl_ret or not face_ret:
                 break
             
-            # Downsample: only add every Nth frame
-            if frame_count % downsample_factor == 0:
-                frames.append((dtl_frame, face_frame))
-                extracted_count += 1
-            
-            frame_count += 1
+            frames.append((dtl_frame, face_frame))
+            extracted_count += 1
+            frame_count = target_frame + 1
         
-        logger.info(f"Extracted {extracted_count} frame pairs from {frame_count} total frames "
+        logger.info(f"Extracted {extracted_count} frame pairs from {self.total_frames} total frames "
                    f"(downsample factor: {downsample_factor})")
         return frames
+    
+    def get_frame_generator(self, downsample_factor: int = 1):
+        """
+        Generator for lazy frame loading - more memory efficient for large videos
+        
+        Args:
+            downsample_factor: Process every Nth frame
+        
+        Yields:
+            Tuple of (frame_index, dtl_frame, face_frame)
+        """
+        if not self.dtl_cap or not self.face_cap:
+            return
+        
+        # Reset to beginning
+        self.dtl_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        self.face_cap.set(cv2.CAP_PROP_POS_FRAMES, self.sync_offset)
+        
+        frame_count = 0
+        
+        while frame_count < self.total_frames:
+            if frame_count % downsample_factor == 0:
+                dtl_ret, dtl_frame = self.dtl_cap.read()
+                face_ret, face_frame = self.face_cap.read()
+                
+                if not dtl_ret or not face_ret:
+                    break
+                
+                yield (frame_count, dtl_frame, face_frame)
+            else:
+                # Skip frame but advance counters
+                self.dtl_cap.read()
+                self.face_cap.read()
+            
+            frame_count += 1
     
     def release(self):
         """Release video resources"""

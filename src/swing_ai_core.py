@@ -16,6 +16,7 @@ from .mlm2pro_listener import LaunchMonitorListener
 from .video_processor import VideoProcessor
 from .ai_coach import AICoach
 from .gamification import GamificationSystem
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -349,41 +350,69 @@ class SwingAIController:
         logger.info(f"  Face: {face_frames} frames @ {result['face_info'].get('fps', 0):.1f} fps, "
                    f"{result['face_info'].get('width', 0)}x{result['face_info'].get('height', 0)}")
         
-        # Process frames (with optional downsampling)
-        frames = self.video_processor.get_all_frames(downsample_factor=downsample_factor)
-        total_frames = len(frames)
+        # Calculate total frames to process (with downsampling)
+        total_frames_to_process = (min(dtl_frames, face_frames) // downsample_factor) + (1 if min(dtl_frames, face_frames) % downsample_factor else 0)
         
-        if not frames:
-            return {"success": False, "error": "No frames extracted from videos"}
+        logger.info(f"Processing {total_frames_to_process} frame pairs (downsampled from {min(dtl_frames, face_frames)})...")
         
-        logger.info(f"Processing {total_frames} frame pairs (downsampled from {min(dtl_frames, face_frames)})...")
+        # Use generator for lazy loading (memory efficient)
+        frame_generator = self.video_processor.get_frame_generator(downsample_factor=downsample_factor)
         
-        # Analyze each frame pair (with progress updates)
+        # Analyze frames with threaded processing for UI responsiveness
         all_pose_data = []
         processed_count = 0
+        processing_times = []
         
-        for idx, (dtl_frame, face_frame) in enumerate(frames):
+        # Process frames in batches for better performance
+        batch_size = 10  # Process 10 frames before checking for cancellation
+        
+        frame_batch = []
+        for frame_info in frame_generator:
             # Check if session was stopped
             if not self.session_active:
                 logger.warning("Session stopped during video processing")
                 return {"success": False, "error": "Processing cancelled - session stopped"}
             
-            pose_data = await self.pose_analyzer.analyze(dtl_frame, face_frame)
-            processed_count += 1
+            frame_batch.append(frame_info)
             
-            if pose_data.get("swing_detected"):
-                all_pose_data.append(pose_data)
-            
-            # Update progress callback if available
-            if hasattr(self, 'on_progress_update') and callable(self.on_progress_update):
-                progress = (idx + 1) / total_frames
-                self.on_progress_update(progress, f"Processing frame {idx + 1}/{total_frames}")
-            
-            # Log progress every 100 frames
-            if (idx + 1) % 100 == 0:
-                logger.info(f"  Processed {idx + 1}/{total_frames} frames ({len(all_pose_data)} swings detected)")
+            # Process batch when full or at end
+            if len(frame_batch) >= batch_size:
+                batch_results = await self._process_frame_batch(frame_batch, processing_times)
+                all_pose_data.extend(batch_results)
+                processed_count += len(frame_batch)
+                
+                # Update progress callback (thread-safe)
+                if hasattr(self, 'on_progress_update') and callable(self.on_progress_update):
+                    progress = processed_count / total_frames_to_process
+                    avg_time = np.mean(processing_times[-batch_size:]) if processing_times else 0
+                    self.on_progress_update(
+                        progress, 
+                        f"Processing frame {processed_count}/{total_frames_to_process} (avg: {avg_time:.1f}ms/frame)"
+                    )
+                
+                frame_batch = []
         
-        logger.info(f"Frame processing complete: {processed_count} frames processed, {len(all_pose_data)} swings detected")
+        # Process remaining frames
+        if frame_batch:
+            batch_results = await self._process_frame_batch(frame_batch, processing_times)
+            all_pose_data.extend(batch_results)
+            processed_count += len(frame_batch)
+        
+        # Log performance statistics
+        if processing_times:
+            avg_time = np.mean(processing_times)
+            max_time = np.max(processing_times)
+            min_time = np.min(processing_times)
+            p95_time = np.percentile(processing_times, 95)
+            
+            logger.info(f"Frame processing complete: {processed_count} frames processed, {len(all_pose_data)} swings detected")
+            logger.info(f"Performance: avg={avg_time:.1f}ms, min={min_time:.1f}ms, max={max_time:.1f}ms, p95={p95_time:.1f}ms")
+            
+            if avg_time > 100:
+                logger.warning(f"Average processing time ({avg_time:.1f}ms) exceeds target (100ms)")
+        
+        if not all_pose_data:
+            return {"success": False, "error": "No swings detected in videos"}
         
         if not all_pose_data:
             return {"success": False, "error": "No swings detected in videos"}

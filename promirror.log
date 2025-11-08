@@ -171,3 +171,42 @@ Traceback (most recent call last):
   File "C:\Users\PC\AppData\Local\Programs\Python\Python310\lib\concurrent\futures\_base.py", line 447, in result
     raise TimeoutError()
 concurrent.futures._base.TimeoutError
+2025-11-08 01:07:19,716 - __main__ - INFO - Initializing SwingAIController...
+2025-11-08 01:07:19,717 - src.swing_ai_core - INFO - SwingAIController config loaded
+2025-11-08 01:07:19,718 - src.swing_ai_core - INFO - Initializing Swing AI modules...
+2025-11-08 01:07:19,718 - src.pose_analyzer - INFO - Attempting GPU acceleration for pose detection
+2025-11-08 01:07:19,772 - src.flaw_detector - INFO - FlawDetector initialized
+2025-11-08 01:07:19,787 - src.database - INFO - Database initialized: ./data/swings.db
+2025-11-08 01:07:19,806 - src.database - INFO - Pro database initialized: ./data/pro_swings.db
+2025-11-08 01:07:19,807 - src.style_matcher - INFO - StyleMatcher initialized
+2025-11-08 01:07:19,823 - src.report_generator - INFO - ReportGenerator initialized: ./data/reports
+2025-11-08 01:07:19,823 - src.ai_coach - INFO - AI Coach initialized
+2025-11-08 01:07:19,823 - src.gamification - INFO - Gamification system initialized
+2025-11-08 01:07:19,823 - src.mlm2pro_listener - INFO - LaunchMonitor initialized: opengolfsim
+2025-11-08 01:07:19,824 - src.swing_ai_core - INFO - MLM2Pro listener initialized
+2025-11-08 01:07:19,824 - src.swing_ai_core - INFO - All Swing AI components initialized
+2025-11-08 01:07:19,824 - __main__ - INFO - Backend initialized successfully
+2025-11-08 01:07:19,826 - __main__ - INFO - Loaded 5 pros for selection
+2025-11-08 01:08:34,559 - src.swing_ai_core - INFO - Starting session for default_user - Video Upload Session (mode: video_upload)
+2025-11-08 01:08:34,559 - src.swing_ai_core - INFO - Video upload mode - cameras disabled
+2025-11-08 01:08:34,559 - src.swing_ai_core - INFO - Video upload mode active - MLM2Pro connector skipped
+2025-11-08 01:08:34,565 - src.database - INFO - Session created: default_user_20251108_010834
+2025-11-08 01:08:34,567 - src.swing_ai_core - INFO - Database session created: default_user_20251108_010834
+2025-11-08 01:08:34,567 - src.swing_ai_core - INFO - VIDEO UPLOAD MODE: Processing uploaded videos
+2025-11-08 01:08:34,567 - src.swing_ai_core - INFO -   DTL: C:/Users/PC/Pictures/DTL._Swing.mp4
+2025-11-08 01:08:34,567 - src.swing_ai_core - INFO -   Face: C:/Users/PC/Pictures/FOV_Swing.mp4
+2025-11-08 01:08:34,567 - src.swing_ai_core - INFO -   Downsample factor: 1 (process every 1 frame(s))
+2025-11-08 01:08:34,701 - src.video_processor - WARNING - Frame count mismatch detected: DTL=107, Face=216, Difference=109 frames
+2025-11-08 01:08:34,702 - src.video_processor - WARNING -   Using shorter video length: 107 frames
+2025-11-08 01:08:34,702 - src.video_processor - INFO - Videos loaded successfully:
+2025-11-08 01:08:34,702 - src.video_processor - INFO -   DTL: 107 frames @ 30.3 fps, 640x480
+2025-11-08 01:08:34,702 - src.video_processor - INFO -   Face: 216 frames @ 30.1 fps, 640x480
+2025-11-08 01:08:34,702 - src.video_processor - INFO -   Alignment: Using 107 frames (shorter video)
+2025-11-08 01:08:34,702 - src.swing_ai_core - WARNING - Frame count mismatch: DTL=107, Face=216, Diff=109 frames
+2025-11-08 01:08:34,703 - src.swing_ai_core - WARNING -   Using shorter video length: 107 frames
+2025-11-08 01:08:34,703 - src.swing_ai_core - INFO - Video properties:
+2025-11-08 01:08:34,703 - src.swing_ai_core - INFO -   DTL: 107 frames @ 30.3 fps, 640x480
+2025-11-08 01:08:34,703 - src.swing_ai_core - INFO -   Face: 216 frames @ 30.1 fps, 640x480
+2025-11-08 01:08:35,075 - src.video_processor - INFO - Extracted 107 frame pairs from 107 total frames (downsample factor: 1)
+2025-11-08 01:08:35,076 - src.swing_ai_core - INFO - Processing 107 frame pairs (downsampled from 107)...
+2025-11-08 01:08:35,203 - src.pose_analyzer - WARNING - Frame processing took 126.46ms (target: <100ms)
