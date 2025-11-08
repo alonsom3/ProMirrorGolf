@@ -22,6 +22,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 # Import backend modules
 from src.swing_ai_core import SwingAIController
+from src.error_handler import ErrorHandler
 
 # Setup logging
 logging.basicConfig(
@@ -82,6 +83,8 @@ class ProMirrorGolfUI:
         # Video processing state
         self.processing_progress = 0.0
         self.processing_active = False
+        self.quality_mode = "speed"  # "speed", "balanced", "quality"
+        self.downsample_factor = 2  # Process every Nth frame
         
         # Backend integration
         self.controller = None
@@ -1104,7 +1107,12 @@ class ProMirrorGolfUI:
                     self.session_active = True
                     self.update_status("Session started - processing videos...")
                 except Exception as e:
-                    messagebox.showerror("Error", f"Failed to start session: {e}")
+                    error_type = ErrorHandler.detect_error_type(e, "session")
+                    error_info = ErrorHandler.get_error_info(error_type, str(e))
+                    messagebox.showerror(
+                        error_info['title'],
+                        ErrorHandler.format_error_message(error_type, str(e))
+                    )
                     return
         
         # Process videos with increased timeout for long videos
@@ -1119,8 +1127,13 @@ class ProMirrorGolfUI:
             # This provides ~4x speedup while maintaining accuracy:
             # - 480px is sufficient for MediaPipe pose detection (designed for mobile/real-time)
             # - Every 2nd frame at 30fps = 15fps, which fully captures golf swing motion
+            # Use current quality settings from UI
             future = asyncio.run_coroutine_threadsafe(
-                self.controller.process_uploaded_videos(dtl_path, face_path, downsample_factor=2, quality_mode="speed"),
+                self.controller.process_uploaded_videos(
+                    dtl_path, face_path, 
+                    downsample_factor=self.downsample_factor, 
+                    quality_mode=self.quality_mode
+                ),
                 self.loop
             )
             
@@ -1712,8 +1725,16 @@ class ProMirrorGolfUI:
                     errors = result.get('errors', [])
                     if errors:
                         error_msg = f"{error_msg}\n\nDetails:\n" + "\n".join(errors)
-                    error_msg_final = error_msg  # Capture for lambda
-                    self.root.after(0, lambda: messagebox.showerror("Processing Error", f"Failed to process videos:\n{error_msg_final}"))
+                    
+                    # Use error handler for user-friendly messages
+                    error_type = ErrorHandler.detect_error_type(Exception(error_msg), "video")
+                    error_info = ErrorHandler.get_error_info(error_type, error_msg)
+                    error_msg_final = ErrorHandler.format_error_message(error_type, error_msg)
+                    
+                    self.root.after(0, lambda: messagebox.showerror(
+                        error_info['title'],
+                        error_msg_final
+                    ))
                 
                 # Clear future
                 self.processing_future = None
@@ -1724,13 +1745,10 @@ class ProMirrorGolfUI:
                 elapsed = time.time() - self.processing_start_time
                 if elapsed > self.processing_timeout:
                     logger.error("Video processing timed out after 600 seconds")
+                    error_info = ErrorHandler.get_error_info("timeout_error")
                     self.root.after(0, lambda: messagebox.showerror(
-                        "Timeout Error",
-                        "Video processing timed out after 10 minutes.\n\n"
-                        "This may occur with very long videos. Try:\n"
-                        "- Using shorter video clips\n"
-                        "- Ensuring videos are properly formatted\n"
-                        "- Checking system resources"
+                        error_info['title'],
+                        ErrorHandler.format_error_message("timeout_error")
                     ))
                     self.processing_future = None
                     self.processing_active = False
@@ -1741,7 +1759,13 @@ class ProMirrorGolfUI:
         except Exception as e:
             error_msg = str(e)
             logger.error(f"Error processing videos: {error_msg}", exc_info=True)
-            self.root.after(0, lambda err=error_msg: messagebox.showerror("Error", f"Failed to process videos:\n{err}"))
+            error_type = ErrorHandler.detect_error_type(e, "video")
+            error_info = ErrorHandler.get_error_info(error_type, error_msg)
+            error_formatted = ErrorHandler.format_error_message(error_type, error_msg)
+            self.root.after(0, lambda: messagebox.showerror(
+                error_info['title'],
+                error_formatted
+            ))
             self.processing_future = None
             self.processing_active = False
     
