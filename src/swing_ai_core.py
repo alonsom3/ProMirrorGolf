@@ -368,6 +368,11 @@ class SwingAIController:
         self.processing_start_time = time.time()
         self.processing_cancelled = False  # Reset cancellation flag
         
+        # Start performance logging
+        video_name = Path(dtl_path).stem
+        if self.performance_logger:
+            self.performance_logger.start_session(video_name, quality_mode, downsample_factor)
+        
         # Use generator for lazy loading (sequential extraction - OpenCV VideoCapture is not thread-safe)
         frame_generator = self.video_processor.get_frame_generator(
             downsample_factor=downsample_factor, 
