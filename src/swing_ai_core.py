@@ -359,6 +359,10 @@ class SwingAIController:
         
         logger.info(f"Processing {total_frames_to_process} frame pairs (downsampled from {min(dtl_frames, face_frames)})...")
         
+        # Initialize processing start time for ETA calculation
+        self.processing_start_time = time.time()
+        self.processing_cancelled = False  # Reset cancellation flag
+        
         # Use generator for lazy loading with parallel extraction
         frame_generator = self.video_processor.get_frame_generator(
             downsample_factor=downsample_factor, 
@@ -402,7 +406,7 @@ class SwingAIController:
                 
                 # Calculate ETA
                 elapsed_time = time.time() - self.processing_start_time
-                if processed_count > 0 and elapsed_time > 0:
+        if processed_count > 0 and elapsed_time > 0:
                     avg_time_per_frame = elapsed_time / processed_count
                     remaining_frames = total_frames_to_process - processed_count
                     eta_seconds = remaining_frames * avg_time_per_frame
