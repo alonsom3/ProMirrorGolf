@@ -8,6 +8,7 @@ from tkinter import messagebox, filedialog
 import sys
 import asyncio
 import threading
+import time
 import logging
 from pathlib import Path
 from datetime import datetime
@@ -1672,6 +1673,77 @@ class ProMirrorGolfUI:
     def on_video_progress_update(self, progress: float, message: str):
         """Callback for video processing progress updates"""
         self.root.after(0, lambda: self.update_progress_bar(progress, message))
+    
+    def _check_processing_complete(self):
+        """Non-blocking check for video processing completion"""
+        if not hasattr(self, 'processing_future') or self.processing_future is None:
+            return
+        
+        try:
+            # Check if future is done (non-blocking)
+            if self.processing_future.done():
+                result = self.processing_future.result()  # Get result (should be instant since it's done)
+                
+                if result.get('success'):
+                    swing_data = result.get('swing_data', {})
+                    self.current_swing_id = result.get('swing_id')
+                    self.current_swing_data = swing_data
+                    self.swing_count += 1
+                    
+                    frames_processed = result.get('frames_processed', 0)
+                    swings_detected = result.get('swings_detected', 0)
+                    
+                    # Update UI with results (thread-safe)
+                    def update_ui():
+                        self.update_ui_with_swing_data(swing_data)
+                        self.update_status(f"Video processed! {frames_processed} frames, {swings_detected} swings detected")
+                    
+                    self.root.after(0, update_ui)
+                    
+                    self.root.after(0, lambda: messagebox.showinfo(
+                        "Success", 
+                        f"Video processed successfully!\n\n"
+                        f"Frames processed: {frames_processed}\n"
+                        f"Swings detected: {swings_detected}\n"
+                        f"Swing analyzed and saved."
+                    ))
+                else:
+                    error_msg = result.get('error', 'Unknown error')
+                    errors = result.get('errors', [])
+                    if errors:
+                        error_msg = f"{error_msg}\n\nDetails:\n" + "\n".join(errors)
+                    error_msg_final = error_msg  # Capture for lambda
+                    self.root.after(0, lambda: messagebox.showerror("Processing Error", f"Failed to process videos:\n{error_msg_final}"))
+                
+                # Clear future
+                self.processing_future = None
+                self.processing_active = False
+                
+            else:
+                # Check for timeout
+                elapsed = time.time() - self.processing_start_time
+                if elapsed > self.processing_timeout:
+                    logger.error("Video processing timed out after 600 seconds")
+                    self.root.after(0, lambda: messagebox.showerror(
+                        "Timeout Error",
+                        "Video processing timed out after 10 minutes.\n\n"
+                        "This may occur with very long videos. Try:\n"
+                        "- Using shorter video clips\n"
+                        "- Ensuring videos are properly formatted\n"
+                        "- Checking system resources"
+                    ))
+                    self.processing_future = None
+                    self.processing_active = False
+                else:
+                    # Check again in 100ms (keeps GUI responsive)
+                    self.root.after(100, self._check_processing_complete)
+                    
+        except Exception as e:
+            error_msg = str(e)
+            logger.error(f"Error processing videos: {error_msg}", exc_info=True)
+            self.root.after(0, lambda err=error_msg: messagebox.showerror("Error", f"Failed to process videos:\n{err}"))
+            self.processing_future = None
+            self.processing_active = False
     
     def update_status(self, message):
         """Update status bar message"""
