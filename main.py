@@ -1532,6 +1532,17 @@ class ProMirrorGolfUI:
         for panel, canvas, color in self.viewer_panels:
             self.draw_skeleton(canvas, color)
     
+    def on_quality_change(self, value):
+        """Handle quality mode change"""
+        quality_map = {
+            "Speed": ("speed", 2),
+            "Balanced": ("balanced", 1),
+            "Quality": ("quality", 1)
+        }
+        self.quality_mode, self.downsample_factor = quality_map.get(value, ("speed", 2))
+        logger.info(f"Quality mode changed to: {value} (mode={self.quality_mode}, downsample={self.downsample_factor})")
+        self.update_status(f"Quality: {value} - Will apply to next video upload")
+    
     def change_club(self, club):
         """Change club selection - updates pro matching"""
         logger.info(f"Club changed to: {club}")
