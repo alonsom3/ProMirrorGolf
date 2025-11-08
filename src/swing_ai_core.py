@@ -414,9 +414,6 @@ class SwingAIController:
         if not all_pose_data:
             return {"success": False, "error": "No swings detected in videos"}
         
-        if not all_pose_data:
-            return {"success": False, "error": "No swings detected in videos"}
-        
         # Use the best swing (most complete pose data)
         best_pose_data = max(all_pose_data, key=lambda x: len(x.get("dtl_poses", [])))
         logger.info(f"Selected best swing with {len(best_pose_data.get('dtl_poses', []))} pose frames")
