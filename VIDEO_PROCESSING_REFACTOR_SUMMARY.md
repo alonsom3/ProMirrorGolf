@@ -51,6 +51,33 @@ Comprehensive refactoring of video upload processing for maximum speed and respo
 - 600 second timeout with clear error messages
 
 ### 7. Overlay Differences Visualization ✅
+
+---
+
+## ⚠️ Known Issues & Fixes
+
+### FFmpeg Assertion Error (Fixed)
+
+**Error**: `Assertion fctx->async_lock failed at libavcodec/pthread_frame.c:173`
+
+**Cause**: OpenCV's `VideoCapture` is not thread-safe. Attempting to read frames from multiple threads simultaneously causes FFmpeg/libavcodec internal conflicts.
+
+**Solution**: 
+- Disabled parallel frame extraction (`use_parallel=False` by default)
+- Frame extraction now uses sequential reading (thread-safe)
+- Processing still runs in background async thread for GUI responsiveness
+
+**Files Modified**:
+- `src/video_processor.py`: Changed default `use_parallel=False`, removed `ThreadPoolExecutor` usage
+- `src/swing_ai_core.py`: Updated to use sequential extraction
+
+**Performance Impact**: Minimal - frame reading is fast; the bottleneck is pose detection (~480ms per frame), not frame extraction.
+
+**Status**: ✅ Fixed - No more FFmpeg assertion errors
+
+---
+
+### 7. Overlay Differences Visualization ✅
 - **Location**: `main.py` - `_draw_overlay_differences()`
 - **Status**: Already implemented
 - Real-time updates when pro selection changes
