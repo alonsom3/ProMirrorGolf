@@ -83,6 +83,12 @@ htmlcov/
 .hypothesis/
 TEST_RESULTS.md
 TESTING_CHECKLIST.md
+tests/
+scripts/*test*.py
+scripts/*Test*.py
+CODE_REVIEW.md
+GITHUB_SETUP.md
+INSTALL.txt
 
 # Distribution / packaging
 .Python
