@@ -1,53 +1,87 @@
 # ProMirrorGolf
 
-Professional golf swing analysis application with dual camera capture, comprehensive session management, and advanced shot data integration.
+![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)
+![License](https://img.shields.io/badge/license-GPL--3.0-green.svg)
+![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)
+![Status](https://img.shields.io/badge/status-active-success.svg)
 
-## License
+**Professional golf swing analysis application with dual camera capture, comprehensive session management, and advanced shot data integration.**
 
-This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.
+---
 
-**What this means:**
-- ✅ **Free to use** - You can use this software for any purpose
-- ✅ **Free to modify** - You can modify the code to suit your needs
-- ✅ **Free to fork** - You can create your own version
-- ✅ **Free to share** - You can share the software with others
-- ❌ **Cannot be sold as proprietary** - You cannot sell this software as proprietary/closed-source
-- ✅ **Must share source** - If you distribute modified versions, you must share the source code
-- ✅ **Same license** - Derivative works must also use GPL-3.0
+## 🎥 See It In Action
 
-**Note:** GPL-3.0 allows selling the software, but only if you also provide the source code under GPL-3.0. This prevents proprietary commercial versions while allowing free distribution.
+**[📸 Screenshots](#-showcase)** | **[🚀 Quick Start](#-quick-start)** | **[📥 Installation](#-installation)**
 
-See the [LICENSE](LICENSE) file for details.
+---
 
-## Disclaimer
+## ✨ Features at a Glance
 
-**Important:** This software is provided "as is" without warranty of any kind, express or implied.
+| 📹 Video Capture | 📊 Analysis & Charts | 🎯 Drawing Tools | 🌐 Web Dashboard |
+|------------------|----------------------|------------------|------------------|
+| Dual camera capture | Speed trends | Freehand drawing | REST API |
+| Slow-motion playback | Distance charts | Swing plane lines | Mobile responsive |
+| Auto-recording | Spin analysis | Reference lines | Real-time stats |
+| Circular buffer | Dispersion plots | Measurements | Chart export |
 
-- **No Warranty**: The developers are not professional software engineers. This is a passion project created as a hobby.
-- **No Liability**: The developers are not responsible for any damages, data loss, or issues that may arise from using this software.
-- **Use at Your Own Risk**: You use this software at your own risk. Always backup your data before use.
-- **Not Professional Software**: This project was created using various tools, resources, and AI assistance. It is not a professionally developed commercial product.
-- **No Support Guarantee**: While we strive to help users, there is no guarantee of support, bug fixes, or updates.
+---
 
-**By using this software, you acknowledge that:**
-- You understand this is hobby/educational software
-- You will not hold the developers liable for any issues
-- You are responsible for backing up your data
-- You may encounter bugs or issues
-- The software may not work as expected in all scenarios
+## 📋 Table of Contents
 
-This software is provided for educational and personal use. If you need professional-grade software with warranties and support, please consider commercial alternatives.
+- [Why ProMirrorGolf?](#-why-promirrorgolf)
+- [Who Is This For?](#-who-is-this-for)
+- [Features](#-features)
+- [Showcase](#-showcase)
+- [Quick Start](#-quick-start)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Configuration](#-configuration)
+- [Web Dashboard](#-web-dashboard)
+- [Project Structure](#-project-structure)
+- [Design System & Themes](#-design-system--themes)
+- [Keyboard Shortcuts](#-keyboard-shortcuts)
+- [Contributing](#-contributing)
+- [Troubleshooting](#-troubleshooting)
+- [License](#-license)
+- [Disclaimer](#-disclaimer)
 
-## Features
+---
 
-### Core Functionality
+## 💡 Why ProMirrorGolf?
+
+| Feature | ProMirrorGolf | Commercial Launch Monitors |
+|---------|---------------|---------------------------|
+| **Cost** | ✅ Free (GPL-3.0) | ❌ $500-$5000+ |
+| **Dual Video** | ✅ Simultaneous DTL & Face-on | ❌ Most don't support |
+| **Drawing Tools** | ✅ Full annotation suite | ⚠️ Limited |
+| **Custom Reports** | ✅ PDF, HTML, DOCX | ❌ Proprietary only |
+| **Source Code** | ✅ Open source | ❌ Proprietary |
+| **Data Export** | ✅ CSV, JSON, Excel | ⚠️ Limited formats |
+| **Web Dashboard** | ✅ Included | ❌ Extra cost |
+| **Modify & Extend** | ✅ Full access | ❌ Not possible |
+
+---
+
+## 👥 Who Is This For?
+
+- **🏌️ Golf Coaches** - Provide detailed swing analysis to students with video annotations and data visualization
+- **🎯 Serious Golfers** - Track progress, identify swing flaws, and analyze performance trends
+- **🔧 DIY Enthusiasts** - Build your own launch monitor setup with affordable USB cameras
+- **📊 Data Nerds** - Export and analyze swing data with custom reports and advanced filtering
+- **💻 Developers** - Open source codebase to customize and extend for your needs
+
+---
+
+## ✨ Features
+
+### 📹 Core Functionality
 - **Dual USB Camera Capture** - Simultaneous DTL (Down the Line) and Face-on camera recording with live preview
 - **Session Management** - SQLite database for persistent storage of sessions and shots
 - **Shot Data Integration** - TCP JSON listener for launch monitor data via TCP/IP
 - **Automatic Video Recording** - Circular buffer captures video clips automatically on shot detection
 - **Modern UI with Theme Support** - GitHub-inspired dark theme with light theme option, consistent styling throughout
 
-### Shot Review & Analysis
+### 🎬 Shot Review & Analysis
 - **Slow-Motion Playback** - Precise playback at 0.1x, 0.25x, 0.5x, 1x, 2x, 4x speeds
 - **Drawing Tools** - Freehand, swing plane, and reference line drawing with customizable colors and widths
 - **Timeline Scrubber** - Visual markers at key positions (0%, 25%, 50%, 75%, 100%) for quick navigation
@@ -57,14 +91,14 @@ This software is provided for educational and personal use. If you need professi
 - **Overlay Customization** - Customize overlay position, metrics, colors, and font size
 - **Next/Previous Navigation** - Navigate between shots with automatic skipping of shots without video
 
-### Shot Management
+### 🏷️ Shot Management
 - **Tags** - Add custom tags to shots for organization and filtering
 - **Favorites** - Mark important shots as favorites for quick access
 - **Notes** - Multi-line notes for detailed shot analysis and observations
 - **Batch Operations** - Bulk tag and favorite operations for multiple shots
 - **Thumbnail Generation** - Automatic thumbnail generation for quick visual identification
 
-### Session Browser
+### 📂 Session Browser
 - **Advanced Filtering** - Filter sessions by date range, club type, and custom search
 - **Multi-Select** - Select multiple sessions for batch operations
 - **Session Editing** - Edit session name, club, and notes inline
@@ -72,7 +106,7 @@ This software is provided for educational and personal use. If you need professi
 - **Export Functionality** - Export sessions to CSV, JSON, or PDF formats
 - **Shot Table** - View all shots with thumbnails, tags, and favorite indicators
 
-### Analysis & Comparison
+### 📊 Analysis & Comparison
 - **Analysis Dashboard** - Comprehensive statistics and trend analysis
   - Speed trends (Club Speed, Ball Speed)
   - Distance trends (Carry, Total)
@@ -88,7 +122,7 @@ This software is provided for educational and personal use. If you need professi
 - **Data Export** - Export charts as PNG/SVG and data as CSV/Excel
 - **Report Builder** - Generate custom reports (PDF, HTML, DOCX) with templates
 
-### Data Import & Management
+### 📥 Data Import & Management
 - **CSV/Excel Import** - Import shot data from CSV and Excel files (File → Import Data, Ctrl+I)
 - **Data Validation** - Automatic validation of shot metrics to flag anomalies and impossible values
 - **Duplicate Detection** - Find and merge duplicate shots based on similarity (File → Find Duplicates)
@@ -97,7 +131,7 @@ This software is provided for educational and personal use. If you need professi
 - **Custom Fields** - Define custom data fields for sessions and shots
 - **Tag Management** - Organize shots with tags, categories, and autocomplete suggestions
 
-### Performance & Reliability
+### ⚡ Performance & Reliability
 - **Parallel Processing** - Multi-threaded video writing for improved responsiveness
 - **Error Recovery** - Automatic camera reconnection on disconnect
 - **High-Resolution Timing** - Precise playback timing using Windows high-resolution timer
@@ -107,7 +141,7 @@ This software is provided for educational and personal use. If you need professi
 - **Multi-Monitor Support** - Optimal window positioning and layout for dual-monitor setups
 - **Database Indexes** - Optimized queries with indexes on common fields (session_id, recorded_at, speeds, distances)
 
-### Advanced Features
+### 🔧 Advanced Features
 - **Advanced Search** - Visual filter builder with saved presets, multiple operators (equals, greater than, between, etc.)
 - **Measurement Tools** - Save measurements with shots, Ctrl+S shortcut, auto-save on close
 - **Video Export Presets** - Quality presets (High/Medium/Low) with automatic codec and scale selection
@@ -115,7 +149,42 @@ This software is provided for educational and personal use. If you need professi
 - **Layout Customization** - Save and load window layouts, multi-monitor support
 - **Mobile Support** - Progressive Web App (PWA) foundation, responsive design for mobile devices
 
-## Installation
+---
+
+## 📸 Showcase
+
+### Main Window - Dual Camera Capture
+![Main Window](docs/screenshots/main_window.png)
+*[Screenshot coming soon] - Main application window showing dual camera preview with live feed from DTL and Face-on cameras*
+
+### Shot Review Window
+![Shot Review](docs/screenshots/shot_review.png)
+*[Screenshot coming soon] - Shot review window with dual video playback, drawing tools, and shot data overlay*
+
+### Analysis Dashboard
+![Analysis Dashboard](docs/screenshots/analysis_dashboard.png)
+*[Screenshot coming soon] - Comprehensive analysis dashboard with speed trends, distance charts, and dispersion plots*
+
+### Web Dashboard
+![Web Dashboard](docs/screenshots/web_dashboard.png)
+*[Screenshot coming soon] - Web dashboard accessible from any device with responsive design and interactive charts*
+
+---
+
+## 🚀 Quick Start
+
+**New to ProMirrorGolf?** Get up and running in 5 minutes!
+
+1. **📥 Install** - See [Installation Guide](#-installation) for step-by-step setup
+2. **🎬 First Session** - See [Quick Start Guide](docs/QUICK_START.md) to record your first shot
+3. **❓ Troubleshooting** - Having issues? Check [Troubleshooting Guide](#-troubleshooting)
+4. **📚 Documentation** - See [Documentation Index](docs/README.md) for complete guides
+
+**For experienced users:** Jump to [Quick Installation](#quick-installation-for-experienced-users)
+
+---
+
+## 📥 Installation
 
 ### Quick Start (For Beginners)
 
@@ -137,7 +206,11 @@ This software is provided for educational and personal use. If you need professi
    - **Important**: Check "Add Python to PATH" during installation
 
 2. **Download ProMirrorGolf**
-   - Extract ZIP file or clone repository
+   - Extract ZIP file or clone repository:
+     ```bash
+     git clone https://github.com/alonsom3/ProMirrorGolf.git
+     cd ProMirrorGolf
+     ```
    - Note the folder location
 
 3. **Install Dependencies**
@@ -155,24 +228,6 @@ This software is provided for educational and personal use. If you need professi
 
 **Having trouble?** Check [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed, beginner-friendly instructions.
 
-### Web Dashboard
-
-The web dashboard automatically starts when you run `main.py`. Access it at:
-- **URL**: http://127.0.0.1:5000
-- **Features**: Same data and functionality as the desktop app
-  - Real-time statistics and charts
-  - Session browsing and filtering
-  - Period and club filtering
-  - Interactive charts (speed, distance, spin, dispersion, club comparison)
-  - Responsive design for desktop and mobile
-
-To disable the web dashboard, edit `data/config.json` and set `"web.enabled": false`.
-
-To run the web dashboard separately:
-```bash
-python web/start_server.py
-```
-
 ### Dependencies
 - PyQt6 >= 6.7.0 - GUI framework
 - opencv-python >= 4.10.0 - Video capture and processing
@@ -188,16 +243,9 @@ python web/start_server.py
 - psutil >= 5.9.0 - System utilities
 - python-dotenv >= 1.0.0 - Configuration management
 
-## Quick Start
+---
 
-**New to ProMirrorGolf?** Start here:
-
-1. **📥 Install** - See [Installation Guide](docs/INSTALLATION.md) for step-by-step setup
-2. **🚀 Quick Start** - See [Quick Start Guide](docs/QUICK_START.md) to get running in 5 minutes
-3. **❓ Troubleshooting** - Having issues? Check [Troubleshooting Guide](docs/TROUBLESHOOTING.md)
-4. **📚 Documentation** - See [Documentation Index](docs/README.md) for guides
-
-## Usage
+## 💻 Usage
 
 ### Starting a Session
 
@@ -231,12 +279,7 @@ Shots are automatically detected via TCP listener (default: `127.0.0.1:5556`). W
 2. Wait a few seconds for cameras to buffer
 3. Click "Run Test Shot" button
 
-**Method 2: Test Script**
-```bash
-python test_shot_sender.py [host] [port]
-```
-
-**Method 3: Manual TCP**
+**Method 2: Manual TCP**
 ```python
 import socket
 import json
@@ -358,29 +401,52 @@ sock.close()
 5. Choose export format (PDF, HTML, DOCX)
 6. Generate and save report
 
-### Web Dashboard
+---
 
-Access your data remotely via web browser:
+## ⚙️ Configuration
 
-1. **Start Web Server**
-   ```bash
-   python web/start_server.py
-   ```
+Configuration is stored in `data/config.json`. Key settings:
 
-2. **Access Dashboard**
-   - Open browser: `http://127.0.0.1:5000`
-   - View sessions and statistics
-   - Filter by club and date range
-   - Mobile-responsive design
+- `cameras.dtl_id` - DTL camera ID (default: 0)
+- `cameras.face_id` - Face camera ID (default: 1)
+- `cameras.fps` - Frame rate (default: 60)
+- `cameras.resolution` - Resolution [width, height] (default: [1280, 720])
+- `storage.buffer_seconds` - Pre-shot buffer duration (default: 5)
+- `storage.clips_dir` - Video clips directory (default: "data/clips")
+- `storage.database` - Database path (default: "data/promirror.db")
+- `shot_listener.host` - TCP listener host (default: "127.0.0.1")
+- `shot_listener.port` - TCP listener port (default: 5556)
 
-3. **API Endpoints**
-   - `GET /api/sessions` - List all sessions
-   - `GET /api/sessions/<id>` - Get session details
-   - `GET /api/shots` - Get shots with filters
-   - `GET /api/stats` - Get summary statistics
-   - `GET /api/clubs` - List available clubs
+---
 
-## Project Structure
+## 🌐 Web Dashboard
+
+The web dashboard automatically starts when you run `main.py`. Access it at:
+- **URL**: http://127.0.0.1:5000
+- **Features**: Same data and functionality as the desktop app
+  - Real-time statistics and charts
+  - Session browsing and filtering
+  - Period and club filtering
+  - Interactive charts (speed, distance, spin, dispersion, club comparison)
+  - Responsive design for desktop and mobile
+
+To disable the web dashboard, edit `data/config.json` and set `"web.enabled": false`.
+
+To run the web dashboard separately:
+```bash
+python web/start_server.py
+```
+
+### API Endpoints
+- `GET /api/sessions` - List all sessions
+- `GET /api/sessions/<id>` - Get session details
+- `GET /api/shots` - Get shots with filters
+- `GET /api/stats` - Get summary statistics
+- `GET /api/clubs` - List available clubs
+
+---
+
+## 📁 Project Structure
 
 ```
 ProMirrorGolf/
@@ -396,16 +462,7 @@ ProMirrorGolf/
 │   │   ├── settings_dialog.py     # Application settings
 │   │   ├── import_dialog.py        # CSV/Excel import dialog
 │   │   ├── enhanced_table.py       # Table with filtering, sorting, pagination
-│   │   ├── goals_dialog.py          # Goals management dialog
-│   │   ├── recent_shots_dialog.py  # Recent shots viewer
-│   │   ├── thumbnail_grid.py       # Thumbnail grid view
-│   │   ├── report_builder_dialog.py # Report builder UI
-│   │   ├── tag_edit_dialog.py      # Tag editing dialog
-│   │   ├── tag_input.py            # Tag input widget with autocomplete
-│   │   ├── custom_field_editor.py  # Custom field editor
-│   │   ├── custom_fields_form.py   # Custom fields form widget
-│   │   ├── shortcut_editor.py     # Shortcut customization dialog
-│   │   └── trajectory_3d.py        # 3D trajectory visualization (deprecated)
+│   │   └── ...                      # Additional widgets
 │   ├── main_window.py              # Main application window
 │   └── theme.py                    # UI theme definitions
 ├── core/
@@ -414,48 +471,33 @@ ProMirrorGolf/
 │   ├── config.py                   # Configuration management
 │   ├── session_manager.py          # Database operations
 │   ├── shot_listener.py            # TCP shot data listener
-│   ├── system_timer.py             # High-resolution timer utilities
-│   ├── thumbnails.py               # Thumbnail generation
 │   ├── video_export.py             # Video export with drawings
-│   ├── data_import.py              # CSV/Excel import functionality
-│   ├── data_validation.py          # Shot data validation
-│   ├── duplicate_detection.py      # Duplicate shot detection and merging
-│   ├── cache_manager.py             # LRU cache for performance
-│   ├── multi_monitor.py             # Multi-monitor layout support
-│   ├── search.py                    # Advanced search functionality
-│   ├── filters.py                   # Smart filter management
-│   ├── analytics.py                 # Advanced analytics (tempo, swing plane, etc.)
-│   ├── goals.py                     # Goal setting and tracking
-│   ├── recent_shots.py              # Recent shots tracking
-│   ├── backup.py                    # Backup and restore functionality
-│   ├── themes.py                    # Custom theme management
-│   ├── session_templates.py         # Session template management
-│   ├── shortcuts.py                 # Keyboard shortcut management
-│   ├── tag_manager.py               # Tag management system
-│   ├── custom_fields.py             # Custom fields management
-│   ├── column_preferences.py        # Table column preferences
-│   ├── report_builder.py            # Report generation (PDF, HTML, DOCX)
-│   └── export.py                    # Export functionality (CSV, JSON, PDF)
+│   └── ...                         # Additional core modules
 ├── data/
 │   ├── clips/                      # Saved video clips
 │   ├── thumbnails/                 # Generated thumbnails
 │   ├── logs/                       # Application logs
 │   └── promirror.db                # SQLite database
 ├── docs/
+│   ├── DESIGN_SYSTEM.md           # Design system specifications
+│   ├── INSTALLATION.md            # Installation guide
 │   ├── KEYBOARD_SHORTCUTS.md      # Keyboard shortcuts reference
+│   ├── QUICK_START.md             # Quick start guide
 │   └── TROUBLESHOOTING.md         # Troubleshooting guide
-├── scripts/
-│   └── profile_performance.py     # Performance profiling script
-├── tests/
-│   ├── test_core_functionality.py # Core functionality tests
-│   ├── test_ui_integration.py    # UI integration tests
-│   └── run_tests.py               # Test runner
+├── web/
+│   ├── api.py                      # Flask API server
+│   ├── start_server.py            # Web server entry point
+│   └── static/
+│       ├── index.html              # Web dashboard frontend
+│       └── manifest.json          # PWA manifest
 ├── main.py                         # Application entry point
 ├── requirements.txt                # Python dependencies
 └── README.md                       # This file
 ```
 
-## Design System & Themes
+---
+
+## 🎨 Design System & Themes
 
 ProMirrorGolf follows a comprehensive design system for consistent, accessible UI components with dynamic theme support.
 
@@ -474,25 +516,11 @@ The application supports dynamic theme switching:
 - **Theme Switching**: Available in Settings → Appearance tab
 - **Automatic Updates**: All UI components update when theme changes
 
-See [docs/THEME_SYSTEM.md](docs/THEME_SYSTEM.md) for complete theme system documentation.
-
 Design constants are available in `app/design_constants.py` for programmatic access to colors, spacing, and typography values. Always use `get_current_colors()` to get theme-aware colors.
 
-## Configuration
+---
 
-Configuration is stored in `config/config.json`. Key settings:
-
-- `cameras.dtl_id` - DTL camera ID (default: 0)
-- `cameras.face_id` - Face camera ID (default: 1)
-- `cameras.fps` - Frame rate (default: 60)
-- `cameras.resolution` - Resolution [width, height] (default: [1280, 720])
-- `storage.buffer_seconds` - Pre-shot buffer duration (default: 5)
-- `storage.clips_dir` - Video clips directory (default: "data/clips")
-- `storage.database` - Database path (default: "data/promirror.db")
-- `shot_listener.host` - TCP listener host (default: "127.0.0.1")
-- `shot_listener.port` - TCP listener port (default: 5556)
-
-## Keyboard Shortcuts
+## ⌨️ Keyboard Shortcuts
 
 See [docs/KEYBOARD_SHORTCUTS.md](docs/KEYBOARD_SHORTCUTS.md) for a complete list of keyboard shortcuts.
 
@@ -501,7 +529,54 @@ See [docs/KEYBOARD_SHORTCUTS.md](docs/KEYBOARD_SHORTCUTS.md) for a complete list
 - **Shot Review**: `Space` (Play/Pause), `1-6` (Speed), `D/P/R/E` (Drawing tools)
 - **Shot Table**: `Return` (Review), `Delete` (Delete), `F/T/N` (Metadata)
 
-## Troubleshooting
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! This is an open-source project and we appreciate any help you can provide.
+
+### How to Contribute
+
+1. **Fork the repository**
+   - Click the "Fork" button at the top of this page
+
+2. **Create a feature branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+3. **Make your changes**
+   - Follow the existing code style
+   - Add comments for complex logic
+   - Test your changes thoroughly
+
+4. **Submit a pull request**
+   - Push your branch to your fork
+   - Open a pull request with a clear description
+   - Reference any related issues
+
+### Contribution Guidelines
+
+- **Code Style**: Follow PEP 8 Python style guide
+- **Documentation**: Update README and docstrings for new features
+- **Testing**: Test your changes before submitting
+- **Issues**: Check existing issues before creating new ones
+- **Communication**: Be respectful and constructive
+
+### Areas Where Help Is Needed
+
+- 📸 Screenshots and documentation
+- 🐛 Bug fixes and testing
+- 🎨 UI/UX improvements
+- 📊 Additional analysis features
+- 🌐 Web dashboard enhancements
+- 📱 Mobile app development
+
+Thank you for contributing to ProMirrorGolf!
+
+---
+
+## 🔧 Troubleshooting
 
 For detailed troubleshooting information, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
 
@@ -527,18 +602,51 @@ For detailed troubleshooting information, see [docs/TROUBLESHOOTING.md](docs/TRO
 - Ensure sufficient disk space
 - Database will auto-migrate on schema changes
 
-## Testing
+**Web Dashboard Not Loading**
+- Check if port 5000 is available
+- Verify firewall settings
+- Check logs in `data/logs/` for errors
 
-## Testing
+---
 
-### Running Tests
-```bash
-# Run all tests
-python tests/run_tests.py
+## 📄 License
 
-# Quick verification
-python scripts/quick_test.py
+This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.
 
-# Performance profiling
-python scripts/profile_performance.py
-```
+**What this means:**
+- ✅ **Free to use** - You can use this software for any purpose
+- ✅ **Free to modify** - You can modify the code to suit your needs
+- ✅ **Free to fork** - You can create your own version
+- ✅ **Free to share** - You can share the software with others
+- ❌ **Cannot be sold as proprietary** - You cannot sell this software as proprietary/closed-source
+- ✅ **Must share source** - If you distribute modified versions, you must share the source code
+- ✅ **Same license** - Derivative works must also use GPL-3.0
+
+**Note:** GPL-3.0 allows selling the software, but only if you also provide the source code under GPL-3.0. This prevents proprietary commercial versions while allowing free distribution.
+
+See the [LICENSE](LICENSE) file for details.
+
+---
+
+## ⚠️ Disclaimer
+
+This is hobby software provided "as is" without warranty. Use at your own risk.
+
+**Important points:**
+- The developers are not professional software engineers
+- This is a passion project created as a hobby
+- No warranty or liability is provided
+- Always backup your data before use
+- The software may contain bugs or issues
+
+**By using this software, you acknowledge that:**
+- You understand this is hobby/educational software
+- You will not hold the developers liable for any issues
+- You are responsible for backing up your data
+- You may encounter bugs or issues
+
+This software is provided for educational and personal use. If you need professional-grade software with warranties and support, please consider commercial alternatives.
+
+---
+
+**Made with ❤️ by the ProMirrorGolf community**
