@@ -228,7 +228,10 @@ class SessionManager:
         logger.info("Session ended (%s)", session_id)
 
     def log_shot(self, payload: dict, dtl_video_path: Optional[str] = None, face_video_path: Optional[str] = None, putting_video_path: Optional[str] = None) -> int:
-        """Log a shot and return the shot ID."""
+        """Log a shot and return the shot ID.
+        
+        Thread-safe database write with retry logic for concurrent access.
+        """
         if self._active_session_id is None:
             logger.debug("No active session; shot discarded.")
             return -1
@@ -243,35 +246,49 @@ class SessionManager:
                     return val
             return None
 
-        with Session(self.engine) as session, session.begin():
-            shot = ShotModel(
-                session_id=self._active_session_id,
-                club_speed=get_val("ClubSpeed", "club_speed"),
-                ball_speed=get_val("BallSpeed", "ball_speed"),
-                launch_angle=get_val("LaunchAngle", "launch_angle"),
-                spin_rate=get_val("TotalSpin", "total_spin", "SpinRate"),
-                carry_distance=get_val("CarryDistance", "carry_distance"),
-                total_distance=get_val("TotalDistance", "total_distance"),
-                side_spin=get_val("SideSpin", "side_spin"),
-                back_spin=get_val("BackSpin", "back_spin"),
-                launch_direction=get_val("LaunchDirection", "launch_direction"),
-                apex_height=get_val("ApexHeight", "apex_height"),
-                descent_angle=get_val("DescentAngle", "descent_angle"),
-                smash_factor=get_val("SmashFactor", "smash_factor"),
-                dynamic_loft=get_val("DynamicLoft", "dynamic_loft"),
-                attack_angle=get_val("AttackAngle", "attack_angle"),
-                club_path=get_val("ClubPath", "club_path"),
-                face_angle=get_val("FaceAngle", "face_angle"),
-                dtl_video_path=dtl_video_path,
-                face_video_path=face_video_path,
-                putting_video_path=putting_video_path,
-                raw_json=raw_json_str,
-            )
-            session.add(shot)
-            session.flush()
-            shot_id = shot.id
-        logger.info("Shot logged for session %s (id=%d)", self._active_session_id, shot_id)
-        return shot_id
+        # Retry logic for database concurrency (SQLite can lock under heavy load)
+        max_retries = 3
+        retry_delay = 0.1  # 100ms
+        
+        for attempt in range(max_retries):
+            try:
+                with Session(self.engine) as session, session.begin():
+                    shot = ShotModel(
+                        session_id=self._active_session_id,
+                        club_speed=get_val("ClubSpeed", "club_speed"),
+                        ball_speed=get_val("BallSpeed", "ball_speed"),
+                        launch_angle=get_val("LaunchAngle", "launch_angle"),
+                        spin_rate=get_val("TotalSpin", "total_spin", "SpinRate"),
+                        carry_distance=get_val("CarryDistance", "carry_distance"),
+                        total_distance=get_val("TotalDistance", "total_distance"),
+                        side_spin=get_val("SideSpin", "side_spin"),
+                        back_spin=get_val("BackSpin", "back_spin"),
+                        launch_direction=get_val("LaunchDirection", "launch_direction"),
+                        apex_height=get_val("ApexHeight", "apex_height"),
+                        descent_angle=get_val("DescentAngle", "descent_angle"),
+                        smash_factor=get_val("SmashFactor", "smash_factor"),
+                        dynamic_loft=get_val("DynamicLoft", "dynamic_loft"),
+                        attack_angle=get_val("AttackAngle", "attack_angle"),
+                        club_path=get_val("ClubPath", "club_path"),
+                        face_angle=get_val("FaceAngle", "face_angle"),
+                        dtl_video_path=dtl_video_path,
+                        face_video_path=face_video_path,
+                        putting_video_path=putting_video_path,
+                        raw_json=raw_json_str,
+                    )
+                    session.add(shot)
+                    session.flush()
+                    shot_id = shot.id
+                logger.info("Shot logged for session %s (id=%d)", self._active_session_id, shot_id)
+                return shot_id
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    logger.warning("Database write failed (attempt %d/%d), retrying: %s", attempt + 1, max_retries, e)
+                    import time
+                    time.sleep(retry_delay * (attempt + 1))  # Exponential backoff
+                else:
+                    logger.error("Failed to log shot after %d attempts: %s", max_retries, e, exc_info=True)
+                    raise
 
     def active_session_id(self) -> Optional[int]:
         return self._active_session_id
