@@ -97,7 +97,14 @@ class SessionManager:
     def __init__(self, db_path: str | Path) -> None:
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self.engine = create_engine(f"sqlite:///{self.db_path}", future=True, pool_pre_ping=True)
+        # SQLite connection with check_same_thread=False for multi-threaded access
+        # and timeout=20 seconds to handle concurrent access better
+        self.engine = create_engine(
+            f"sqlite:///{self.db_path}",
+            future=True,
+            pool_pre_ping=True,
+            connect_args={"check_same_thread": False, "timeout": 20}
+        )
         Base.metadata.create_all(self.engine)
         self._migrate_database()
         self._active_session_id: Optional[int] = None
