@@ -81,6 +81,8 @@ desktop.ini
 htmlcov/
 .tox/
 .hypothesis/
+TEST_RESULTS.md
+TESTING_CHECKLIST.md
 
 # Distribution / packaging
 .Python
