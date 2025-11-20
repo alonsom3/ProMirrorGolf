@@ -2,7 +2,7 @@
 name = "promirrorgolf"
 version = "0.1.0"
 description = "PyQt-based golf sim companion with dual camera capture and session tracking"
-authors = [{name = "ProMirrorGolf", email = "dev@example.com"}]
+authors = [{name = "ProMirrorGolf Contributors"}]
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
