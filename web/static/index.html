@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ProMirror Golf - Professional Golf Swing Analysis">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="manifest" href="/static/manifest.json">
+    <title>ProMirror Golf - Web Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #0a0a0a;
+            color: #fafafa;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .chart-container {
+                padding: 12px;
+            }
+            
+            .chart-wrapper {
+                height: 250px !important;
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+            
+            .filter-row {
+                flex-direction: column;
+            }
+            
+            .filter-group {
+                min-width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+        }
+        
+        header {
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #2a2a2a;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #ff4d4d;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background-color: #161b22;
+            border: 1px solid #21262d;
+            border-radius: 8px;
+            padding: 16px;
+            transition: border-color 0.2s;
+        }
+        
+        .stat-card:hover {
+            border-color: #30363d;
+        }
+        
+        .stat-label {
+            color: #8b949e;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .stat-value {
+            color: #fafafa;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .filters {
+            background-color: #161b22;
+            border: 1px solid #21262d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .filters h2 {
+            color: #fafafa;
+            font-size: 16px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .filter-group label {
+            color: #8b949e;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        
+        select, input {
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: #c9d1d9;
+            font-size: 13px;
+            font-family: inherit;
+        }
+        
+        select:hover, input:hover {
+            border-color: #21262d;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #ff4d4d;
+        }
+        
+        button {
+            background-color: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 8px 16px;
+            color: #c9d1d9;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        
+        button:hover {
+            background-color: #30363d;
+            border-color: #21262d;
+        }
+        
+        button.secondary {
+            background-color: transparent;
+        }
+        
+        button.primary {
+            background-color: #ff4d4d;
+            border-color: #ff4d4d;
+            color: #ffffff;
+        }
+        
+        button.primary:hover {
+            background-color: #ff5c5c;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #21262d;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: #8b949e;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .tab:hover {
+            color: #c9d1d9;
+        }
+        
+        .tab.active {
+            color: #ff4d4d;
+            border-bottom-color: #ff4d4d;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .chart-container {
+            background-color: #161b22;
+            border: 1px solid #21262d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .chart-container h3 {
+            color: #fafafa;
+            font-size: 16px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+        
+        .sessions-list {
+            background-color: #161b22;
+            border: 1px solid #21262d;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .sessions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .sessions-header h2 {
+            color: #fafafa;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .session-item {
+            background-color: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .session-item:hover {
+            background-color: #161b22;
+            border-color: #30363d;
+        }
+        
+        .session-name {
+            color: #fafafa;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+        
+        .session-meta {
+            color: #8b949e;
+            font-size: 12px;
+        }
+        
+        .session-details {
+            background-color: #161b22;
+            border: 1px solid #21262d;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: none;
+        }
+        
+        .session-details.active {
+            display: block;
+        }
+        
+        .shots-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+        
+        .shots-table th,
+        .shots-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #21262d;
+        }
+        
+        .shots-table th {
+            color: #8b949e;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        
+        .shots-table td {
+            color: #fafafa;
+            font-size: 13px;
+        }
+        
+        .shots-table tr:hover {
+            background-color: #0d1117;
+        }
+        
+        .close-btn {
+            float: right;
+            background: transparent;
+            border: none;
+            color: #8b949e;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            line-height: 1;
+        }
+        
+        .close-btn:hover {
+            color: #c9d1d9;
+        }
+        
+        .error {
+            background-color: #da3633;
+            border: 1px solid #f85149;
+            border-radius: 6px;
+            padding: 12px;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #8b949e;
+            padding: 40px;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+            
+            .filter-row {
+                flex-direction: column;
+            }
+            
+            .filter-group {
+                width: 100%;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-wrapper {
+                height: 250px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .stat-card {
+                padding: 12px;
+            }
+            
+            .stat-value {
+                font-size: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-wrapper {
+                height: 200px;
+            }
+        }
+        
+        .chart-tooltip {
+            position: absolute;
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: #fafafa;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .refresh-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #238636;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .auto-refresh-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 40px;
+            height: 20px;
+            background-color: #21262d;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .toggle-switch.active {
+            background-color: #238636;
+        }
+        
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #fafafa;
+            top: 2px;
+            left: 2px;
+            transition: left 0.2s;
+        }
+        
+        .toggle-switch.active::after {
+            left: 22px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>ProMirror Golf</h1>
+            <p class="subtitle">Web Dashboard</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div id="error-message" class="error" style="display: none;"></div>
+        
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Shots</div>
+                <div class="stat-value" id="stat-total-shots">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Sessions</div>
+                <div class="stat-value" id="stat-total-sessions">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Avg Club Speed</div>
+                <div class="stat-value" id="stat-avg-club-speed">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Avg Ball Speed</div>
+                <div class="stat-value" id="stat-avg-ball-speed">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Avg Carry</div>
+                <div class="stat-value" id="stat-avg-carry">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Max Carry</div>
+                <div class="stat-value" id="stat-max-carry">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Avg Spin Rate</div>
+                <div class="stat-value" id="stat-avg-spin">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Consistency</div>
+                <div class="stat-value" id="stat-consistency">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Min Carry</div>
+                <div class="stat-value" id="stat-min-carry">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Avg Total Distance</div>
+                <div class="stat-value" id="stat-avg-total-distance">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Max Total Distance</div>
+                <div class="stat-value" id="stat-max-total-distance">--</div>
+            </div>
+        </div>
+        
+        <div class="filters">
+            <h2>Filters</h2>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Period</label>
+                    <select id="period-filter">
+                        <option value="all">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="3days">Last 3 Days</option>
+                        <option value="7days">Last 7 Days</option>
+                        <option value="30days">Last 30 Days</option>
+                        <option value="90days">Last 90 Days</option>
+                        <option value="custom">Custom Range</option>
+                    </select>
+                </div>
+                <div class="filter-group" id="custom-date-group" style="display: none;">
+                    <label>Start Date</label>
+                    <input type="date" id="custom-start-date">
+                </div>
+                <div class="filter-group" id="custom-date-group-end" style="display: none;">
+                    <label>End Date</label>
+                    <input type="date" id="custom-end-date">
+                </div>
+                <div class="filter-group">
+                    <label>Club</label>
+                    <select id="club-filter">
+                        <option value="">All Clubs</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <button class="primary" onclick="applyFilters()">Apply Filters</button>
+                </div>
+                <div class="filter-group">
+                    <label>Min Speed (mph)</label>
+                    <input type="number" id="min-speed" placeholder="Any" min="0" step="0.1">
+                </div>
+                <div class="filter-group">
+                    <label>Max Speed (mph)</label>
+                    <input type="number" id="max-speed" placeholder="Any" min="0" step="0.1">
+                </div>
+                <div class="filter-group">
+                    <label>Min Distance (yds)</label>
+                    <input type="number" id="min-distance" placeholder="Any" min="0" step="1">
+                </div>
+                <div class="filter-group">
+                    <label>Max Distance (yds)</label>
+                    <input type="number" id="max-distance" placeholder="Any" min="0" step="1">
+                </div>
+                <div class="filter-group">
+                    <button class="primary" onclick="applyFilters()">Apply Filters</button>
+                </div>
+                <div class="filter-group">
+                    <button class="secondary" onclick="clearFilters()">Clear</button>
+                </div>
+            </div>
+            <div class="auto-refresh-toggle" style="margin-top: 12px;">
+                <label style="color: #8b949e; font-size: 12px; cursor: pointer;" onclick="toggleAutoRefresh()">
+                    Auto-refresh
+                </label>
+                <div class="toggle-switch" id="auto-refresh-toggle" onclick="toggleAutoRefresh()"></div>
+                <span class="refresh-indicator" id="refresh-indicator" style="display: none;"></span>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('overview')">Overview</button>
+            <button class="tab" onclick="switchTab('analysis')">Analysis</button>
+            <button class="tab" onclick="switchTab('sessions')">Sessions</button>
+        </div>
+        
+        <div id="overview-tab" class="tab-content active">
+            <div class="chart-container">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3 style="margin: 0;">Performance Trends</h3>
+                    <button onclick="exportChart('trends-chart', 'performance-trends')" style="
+                        background-color: #21262d;
+                        border: 1px solid #30363d;
+                        border-radius: 6px;
+                        padding: 6px 12px;
+                        color: #c9d1d9;
+                        font-size: 12px;
+                        cursor: pointer;
+                    ">Export</button>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="trends-chart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3 style="margin: 0;">Speed vs Distance</h3>
+                    <button onclick="exportChart('speed-distance-chart', 'speed-distance')" style="
+                        background-color: #21262d;
+                        border: 1px solid #30363d;
+                        border-radius: 6px;
+                        padding: 6px 12px;
+                        color: #c9d1d9;
+                        font-size: 12px;
+                        cursor: pointer;
+                    ">Export</button>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="speed-distance-chart"></canvas>
+                </div>
+            </div>
+            
+            <div class="session-details" id="session-details">
+                <button class="close-btn" onclick="closeSessionDetails()">&times;</button>
+                <h2 id="session-details-name"></h2>
+                <div id="session-details-meta"></div>
+                <table class="shots-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Club Speed</th>
+                            <th>Ball Speed</th>
+                            <th>Carry</th>
+                            <th>Total</th>
+                            <th>Spin</th>
+                            <th>Launch Angle</th>
+                        </tr>
+                    </thead>
+                    <tbody id="session-shots-tbody">
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="sessions-list">
+                <div class="sessions-header">
+                    <h2>Recent Sessions</h2>
+                </div>
+                <div id="sessions-container">
+                    <div class="loading">Loading sessions...</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="analysis-tab" class="tab-content">
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3>Speed Trends</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="speed-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h3>Distance Trends</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="distance-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h3>Spin Rate Trends</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="spin-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="margin: 0;">Shot Dispersion</h3>
+                        <button onclick="exportChart('dispersion-chart', 'dispersion')" style="
+                            background-color: #21262d;
+                            border: 1px solid #30363d;
+                            border-radius: 6px;
+                            padding: 6px 12px;
+                            color: #c9d1d9;
+                            font-size: 12px;
+                            cursor: pointer;
+                        ">Export</button>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="dispersion-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h3>Club Comparison</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="club-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <h3>Carry Distance Distribution</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="histogram-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="sessions-tab" class="tab-content">
+            <div class="sessions-list">
+                <div class="sessions-header">
+                    <h2>All Sessions</h2>
+                    <button onclick="loadSessions()">Refresh</button>
+                </div>
+                <div id="sessions-list-container">
+                    <div class="loading">Loading sessions...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://127.0.0.1:5000/api';
+        
+        let currentFilters = {};
+        let charts = {};
+        let allShots = [];
+        let autoRefreshEnabled = false;
+        let autoRefreshInterval = null;
+        let refreshInterval = 30000; // 30 seconds
+        
+        // Chart.js configuration
+        Chart.defaults.color = '#8b949e';
+        Chart.defaults.borderColor = '#21262d';
+        Chart.defaults.backgroundColor = '#161b22';
+        Chart.defaults.interaction = {
+            intersect: false,
+            mode: 'index'
+        };
+        Chart.defaults.plugins.tooltip = {
+            backgroundColor: '#161b22',
+            borderColor: '#30363d',
+            borderWidth: 1,
+            titleColor: '#fafafa',
+            bodyColor: '#c9d1d9',
+            padding: 12,
+            cornerRadius: 6,
+            displayColors: true
+        };
+        
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            
+            // Find and activate the clicked tab button
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                if (tab.textContent.toLowerCase().includes(tabName.toLowerCase())) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            if (tabName === 'analysis') {
+                setTimeout(() => {
+                    updateAnalysisCharts();
+                }, 100);
+            } else if (tabName === 'overview') {
+                // Update charts in overview tab when switching to it
+                setTimeout(() => {
+                    updateTrendsChart();
+                    updateSpeedDistanceChart();
+                }, 100);
+            }
+        }
+        
+        async function loadStats() {
+            try {
+                const params = new URLSearchParams(currentFilters);
+                const response = await fetch(`${API_BASE}/stats?${params}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const stats = await response.json();
+                
+                // Check if response contains an error
+                if (stats.error) {
+                    throw new Error(stats.error);
+                }
+                
+                // Safely update all stat fields with fallbacks
+                const setStat = (id, value, format = (v) => v) => {
+                    const elem = document.getElementById(id);
+                    if (elem) {
+                        elem.textContent = (value != null && value !== undefined) ? format(value) : '--';
+                    }
+                };
+                
+                setStat('stat-total-shots', stats.total_shots, v => v.toString());
+                setStat('stat-total-sessions', stats.total_sessions, v => v.toString());
+                setStat('stat-avg-club-speed', stats.avg_club_speed, v => `${v.toFixed(1)} mph`);
+                setStat('stat-avg-ball-speed', stats.avg_ball_speed, v => `${v.toFixed(1)} mph`);
+                setStat('stat-avg-carry', stats.avg_carry, v => `${v.toFixed(1)} yds`);
+                setStat('stat-max-carry', stats.max_carry, v => `${v.toFixed(1)} yds`);
+                setStat('stat-avg-spin', stats.avg_spin_rate, v => `${v.toFixed(0)} rpm`);
+                setStat('stat-consistency', stats.consistency, v => `±${v.toFixed(1)} yds`);
+                setStat('stat-min-carry', stats.min_carry, v => `${v.toFixed(1)} yds`);
+                setStat('stat-avg-total-distance', stats.avg_total_distance, v => `${v.toFixed(1)} yds`);
+                setStat('stat-max-total-distance', stats.max_total_distance, v => `${v.toFixed(1)} yds`);
+            } catch (error) {
+                console.error('Failed to load statistics:', error);
+                showError('Failed to load statistics: ' + error.message);
+                
+                // Set all stats to '--' on error
+                const statIds = [
+                    'stat-total-shots', 'stat-total-sessions', 'stat-avg-club-speed',
+                    'stat-avg-ball-speed', 'stat-avg-carry', 'stat-max-carry',
+                    'stat-avg-spin', 'stat-consistency', 'stat-min-carry',
+                    'stat-avg-total-distance', 'stat-max-total-distance'
+                ];
+                statIds.forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem) elem.textContent = '--';
+                });
+            }
+        }
+        
+        async function loadSessions() {
+            try {
+                const container = document.getElementById('sessions-container');
+                const listContainer = document.getElementById('sessions-list-container');
+                
+                [container, listContainer].forEach(c => {
+                    if (c) c.innerHTML = '<div class="loading">Loading sessions...</div>';
+                });
+                
+                const params = new URLSearchParams(currentFilters);
+                const response = await fetch(`${API_BASE}/sessions?${params}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Check if response contains an error
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                const renderSessions = (targetContainer) => {
+                    if (data.sessions && data.sessions.length > 0) {
+                        targetContainer.innerHTML = data.sessions.map(session => `
+                            <div class="session-item" onclick="loadSession(${session.id})">
+                                <div class="session-name">${session.name || 'Unnamed Session'}</div>
+                                <div class="session-meta">
+                                    ${session.club ? `Club: ${session.club} • ` : ''}
+                                    ${session.shot_count || 0} shots • 
+                                    ${session.started_at ? new Date(session.started_at).toLocaleDateString() : 'No date'}
+                                </div>
+                            </div>
+                        `).join('');
+                    } else {
+                        targetContainer.innerHTML = '<div class="loading">No sessions found</div>';
+                    }
+                };
+                
+                if (container) renderSessions(container);
+                if (listContainer) renderSessions(listContainer);
+            } catch (error) {
+                console.error('Failed to load sessions:', error);
+                showError('Failed to load sessions: ' + error.message);
+                const containers = [document.getElementById('sessions-container'), 
+                                   document.getElementById('sessions-list-container')];
+                containers.forEach(c => {
+                    if (c) c.innerHTML = '<div class="loading">Error loading sessions</div>';
+                });
+            }
+        }
+        
+        async function loadClubs() {
+            try {
+                const response = await fetch(`${API_BASE}/clubs`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Check if response contains an error
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                const select = document.getElementById('club-filter');
+                if (select) {
+                    select.innerHTML = '<option value="">All Clubs</option>';
+                    if (data.clubs && Array.isArray(data.clubs)) {
+                        data.clubs.forEach(club => {
+                            if (club) {
+                                const option = document.createElement('option');
+                                option.value = club;
+                                option.textContent = club;
+                                select.appendChild(option);
+                            }
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load clubs:', error);
+                // Don't show error for clubs as it's less critical
+            }
+        }
+        
+        function applyFilters() {
+            const period = document.getElementById('period-filter').value;
+            const club = document.getElementById('club-filter').value;
+            const customStart = document.getElementById('custom-start-date').value;
+            const customEnd = document.getElementById('custom-end-date').value;
+            const minSpeed = document.getElementById('min-speed').value;
+            const maxSpeed = document.getElementById('max-speed').value;
+            const minDistance = document.getElementById('min-distance').value;
+            const maxDistance = document.getElementById('max-distance').value;
+            
+            currentFilters = {};
+            
+            if (club) currentFilters.club = club;
+            if (minSpeed) currentFilters.min_speed = parseFloat(minSpeed);
+            if (maxSpeed) currentFilters.max_speed = parseFloat(maxSpeed);
+            if (minDistance) currentFilters.min_distance = parseFloat(minDistance);
+            if (maxDistance) currentFilters.max_distance = parseFloat(maxDistance);
+            
+            const now = new Date();
+            if (period === 'today') {
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                currentFilters.start_date = today.toISOString().split('T')[0];
+            } else if (period === '3days') {
+                const date = new Date(now);
+                date.setDate(date.getDate() - 3);
+                currentFilters.start_date = date.toISOString().split('T')[0];
+            } else if (period === '7days') {
+                const date = new Date(now);
+                date.setDate(date.getDate() - 7);
+                currentFilters.start_date = date.toISOString().split('T')[0];
+            } else if (period === '30days') {
+                const date = new Date(now);
+                date.setDate(date.getDate() - 30);
+                currentFilters.start_date = date.toISOString().split('T')[0];
+            } else if (period === '90days') {
+                const date = new Date(now);
+                date.setDate(date.getDate() - 90);
+                currentFilters.start_date = date.toISOString().split('T')[0];
+            } else if (period === 'custom') {
+                if (customStart) currentFilters.start_date = customStart;
+                if (customEnd) currentFilters.end_date = customEnd;
+            }
+            
+            loadStats();
+            loadSessions();
+            loadShots();
+        }
+        
+        function clearFilters() {
+            document.getElementById('period-filter').value = 'all';
+            document.getElementById('club-filter').value = '';
+            document.getElementById('custom-start-date').value = '';
+            document.getElementById('custom-end-date').value = '';
+            document.getElementById('min-speed').value = '';
+            document.getElementById('max-speed').value = '';
+            document.getElementById('min-distance').value = '';
+            document.getElementById('max-distance').value = '';
+            document.getElementById('custom-date-group').style.display = 'none';
+            document.getElementById('custom-date-group-end').style.display = 'none';
+            currentFilters = {};
+            loadStats();
+            loadSessions();
+            loadShots();
+        }
+        
+        function toggleAutoRefresh() {
+            autoRefreshEnabled = !autoRefreshEnabled;
+            const toggle = document.getElementById('auto-refresh-toggle');
+            const indicator = document.getElementById('refresh-indicator');
+            
+            if (autoRefreshEnabled) {
+                toggle.classList.add('active');
+                indicator.style.display = 'inline-block';
+                startAutoRefresh();
+            } else {
+                toggle.classList.remove('active');
+                indicator.style.display = 'none';
+                stopAutoRefresh();
+            }
+        }
+        
+        function startAutoRefresh() {
+            stopAutoRefresh();
+            autoRefreshInterval = setInterval(() => {
+                loadStats();
+                loadSessions();
+                loadShots();
+            }, refreshInterval);
+        }
+        
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+        }
+        
+        document.getElementById('period-filter').addEventListener('change', function() {
+            if (this.value === 'custom') {
+                document.getElementById('custom-date-group').style.display = 'flex';
+                document.getElementById('custom-date-group-end').style.display = 'flex';
+            } else {
+                document.getElementById('custom-date-group').style.display = 'none';
+                document.getElementById('custom-date-group-end').style.display = 'none';
+            }
+        });
+        
+        async function loadShots() {
+            try {
+                const params = new URLSearchParams({...currentFilters, limit: 1000});
+                const response = await fetch(`${API_BASE}/shots?${params}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Check if response contains an error
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                let shots = data.shots || [];
+                
+                // Apply client-side filters for speed and distance
+                if (currentFilters.min_speed !== undefined) {
+                    shots = shots.filter(s => s.ball_speed && s.ball_speed >= currentFilters.min_speed);
+                }
+                if (currentFilters.max_speed !== undefined) {
+                    shots = shots.filter(s => s.ball_speed && s.ball_speed <= currentFilters.max_speed);
+                }
+                if (currentFilters.min_distance !== undefined) {
+                    shots = shots.filter(s => s.carry_distance && s.carry_distance >= currentFilters.min_distance);
+                }
+                if (currentFilters.max_distance !== undefined) {
+                    shots = shots.filter(s => s.carry_distance && s.carry_distance <= currentFilters.max_distance);
+                }
+                
+                allShots = shots;
+                updateTrendsChart();
+                updateSpeedDistanceChart();
+            } catch (error) {
+                console.error('Failed to load shots:', error);
+                allShots = [];
+                // Don't show error for shots loading as it's less critical
+            }
+        }
+        
+        function updateTrendsChart() {
+            const ctx = document.getElementById('trends-chart');
+            if (!ctx) return;
+            
+            if (charts.trends) {
+                charts.trends.destroy();
+            }
+            
+            const carries = allShots.map(s => s.carry_distance || 0).filter(v => v > 0);
+            const dates = allShots.map(s => new Date(s.recorded_at)).filter((v, i) => carries[i] > 0);
+            
+            if (carries.length === 0) {
+                ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+                return;
+            }
+            
+            charts.trends = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates.map(d => d.toLocaleDateString()),
+                    datasets: [{
+                        label: 'Carry Distance (yds)',
+                        data: carries,
+                        borderColor: '#ff4d4d',
+                        backgroundColor: 'rgba(255, 77, 77, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: { color: '#8b949e' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#8b949e' },
+                            grid: { color: '#21262d' }
+                        },
+                        y: {
+                            ticks: { color: '#8b949e' },
+                            grid: { color: '#21262d' },
+                            title: {
+                                display: true,
+                                text: 'Distance (yds)',
+                                color: '#8b949e'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateAnalysisCharts() {
+            if (allShots.length === 0) {
+                loadShots().then(() => {
+                    updateSpeedChart();
+                    updateDistanceChart();
+                    updateSpinChart();
+                    updateDispersionChart();
+                    updateClubChart();
+                    updateHistogramChart();
+                    updateSpeedDistanceChart();
+                });
+            } else {
+                updateSpeedChart();
+                updateDistanceChart();
+                updateSpinChart();
+                updateDispersionChart();
+                updateClubChart();
+                updateHistogramChart();
+                updateSpeedDistanceChart();
+            }
+        }
+        
+        function updateSpeedChart() {
+            const ctx = document.getElementById('speed-chart');
+            if (!ctx) return;
+            
+            if (charts.speed) charts.speed.destroy();
+            
+            const dates = allShots.filter(s => s.club_speed && s.ball_speed).map(s => new Date(s.recorded_at));
+            const clubSpeeds = allShots.filter(s => s.club_speed && s.ball_speed).map(s => s.club_speed);
+            const ballSpeeds = allShots.filter(s => s.club_speed && s.ball_speed).map(s => s.ball_speed);
+            
+            if (dates.length === 0) return;
+            
+            charts.speed = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates.map(d => d.toLocaleDateString()),
+                    datasets: [
+                        {
+                            label: 'Club Speed (mph)',
+                            data: clubSpeeds,
+                            borderColor: '#ff4d4d',
+                            backgroundColor: 'rgba(255, 77, 77, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Ball Speed (mph)',
+                            data: ballSpeeds,
+                            borderColor: '#238636',
+                            backgroundColor: 'rgba(35, 134, 54, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#8b949e' } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+                        y: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } }
+                    }
+                }
+            });
+        }
+        
+        function updateDistanceChart() {
+            const ctx = document.getElementById('distance-chart');
+            if (!ctx) return;
+            
+            if (charts.distance) charts.distance.destroy();
+            
+            const dates = allShots.filter(s => s.carry_distance).map(s => new Date(s.recorded_at));
+            const carries = allShots.filter(s => s.carry_distance).map(s => s.carry_distance);
+            const totals = allShots.filter(s => s.carry_distance && s.total_distance).map(s => s.total_distance);
+            
+            if (dates.length === 0) return;
+            
+            charts.distance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates.map(d => d.toLocaleDateString()),
+                    datasets: [
+                        {
+                            label: 'Carry (yds)',
+                            data: carries,
+                            borderColor: '#ff4d4d',
+                            backgroundColor: 'rgba(255, 77, 77, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Total (yds)',
+                            data: totals,
+                            borderColor: '#238636',
+                            backgroundColor: 'rgba(35, 134, 54, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#8b949e' } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+                        y: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } }
+                    }
+                }
+            });
+        }
+        
+        function updateSpinChart() {
+            const ctx = document.getElementById('spin-chart');
+            if (!ctx) return;
+            
+            if (charts.spin) charts.spin.destroy();
+            
+            const dates = allShots.filter(s => s.spin_rate).map(s => new Date(s.recorded_at));
+            const spins = allShots.filter(s => s.spin_rate).map(s => s.spin_rate);
+            
+            if (dates.length === 0) return;
+            
+            charts.spin = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates.map(d => d.toLocaleDateString()),
+                    datasets: [{
+                        label: 'Spin Rate (rpm)',
+                        data: spins,
+                        borderColor: '#ff4d4d',
+                        backgroundColor: 'rgba(255, 77, 77, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#8b949e' } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+                        y: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } }
+                    }
+                }
+            });
+        }
+        
+        function updateSpeedDistanceChart() {
+            const ctx = document.getElementById('speed-distance-chart');
+            if (!ctx) return;
+            
+            if (charts.speedDistance) charts.speedDistance.destroy();
+            
+            // Filter shots that have both ball speed and carry distance
+            const validShots = allShots.filter(s => s.ball_speed != null && s.carry_distance != null);
+            
+            if (validShots.length === 0) {
+                // Clear canvas if no data
+                const canvas = ctx.getContext('2d');
+                canvas.clearRect(0, 0, ctx.width, ctx.height);
+                return;
+            }
+            
+            const speeds = validShots.map(s => s.ball_speed);
+            const distances = validShots.map(s => s.carry_distance);
+            
+            charts.speedDistance = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Ball Speed vs Carry Distance',
+                        data: speeds.map((speed, i) => ({x: speed, y: distances[i]})),
+                        backgroundColor: 'rgba(255, 77, 77, 0.6)',
+                        borderColor: '#ff4d4d',
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: { color: '#8b949e' }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Speed: ${context.parsed.x.toFixed(1)} mph, Distance: ${context.parsed.y.toFixed(1)} yds`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#8b949e' },
+                            grid: { color: '#21262d' },
+                            title: {
+                                display: true,
+                                text: 'Ball Speed (mph)',
+                                color: '#8b949e'
+                            }
+                        },
+                        y: {
+                            ticks: { color: '#8b949e' },
+                            grid: { color: '#21262d' },
+                            title: {
+                                display: true,
+                                text: 'Carry Distance (yds)',
+                                color: '#8b949e'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateDispersionChart() {
+            const ctx = document.getElementById('dispersion-chart');
+            if (!ctx) return;
+            
+            if (charts.dispersion) charts.dispersion.destroy();
+            
+            // Filter shots with both carry_distance and launch_direction
+            const validShots = allShots.filter(s => 
+                s.carry_distance != null && 
+                s.launch_direction != null &&
+                !isNaN(s.carry_distance) && 
+                !isNaN(s.launch_direction)
+            );
+            
+            if (validShots.length === 0) {
+                // Show empty state message
+                ctx.getContext('2d').clearRect(0, 0, ctx.width, ctx.height);
+                const ctx2d = ctx.getContext('2d');
+                ctx2d.fillStyle = '#8b949e';
+                ctx2d.font = '14px sans-serif';
+                ctx2d.textAlign = 'center';
+                ctx2d.fillText('No dispersion data available', ctx.width / 2, ctx.height / 2);
+                return;
+            }
+            
+            // Create scatter plot data
+            const scatterData = validShots.map(s => ({
+                x: parseFloat(s.launch_direction),
+                y: parseFloat(s.carry_distance)
+            }));
+            
+            // Calculate center point for reference
+            const avgDirection = scatterData.reduce((sum, p) => sum + p.x, 0) / scatterData.length;
+            const avgCarry = scatterData.reduce((sum, p) => sum + p.y, 0) / scatterData.length;
+            
+            charts.dispersion = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Shots',
+                            data: scatterData,
+                            backgroundColor: 'rgba(255, 77, 77, 0.6)',
+                            borderColor: '#ff4d4d',
+                            pointRadius: 5,
+                            pointHoverRadius: 7
+                        },
+                        {
+                            label: 'Average',
+                            data: [{x: avgDirection, y: avgCarry}],
+                            backgroundColor: 'rgba(35, 134, 54, 0.8)',
+                            borderColor: '#238636',
+                            pointRadius: 8,
+                            pointHoverRadius: 10,
+                            pointStyle: 'star'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            display: true,
+                            labels: { color: '#8b949e' }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const point = context.raw;
+                                    if (context.datasetIndex === 0) {
+                                        return `Direction: ${point.x.toFixed(1)}° | Distance: ${point.y.toFixed(0)} yds`;
+                                    } else {
+                                        return `Avg: ${point.x.toFixed(1)}° | ${point.y.toFixed(0)} yds`;
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#8b949e' },
+                            grid: { color: '#21262d' },
+                            title: {
+                                display: true,
+                                text: 'Launch Direction (degrees)',
+                                color: '#8b949e'
+                            }
+                        },
+                        y: {
+                            ticks: { color: '#8b949e' },
+                            grid: { color: '#21262d' },
+                            title: {
+                                display: true,
+                                text: 'Carry Distance (yards)',
+                                color: '#8b949e'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateClubChart() {
+            const ctx = document.getElementById('club-chart');
+            if (!ctx) return;
+            
+            if (charts.club) charts.club.destroy();
+            
+            // Group shots by club
+            const clubData = {};
+            allShots.forEach(shot => {
+                const club = shot.club || 'Unknown';
+                if (!clubData[club]) {
+                    clubData[club] = {carries: [], speeds: []};
+                }
+                if (shot.carry_distance) {
+                    clubData[club].carries.push(shot.carry_distance);
+                }
+                if (shot.club_speed) {
+                    clubData[club].speeds.push(shot.club_speed);
+                }
+            });
+            
+            const clubs = Object.keys(clubData).filter(c => c !== 'Unknown' || clubData[c].carries.length > 0);
+            const avgCarries = clubs.map(c => {
+                const values = clubData[c].carries;
+                return values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+            });
+            const avgSpeeds = clubs.map(c => {
+                const values = clubData[c].speeds;
+                return values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+            });
+            
+            if (clubs.length === 0) return;
+            
+            charts.club = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: clubs,
+                    datasets: [
+                        {
+                            label: 'Avg Carry (yds)',
+                            data: avgCarries,
+                            backgroundColor: 'rgba(255, 77, 77, 0.8)',
+                            borderColor: '#ff4d4d',
+                            borderWidth: 1,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Avg Club Speed (mph)',
+                            data: avgSpeeds,
+                            backgroundColor: 'rgba(35, 134, 54, 0.8)',
+                            borderColor: '#238636',
+                            borderWidth: 1,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#8b949e' } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#8b949e' }, grid: { color: '#21262d' } },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            ticks: { color: '#8b949e' },
+                            grid: { color: '#21262d' },
+                            title: {
+                                display: true,
+                                text: 'Carry Distance (yds)',
+                                color: '#8b949e'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            ticks: { color: '#8b949e' },
+                            grid: { drawOnChartArea: false },
+                            title: {
+                                display: true,
+                                text: 'Club Speed (mph)',
+                                color: '#8b949e'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateHistogramChart() {
+            const ctx = document.getElementById('histogram-chart');
+            if (!ctx) return;
+            
+            if (charts.histogram) charts.histogram.destroy();
+            
+            const carries = allShots.filter(s => s.carry_distance).map(s => s.carry_distance);
+            
+            if (carries.length === 0) return;
+            
+            // Create bins
+            const min = Math.min(...carries);
+            const max = Math.max(...carries);
+            const binCount = 20;
+            const binSize = (max - min) / binCount;
+            const bins = Array(binCount).fill(0);
+            const binLabels = [];
+            
+            for (let i = 0; i < binCount; i++) {
+                binLabels.push((min + i * binSize).toFixed(0));
+            }
+            
+            carries.forEach(carry => {
+                const binIndex = Math.min(Math.floor((carry - min) / binSize), binCount - 1);
+                bins[binIndex]++;
+            });
+            
+            charts.histogram = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: binLabels,
+                    datasets: [{
+                        label: 'Frequency',
+                        data: bins,
+                        backgroundColor: 'rgba(255, 77, 77, 0.8)',
+                        borderColor: '#ff4d4d',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#8b949e' },
+                            grid: { color: '#21262d' },
+                            title: {
+                                display: true,
+                                text: 'Carry Distance (yds)',
+                                color: '#8b949e'
+                            }
+                        },
+                        y: {
+                            ticks: { color: '#8b949e' },
+                            grid: { color: '#21262d' },
+                            title: {
+                                display: true,
+                                text: 'Frequency',
+                                color: '#8b949e'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        async function loadSession(sessionId) {
+            try {
+                const response = await fetch(`${API_BASE}/sessions/${sessionId}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const session = await response.json();
+                
+                // Check if response contains an error
+                if (session.error) {
+                    throw new Error(session.error);
+                }
+                
+                const nameElem = document.getElementById('session-details-name');
+                const metaElem = document.getElementById('session-details-meta');
+                
+                if (nameElem) {
+                    nameElem.textContent = session.name || 'Unnamed Session';
+                }
+                
+                if (metaElem) {
+                    metaElem.innerHTML = `
+                        <div class="session-meta" style="margin-bottom: 15px;">
+                            ${session.club ? `Club: ${session.club} • ` : ''}
+                            ${session.shots ? session.shots.length : 0} shots • 
+                            ${session.started_at ? new Date(session.started_at).toLocaleDateString() : 'No date'}
+                            ${session.notes ? `<br>Notes: ${session.notes}` : ''}
+                        </div>
+                    `;
+                }
+                
+                const tbody = document.getElementById('session-shots-tbody');
+                if (tbody) {
+                    if (session.shots && session.shots.length > 0) {
+                        tbody.innerHTML = session.shots.map(shot => `
+                            <tr>
+                                <td>${shot.recorded_at ? new Date(shot.recorded_at).toLocaleTimeString() : '--'}</td>
+                                <td>${(shot.club_speed != null) ? shot.club_speed.toFixed(1) : '--'} mph</td>
+                                <td>${(shot.ball_speed != null) ? shot.ball_speed.toFixed(1) : '--'} mph</td>
+                                <td>${(shot.carry_distance != null) ? shot.carry_distance.toFixed(0) : '--'} yds</td>
+                                <td>${(shot.total_distance != null) ? shot.total_distance.toFixed(0) : '--'} yds</td>
+                                <td>${(shot.spin_rate != null) ? shot.spin_rate.toFixed(0) : '--'} rpm</td>
+                                <td>${(shot.launch_angle != null) ? shot.launch_angle.toFixed(1) : '--'}°</td>
+                            </tr>
+                        `).join('');
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #8b949e;">No shots in this session</td></tr>';
+                    }
+                }
+                
+                const detailsElem = document.getElementById('session-details');
+                if (detailsElem) {
+                    detailsElem.classList.add('active');
+                }
+            } catch (error) {
+                console.error('Failed to load session details:', error);
+                showError('Failed to load session details: ' + error.message);
+            }
+        }
+        
+        function closeSessionDetails() {
+            document.getElementById('session-details').classList.remove('active');
+        }
+        
+        async function testConnection() {
+            try {
+                const response = await fetch(`${API_BASE}/test`);
+                const data = await response.json();
+                if (data.status === 'ok') {
+                    console.log('API connected:', data.message, 'Sessions:', data.session_count);
+                } else {
+                    showError('API connection error: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                showError('Failed to connect to API: ' + error.message);
+                console.error('API connection failed:', error);
+            }
+        }
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        function exportChart(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) {
+                console.error('Chart canvas not found:', canvasId);
+                return;
+            }
+            
+            try {
+                const url = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = `${filename}-${new Date().toISOString().split('T')[0]}.png`;
+                link.href = url;
+                link.click();
+            } catch (error) {
+                console.error('Error exporting chart:', error);
+                showError('Failed to export chart: ' + error.message);
+            }
+        }
+        
+        // Initialize
+        testConnection();
+        loadStats();
+        loadSessions();
+        loadClubs();
+        loadShots();
+        
+        // Enable auto-refresh by default
+        toggleAutoRefresh();
+    </script>
+</body>
+</html>

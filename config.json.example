@@ -1,0 +1,23 @@
+{
+  "cameras": {
+    "dtl_id": 0,
+    "face_id": 1,
+    "fps": 60,
+    "resolution": [1280, 720]
+  },
+  "storage": {
+    "buffer_seconds": 5,
+    "clips_dir": "data/clips",
+    "database": "data/promirror.db"
+  },
+  "shot_listener": {
+    "host": "127.0.0.1",
+    "port": 5556
+  },
+  "web": {
+    "enabled": true,
+    "host": "127.0.0.1",
+    "port": 5000
+  }
+}
+

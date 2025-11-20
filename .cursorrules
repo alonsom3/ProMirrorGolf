@@ -1,0 +1,276 @@
+# ProMirrorGolf Cursor AI Rules
+
+You are an expert Python UI developer specializing in PyQt6 dark-themed, minimalist interfaces for professional golf swing analysis applications.
+
+## PROJECT CONTEXT
+
+**Project Name**: ProMirrorGolf  
+**Framework**: PyQt6  
+**Theme**: GitHub-inspired dark theme  
+**Design System**: See `docs/DESIGN_SYSTEM.md`  
+**Code Style**: PEP 8, type hints, docstrings  
+
+## DESIGN SYSTEM
+
+### Color Palette
+- **Base Background**: `#0f1116`
+- **Surface**: `#161b22`
+- **Surface Elevated**: `#1c2128`
+- **Control Container**: `#0d1117`
+- **Border Default**: `#21262d`
+- **Border Hover**: `#30363d`
+- **Primary Text**: `#c9d1d9` (87% white opacity)
+- **Secondary Text**: `#8b949e` (60% white opacity)
+- **Disabled Text**: `#484f58` (38% white opacity)
+- **Accent**: `#ff4d4d` (red)
+- **Success**: `#238636` (green)
+- **Danger**: `#da3633` (red)
+
+**IMPORTANT**: Always use colors from `app/theme.py` constants. Never hardcode colors.
+
+### Spacing System
+- **Base Unit**: 8px grid system
+- **Common Values**: 4px (XS), 8px (S), 16px (M), 24px (L), 32px (XL), 48px (XXL)
+- **Component Padding**: Buttons `8px 16px`, Inputs `8px 12px`, Cards `16px`
+- **Layout Spacing**: Sections `24px`, Cards `16px`, Form fields `16px`
+
+**IMPORTANT**: All spacing must be multiples of 8px.
+
+### Typography
+- **Font Family**: `-apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif`
+- **Font Sizes**: 28px (H1), 24px (H2), 18px (H3), 13px (Body), 12px (Small), 11px (Tiny)
+- **Font Weights**: 600 (Bold), 500 (Medium), 400 (Regular)
+- **Line Heights**: 1.2 (Tight), 1.5 (Normal), 1.6 (Loose)
+
+### Component Specifications
+
+#### Buttons
+- **Min Height**: 32px
+- **Border Radius**: 6px
+- **Padding**: 8px 16px
+- **Font Size**: 12px
+- **Font Weight**: 500 (secondary), 600 (primary)
+- **States**: Hover (8% white overlay), Active (16% white overlay), Disabled (38% opacity), Focus (2px accent outline)
+
+#### Input Fields
+- **Background**: `#0d1117`
+- **Border**: `1px solid #30363d`
+- **Border Radius**: 6px
+- **Padding**: 8px 12px
+- **Min Height**: 32px
+- **Focus Border**: `1px solid #ff4d4d`
+
+#### Tables
+- **Background**: `#0d1117`
+- **Border**: `1px solid #21262d`
+- **Border Radius**: 8px
+- **Header Padding**: 12px 16px
+- **Cell Padding**: 12px 16px
+- **Selected Background**: `#1c2128`
+- **Hover Background**: `#161b22`
+
+## ACCESSIBILITY REQUIREMENTS
+
+### WCAG Compliance
+- **Level AA Required**: All text must meet 4.5:1 contrast ratio minimum
+- **Level AAA Preferred**: Aim for 7:1 where possible
+- **Focus Indicators**: Always visible 2px outline in accent color
+- **Keyboard Navigation**: Full keyboard support required
+- **Screen Readers**: Proper labels and ARIA attributes
+
+### Testing Checklist
+- ✅ Verify contrast ratios using WebAIM Contrast Checker
+- ✅ Test keyboard navigation (Tab, Enter, Space, Escape)
+- ✅ Ensure focus indicators are visible
+- ✅ Test with screen reader if possible
+- ✅ Verify disabled states are clear
+
+## CODE STYLE
+
+### Python Style
+- **PEP 8**: Follow Python style guide
+- **Type Hints**: Use type hints for all function parameters and returns
+- **Docstrings**: Google-style docstrings for all public functions/classes
+- **Imports**: Group imports (stdlib, third-party, local)
+- **Line Length**: Maximum 100 characters (where practical)
+
+### PyQt6 Patterns
+- **Widget Naming**: Use descriptive names (`self.start_session_btn`, not `self.btn1`)
+- **Layout Management**: Use `QVBoxLayout`, `QHBoxLayout`, `QGridLayout`
+- **Signals/Slots**: Use `@pyqtSlot` decorator for slots
+- **Stylesheets**: Prefer global stylesheet, use object names for variants
+- **Resource Management**: Properly clean up resources, close dialogs
+
+### Component Patterns
+```python
+# Button example
+btn = QPushButton("Label")
+btn.setObjectName("accentButton")  # Use object names for styling variants
+btn.setMinimumHeight(32)
+btn.setMinimumWidth(120)
+btn.setCursor(Qt.CursorShape.PointingHandCursor)
+btn.clicked.connect(self._on_button_clicked)
+
+# Input example
+input_field = QLineEdit()
+input_field.setPlaceholderText("Placeholder text")
+input_field.setMinimumHeight(32)
+input_field.editingFinished.connect(self._on_input_changed)
+```
+
+## ARCHITECTURE
+
+### Project Structure
+- `app/` - UI layer (main_window.py, widgets/)
+- `core/` - Business logic (session_manager.py, camera_service.py, etc.)
+- `data/` - Data storage (database, clips, thumbnails)
+- `docs/` - Documentation
+- `scripts/` - Utility scripts
+- `tests/` - Test files
+
+### Import Patterns
+```python
+# Standard library
+from pathlib import Path
+from typing import Optional
+
+# Third-party
+from PyQt6.QtWidgets import QPushButton, QLabel
+from PyQt6.QtCore import Qt
+
+# Local
+from app.theme import DARK_THEME
+from core.session_manager import SessionManager
+```
+
+### Error Handling
+- Use try/except blocks for operations that can fail
+- Log errors using `logging.getLogger(__name__)`
+- Show user-friendly error messages
+- Graceful degradation (continue if optional feature fails)
+
+## IMPLEMENTATION RULES
+
+### When Creating Components
+1. **Structure First**: Create layout and widgets without styling
+2. **Apply Styling**: Use design system colors and spacing
+3. **Add States**: Implement hover, active, focus, disabled states
+4. **Test Accessibility**: Verify contrast, keyboard navigation, focus indicators
+5. **Document**: Add docstrings explaining component purpose
+
+### When Modifying Existing Code
+1. **Check Design System**: Ensure changes follow `docs/DESIGN_SYSTEM.md`
+2. **Maintain Consistency**: Follow existing patterns in similar components
+3. **Update Theme**: If adding new colors/spacing, update `app/theme.py`
+4. **Test**: Verify changes don't break existing functionality
+5. **Document**: Update docstrings if behavior changes
+
+### When Styling
+- **Use Global Stylesheet**: Prefer `DARK_THEME` from `app/theme.py`
+- **Object Names**: Use object names for component variants (`#accentButton`)
+- **Avoid Inline Styles**: Only use for dynamic values
+- **Consistent Spacing**: Always use 8px grid multiples
+- **Consistent Colors**: Always use design system colors
+
+## COMMON PATTERNS
+
+### Dialog Pattern
+```python
+class MyDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Dialog Title")
+        self.setMinimumSize(400, 300)
+        self.setStyleSheet(DARK_THEME)
+        self._build_ui()
+        self._wire_signals()
+    
+    def _build_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(16)
+        layout.setContentsMargins(24, 24, 24, 24)
+        # Add widgets...
+    
+    def _wire_signals(self):
+        # Connect signals...
+        pass
+```
+
+### Button Pattern
+```python
+# Primary button
+primary_btn = QPushButton("Primary Action")
+primary_btn.setObjectName("accentButton")
+primary_btn.setMinimumHeight(32)
+primary_btn.setMinimumWidth(120)
+primary_btn.clicked.connect(self._on_primary_action)
+
+# Secondary button
+secondary_btn = QPushButton("Secondary Action")
+secondary_btn.setMinimumHeight(32)
+secondary_btn.clicked.connect(self._on_secondary_action)
+```
+
+### Form Pattern
+```python
+form_layout = QVBoxLayout()
+form_layout.setSpacing(16)
+
+# Label
+label = QLabel("Field Label")
+label.setStyleSheet("color: #8b949e; font-size: 12px; font-weight: 600;")
+form_layout.addWidget(label)
+
+# Input
+input_field = QLineEdit()
+input_field.setPlaceholderText("Enter value...")
+input_field.setMinimumHeight(32)
+form_layout.addWidget(input_field)
+```
+
+## ALWAYS DO
+
+✅ Check `docs/DESIGN_SYSTEM.md` before styling  
+✅ Use colors from `app/theme.py` constants  
+✅ Follow 8px spacing grid  
+✅ Ensure WCAG AA contrast (4.5:1 minimum)  
+✅ Add focus indicators (2px accent outline)  
+✅ Test keyboard navigation  
+✅ Use type hints and docstrings  
+✅ Follow existing code patterns  
+✅ Use object names for styling variants  
+✅ Maintain consistent border radius (6px inputs, 8px cards)  
+
+## NEVER DO
+
+❌ Hardcode colors (use constants)  
+❌ Use arbitrary spacing (must be 8px multiples)  
+❌ Remove focus indicators  
+❌ Use pure black (#000000) backgrounds  
+❌ Skip accessibility checks  
+❌ Create components without proper structure  
+❌ Use inline styles for static values  
+❌ Ignore existing patterns  
+❌ Create inconsistent component sizes  
+❌ Forget to test keyboard navigation  
+
+## REFERENCE FILES
+
+- **Design System**: `docs/DESIGN_SYSTEM.md`
+- **Theme Constants**: `app/theme.py`
+- **Main Window**: `app/main_window.py` (example patterns)
+- **Widget Examples**: `app/widgets/` (reference implementations)
+
+## PROMPTING GUIDELINES
+
+When asking for new components or features:
+1. Reference `@docs/DESIGN_SYSTEM.md` for design specifications
+2. Reference `@app/theme.py` for color constants
+3. Reference `@app/widgets/[similar_component].py` for patterns
+4. Specify exact requirements (colors, spacing, states, behavior)
+5. Include accessibility requirements
+6. Mention responsive behavior if needed
+
+Example prompt:
+"Create a settings dialog following @docs/DESIGN_SYSTEM.md. Use colors from @app/theme.py. Follow the pattern in @app/widgets/settings_dialog.py. Include: form fields with proper spacing (16px between fields), primary action button, proper focus indicators, keyboard navigation support."
+
