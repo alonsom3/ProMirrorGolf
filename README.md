@@ -1,11 +1,26 @@
 # ProMirrorGolf
 
 ![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)
+
 ![License](https://img.shields.io/badge/license-GPL--3.0-green.svg)
-![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)
+
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)
+
 ![Status](https://img.shields.io/badge/status-active-success.svg)
 
 **Professional golf swing analysis application with dual camera capture, comprehensive session management, and advanced shot data integration.**
+
+---
+
+**👍 Like this project?** [Star it on GitHub](https://github.com/alonsom3/ProMirrorGolf) to show your support!
+
+---
+
+## 🎥 Demo
+
+> **Coming Soon:** 2-minute walkthrough video
+
+*In the meantime, check out the [Showcase](#-showcase) section for feature screenshots.*
 
 ---
 
@@ -155,19 +170,31 @@
 
 ### Main Window - Dual Camera Capture
 ![Main Window](docs/screenshots/main_window.png)
-*[Screenshot coming soon] - Main application window showing dual camera preview with live feed from DTL and Face-on cameras*
+
+*[Screenshot coming soon]*
+
+Shows the main application window with live dual-camera preview (DTL and Face-on views), session controls, shot table with thumbnails, and real-time shot data display.
 
 ### Shot Review Window
 ![Shot Review](docs/screenshots/shot_review.png)
-*[Screenshot coming soon] - Shot review window with dual video playback, drawing tools, and shot data overlay*
+
+*[Screenshot coming soon]*
+
+Shot review window with dual video playback, drawing tools (freehand, swing plane, reference lines), shot data overlay, timeline scrubber with markers, and playback controls.
 
 ### Analysis Dashboard
 ![Analysis Dashboard](docs/screenshots/analysis_dashboard.png)
-*[Screenshot coming soon] - Comprehensive analysis dashboard with speed trends, distance charts, and dispersion plots*
+
+*[Screenshot coming soon]*
+
+Comprehensive analysis dashboard with speed trends, distance charts, spin analysis, dispersion plots with heat map view, club comparison charts, and distribution analysis.
 
 ### Web Dashboard
 ![Web Dashboard](docs/screenshots/web_dashboard.png)
-*[Screenshot coming soon] - Web dashboard accessible from any device with responsive design and interactive charts*
+
+*[Screenshot coming soon]*
+
+Web dashboard accessible from any device with responsive design, interactive charts (speed, distance, spin, dispersion), real-time statistics, and mobile-optimized interface.
 
 ---
 
@@ -175,10 +202,10 @@
 
 **New to ProMirrorGolf?** Get up and running in 5 minutes!
 
-1. **📥 Install** - See [Installation Guide](#-installation) for step-by-step setup
-2. **🎬 First Session** - See [Quick Start Guide](docs/QUICK_START.md) to record your first shot
-3. **❓ Troubleshooting** - Having issues? Check [Troubleshooting Guide](#-troubleshooting)
-4. **📚 Documentation** - See [Documentation Index](docs/README.md) for complete guides
+1. **📥 [Install](docs/INSTALLATION.md)** - Complete installation guide with step-by-step setup
+2. **🎬 [First Session](docs/QUICK_START.md)** - Record your first shot in 5 minutes
+3. **❓ [Troubleshooting](docs/TROUBLESHOOTING.md)** - Solutions to common issues
+4. **📚 [Documentation](docs/README.md)** - Complete documentation index
 
 **For experienced users:** Jump to [Quick Installation](#quick-installation-for-experienced-users)
 
@@ -229,6 +256,9 @@
 **Having trouble?** Check [docs/INSTALLATION.md](docs/INSTALLATION.md) for detailed, beginner-friendly instructions.
 
 ### Dependencies
+
+**Note:** All dependencies are automatically installed via `requirements.txt`. Tested on Python 3.10, 3.11, and 3.12.
+
 - PyQt6 >= 6.7.0 - GUI framework
 - opencv-python >= 4.10.0 - Video capture and processing
 - numpy >= 1.26.0 - Numerical operations
@@ -630,23 +660,24 @@ See the [LICENSE](LICENSE) file for details.
 
 ## ⚠️ Disclaimer
 
-This is hobby software provided "as is" without warranty. Use at your own risk.
+**Hobby Software**: This is a passion project by non-professional developers, provided "as is" without warranty.
 
-**Important points:**
-- The developers are not professional software engineers
-- This is a passion project created as a hobby
-- No warranty or liability is provided
-- Always backup your data before use
-- The software may contain bugs or issues
+**Use at Your Own Risk**: Always backup your data. We are not liable for any issues.
 
-**By using this software, you acknowledge that:**
-- You understand this is hobby/educational software
-- You will not hold the developers liable for any issues
-- You are responsible for backing up your data
-- You may encounter bugs or issues
+**For Professional Use**: If you need commercial-grade software with warranties and support, consider commercial alternatives.
 
-This software is provided for educational and personal use. If you need professional-grade software with warranties and support, please consider commercial alternatives.
+See full disclaimer in [LICENSE](LICENSE).
+
+---
 
 ---
 
 **Made with ❤️ by the ProMirrorGolf community**
+
+---
+
+### 📌 GitHub Topics
+
+To make this repository more discoverable, consider adding these topics in the repository settings:
+
+`golf` `golf-analysis` `swing-analysis` `launch-monitor` `computer-vision` `opencv` `pyqt6` `sports-analytics`
