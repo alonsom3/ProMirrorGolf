@@ -19,6 +19,25 @@ This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**
 
 See the [LICENSE](LICENSE) file for details.
 
+## Disclaimer
+
+**Important:** This software is provided "as is" without warranty of any kind, express or implied.
+
+- **No Warranty**: The developers are not professional software engineers. This is a passion project created as a hobby.
+- **No Liability**: The developers are not responsible for any damages, data loss, or issues that may arise from using this software.
+- **Use at Your Own Risk**: You use this software at your own risk. Always backup your data before use.
+- **Not Professional Software**: This project was created using various tools, resources, and AI assistance. It is not a professionally developed commercial product.
+- **No Support Guarantee**: While we strive to help users, there is no guarantee of support, bug fixes, or updates.
+
+**By using this software, you acknowledge that:**
+- You understand this is hobby/educational software
+- You will not hold the developers liable for any issues
+- You are responsible for backing up your data
+- You may encounter bugs or issues
+- The software may not work as expected in all scenarios
+
+This software is provided for educational and personal use. If you need professional-grade software with warranties and support, please consider commercial alternatives.
+
 ## Features
 
 ### Core Functionality
