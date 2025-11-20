@@ -12,10 +12,6 @@
 
 ---
 
-**👍 Like this project?** [Star it on GitHub](https://github.com/alonsom3/ProMirrorGolf) to show your support!
-
----
-
 ## 🎥 Demo
 
 > **Coming Soon:** 2-minute walkthrough video
@@ -660,7 +656,7 @@ See the [LICENSE](LICENSE) file for details.
 
 ## ⚠️ Disclaimer
 
-**Hobby Software**: This is a passion project by non-professional developers, provided "as is" without warranty.
+**Hobby Software**: This is a passion project by non-professional developer, provided "as is" without warranty.
 
 **Use at Your Own Risk**: Always backup your data. We are not liable for any issues.
 
@@ -672,12 +668,10 @@ See full disclaimer in [LICENSE](LICENSE).
 
 ---
 
-**Made with ❤️ by the ProMirrorGolf community**
+**Made with ❤️ by the community**
 
 ---
 
 ### 📌 GitHub Topics
-
-To make this repository more discoverable, consider adding these topics in the repository settings:
 
 `golf` `golf-analysis` `swing-analysis` `launch-monitor` `computer-vision` `opencv` `pyqt6` `sports-analytics`
