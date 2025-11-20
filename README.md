@@ -2,6 +2,23 @@
 
 Professional golf swing analysis application with dual camera capture, comprehensive session management, and advanced shot data integration.
 
+## License
+
+This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**.
+
+**What this means:**
+- ✅ **Free to use** - You can use this software for any purpose
+- ✅ **Free to modify** - You can modify the code to suit your needs
+- ✅ **Free to fork** - You can create your own version
+- ✅ **Free to share** - You can share the software with others
+- ❌ **Cannot be sold as proprietary** - You cannot sell this software as proprietary/closed-source
+- ✅ **Must share source** - If you distribute modified versions, you must share the source code
+- ✅ **Same license** - Derivative works must also use GPL-3.0
+
+**Note:** GPL-3.0 allows selling the software, but only if you also provide the source code under GPL-3.0. This prevents proprietary commercial versions while allowing free distribution.
+
+See the [LICENSE](LICENSE) file for details.
+
 ## Features
 
 ### Core Functionality
