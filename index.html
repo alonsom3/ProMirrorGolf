@@ -111,57 +111,31 @@
             color: #8b949e;
             line-height: 1.6;
         }
-        .comparison {
+        .quick-start {
             background: #161b22;
-            border-radius: 12px;
             padding: 2rem;
-            margin: 2rem 0;
-            border: 1px solid #21262d;
-        }
-        .comparison h3 {
-            color: #ff4d4d;
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-        .comparison-table {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        .comparison-item {
-            padding: 1rem;
-            background: #0f1116;
-            border-radius: 6px;
-            border: 1px solid #21262d;
-        }
-        .comparison-item strong {
-            color: #c9d1d9;
-            display: block;
-            margin-bottom: 0.5rem;
-        }
-        .use-cases {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-        .use-case {
-            background: #161b22;
-            padding: 1.5rem;
             border-radius: 8px;
             border: 1px solid #21262d;
+            max-width: 700px;
+            margin: 0 auto;
         }
-        .use-case h4 {
+        .quick-start h3 {
             color: #ff4d4d;
-            margin-bottom: 0.5rem;
-        }
-        .footer {
+            margin-bottom: 1rem;
             text-align: center;
-            padding: 3rem 20px;
-            border-top: 1px solid #21262d;
-            margin-top: 4rem;
+        }
+        .quick-start ol {
+            text-align: left;
             color: #8b949e;
+            line-height: 2;
+            margin-bottom: 1.5rem;
+        }
+        .quick-start code {
+            background: #0f1116;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #c9d1d9;
+            font-family: 'Courier New', monospace;
         }
         @media (max-width: 768px) {
             h1 {
@@ -172,9 +146,6 @@
             }
             .section {
                 padding: 2rem 20px;
-            }
-            .comparison-table {
-                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -199,45 +170,6 @@
         <div>
             <a href="https://github.com/alonsom3/ProMirrorGolf" class="btn">View on GitHub</a>
             <a href="https://github.com/alonsom3/ProMirrorGolf#-installation" class="btn btn-secondary">Get Started</a>
-        </div>
-    </div>
-
-    <div class="section">
-        <h2 class="section-title">Why ProMirrorGolf?</h2>
-        <div class="comparison">
-            <h3>ProMirrorGolf vs Commercial Launch Monitors</h3>
-            <div class="comparison-table">
-                <div class="comparison-item">
-                    <strong>Cost</strong>
-                    <span style="color: #238636;">✅ Free (GPL-3.0)</span>
-                    <span style="color: #da3633;">❌ $500-$5000+</span>
-                </div>
-                <div class="comparison-item">
-                    <strong>Dual Video</strong>
-                    <span style="color: #238636;">✅ Simultaneous DTL & Face-on</span>
-                    <span style="color: #da3633;">❌ Most don't support</span>
-                </div>
-                <div class="comparison-item">
-                    <strong>Drawing Tools</strong>
-                    <span style="color: #238636;">✅ Full annotation suite</span>
-                    <span style="color: #8b949e;">⚠️ Limited</span>
-                </div>
-                <div class="comparison-item">
-                    <strong>Custom Reports</strong>
-                    <span style="color: #238636;">✅ PDF, HTML, DOCX</span>
-                    <span style="color: #da3633;">❌ Proprietary only</span>
-                </div>
-                <div class="comparison-item">
-                    <strong>Source Code</strong>
-                    <span style="color: #238636;">✅ Open source</span>
-                    <span style="color: #da3633;">❌ Proprietary</span>
-                </div>
-                <div class="comparison-item">
-                    <strong>Data Export</strong>
-                    <span style="color: #238636;">✅ CSV, JSON, Excel</span>
-                    <span style="color: #8b949e;">⚠️ Limited formats</span>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -280,51 +212,20 @@
     </div>
 
     <div class="section">
-        <h2 class="section-title">Who Is This For?</h2>
-        <div class="use-cases">
-            <div class="use-case">
-                <h4>🏌️ Golf Coaches</h4>
-                <p>Provide detailed swing analysis to students with video annotations, data visualization, and custom reports.</p>
-            </div>
-            <div class="use-case">
-                <h4>🎯 Serious Golfers</h4>
-                <p>Track progress, identify swing flaws, and analyze performance trends over time with comprehensive statistics.</p>
-            </div>
-            <div class="use-case">
-                <h4>🔧 DIY Enthusiasts</h4>
-                <p>Build your own launch monitor setup with affordable USB cameras and open-source software.</p>
-            </div>
-            <div class="use-case">
-                <h4>📊 Data Analysts</h4>
-                <p>Export and analyze swing data with custom reports, advanced filtering, and multiple export formats.</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="section">
         <h2 class="section-title">Quick Start</h2>
-        <div style="background: #161b22; padding: 2rem; border-radius: 8px; border: 1px solid #21262d; max-width: 700px; margin: 0 auto;">
-            <h3 style="color: #ff4d4d; margin-bottom: 1rem;">Get Started in 5 Minutes</h3>
-            <ol style="text-align: left; color: #8b949e; line-height: 2;">
+        <div class="quick-start">
+            <h3>Get Started in 5 Minutes</h3>
+            <ol>
                 <li>Install Python 3.10+ on Windows 10/11</li>
-                <li>Clone the repository: <code style="background: #0f1116; padding: 2px 6px; border-radius: 4px; color: #c9d1d9;">git clone https://github.com/alonsom3/ProMirrorGolf.git</code></li>
-                <li>Install dependencies: <code style="background: #0f1116; padding: 2px 6px; border-radius: 4px; color: #c9d1d9;">pip install -r requirements.txt</code></li>
-                <li>Run the application: <code style="background: #0f1116; padding: 2px 6px; border-radius: 4px; color: #c9d1d9;">python main.py</code></li>
+                <li>Clone the repository: <code>git clone https://github.com/alonsom3/ProMirrorGolf.git</code></li>
+                <li>Install dependencies: <code>pip install -r requirements.txt</code></li>
+                <li>Run the application: <code>python main.py</code></li>
             </ol>
-            <div style="margin-top: 1.5rem;">
-                <a href="https://github.com/alonsom3/ProMirrorGolf/blob/main/docs/INSTALLATION.md" class="btn" style="display: inline-block;">📥 Installation Guide</a>
-                <a href="https://github.com/alonsom3/ProMirrorGolf/blob/main/docs/QUICK_START.md" class="btn btn-secondary" style="display: inline-block;">🚀 Quick Start</a>
+            <div style="text-align: center;">
+                <a href="https://github.com/alonsom3/ProMirrorGolf/blob/main/docs/INSTALLATION.md" class="btn">📥 Installation Guide</a>
+                <a href="https://github.com/alonsom3/ProMirrorGolf/blob/main/docs/QUICK_START.md" class="btn btn-secondary">🚀 Quick Start</a>
             </div>
         </div>
-    </div>
-
-    <div class="footer">
-        <p><strong>ProMirrorGolf</strong> - Open source golf swing analysis</p>
-        <p style="margin-top: 0.5rem;">
-            <a href="https://github.com/alonsom3/ProMirrorGolf" style="color: #8b949e; text-decoration: none;">GitHub</a> • 
-            <a href="https://github.com/alonsom3/ProMirrorGolf/blob/main/LICENSE" style="color: #8b949e; text-decoration: none;">License</a> • 
-            <a href="https://github.com/alonsom3/ProMirrorGolf/blob/main/docs/TROUBLESHOOTING.md" style="color: #8b949e; text-decoration: none;">Troubleshooting</a>
-        </p>
     </div>
 </body>
 </html>
