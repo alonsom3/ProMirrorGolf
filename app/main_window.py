@@ -82,6 +82,7 @@ class MainWindow(QMainWindow):
         from core.layout_manager import LayoutManager
         self.layout_manager = LayoutManager(Path("data/layouts.json"))
         self._main_splitter = None  # Will be set in _build_ui
+        self._bridge_status_widget = None  # Bridge status indicator
         self._club_options = [
             "Driver",
             "3 Wood",
@@ -579,7 +580,88 @@ class MainWindow(QMainWindow):
             }}
         """)
         self.status_bar.showMessage("Ready")
+        
+        # Add bridge status indicator if bridge is enabled
+        if self.config.get("springbok_bridge.enabled", False):
+            self._build_bridge_status_indicator()
     
+    def _build_bridge_status_indicator(self) -> None:
+        """Build bridge connection status indicator in status bar."""
+        from app.design_constants import get_current_colors, TYPOGRAPHY, SPACING
+        current_colors = get_current_colors()
+        
+        # Create container widget
+        status_container = QWidget()
+        status_layout = QHBoxLayout(status_container)
+        status_layout.setContentsMargins(SPACING.SMALL, 0, SPACING.SMALL, 0)
+        status_layout.setSpacing(SPACING.SMALL)
+        
+        # Springbok status
+        self._springbok_status_label = QLabel("Springbok: ●")
+        self._springbok_status_label.setObjectName("springbokStatus")
+        self._springbok_status_label.setToolTip("Springbok connector connection status")
+        status_layout.addWidget(self._springbok_status_label)
+        
+        # GSPro status
+        self._gspro_status_label = QLabel("GSPro: ●")
+        self._gspro_status_label.setObjectName("gsproStatus")
+        self._gspro_status_label.setToolTip("GSPro API Connect connection status")
+        status_layout.addWidget(self._gspro_status_label)
+        
+        # Style the labels
+        self._update_bridge_status_style(False, False)
+        
+        # Add to status bar (permanent widget on the right)
+        self.status_bar.addPermanentWidget(status_container)
+    
+    def _update_bridge_status_style(self, springbok_connected: bool, gspro_connected: bool) -> None:
+        """Update bridge status indicator styles."""
+        from app.design_constants import get_current_colors, TYPOGRAPHY, SPACING
+        current_colors = get_current_colors()
+        
+        if not hasattr(self, '_springbok_status_label') or not hasattr(self, '_gspro_status_label'):
+            return
+        
+        # Springbok status
+        springbok_color = current_colors.SUCCESS if springbok_connected else current_colors.TEXT_DISABLED
+        self._springbok_status_label.setStyleSheet(f"""
+            QLabel#springbokStatus {{
+                color: {springbok_color};
+                font-size: {TYPOGRAPHY.SMALL}px;
+                padding: 0px {SPACING.XS}px;
+            }}
+        """)
+        self._springbok_status_label.setText(f"Springbok: {'●' if springbok_connected else '○'}")
+        self._springbok_status_label.setToolTip(
+            "Springbok connector: Connected" if springbok_connected 
+            else "Springbok connector: Not connected (waiting for Springbok to connect)"
+        )
+        
+        # GSPro status
+        gspro_color = current_colors.SUCCESS if gspro_connected else current_colors.TEXT_DISABLED
+        self._gspro_status_label.setStyleSheet(f"""
+            QLabel#gsproStatus {{
+                color: {gspro_color};
+                font-size: {TYPOGRAPHY.SMALL}px;
+                padding: 0px {SPACING.XS}px;
+            }}
+        """)
+        self._gspro_status_label.setText(f"GSPro: {'●' if gspro_connected else '○'}")
+        self._gspro_status_label.setToolTip(
+            "GSPro API Connect: Connected" if gspro_connected 
+            else "GSPro API Connect: Not connected (make sure GSPro API Connect is running)"
+        )
+    
+    def update_bridge_status(self, springbok_connected: bool, gspro_connected: bool) -> None:
+        """Update bridge connection status (called from bridge thread).
+        
+        Args:
+            springbok_connected: Whether Springbok connector is connected.
+            gspro_connected: Whether GSPro API Connect is connected.
+        """
+        # Use QTimer.singleShot to update UI from background thread
+        from PyQt6.QtCore import QTimer
+        QTimer.singleShot(0, lambda: self._update_bridge_status_style(springbok_connected, gspro_connected))
 
     def _persist_session_details(self) -> None:
         """Save session edits to database."""
@@ -1157,6 +1239,12 @@ class MainWindow(QMainWindow):
         self.stop_btn.setEnabled(True)
         self.save_btn.setEnabled(True)
         self.test_shot_btn.setEnabled(True)
+        
+        # Clear buffers when starting new session to ensure clean recording
+        self.dtl_buffer.clear()
+        self.face_buffer.clear()
+        logger.debug("Buffers cleared at session start")
+        
         self.camera_service.start()
         self.status_bar.showMessage("Session running")
         self._persist_session_details()
@@ -1205,11 +1293,26 @@ class MainWindow(QMainWindow):
         current_colors = get_current_colors()
         
         try:
-            # Auto-save clips from buffer
-            dtl_frames = self.dtl_buffer.dump()
-            face_frames = self.face_buffer.dump()
+            # Get current time to filter buffer frames
+            current_time = dt.datetime.now().timestamp()
+            buffer_window = self.buffer_frames / self.fps  # Convert frames to seconds
             
-            logger.info("Shot detected - DTL frames: %d, Face frames: %d", len(dtl_frames), len(face_frames))
+            # Auto-save clips from buffer (only frames within buffer window)
+            all_dtl_frames = self.dtl_buffer.dump()
+            all_face_frames = self.face_buffer.dump()
+            
+            # Filter frames to only include those within the buffer window
+            dtl_frames = [
+                frame for frame in all_dtl_frames
+                if (current_time - frame.timestamp) <= buffer_window
+            ]
+            face_frames = [
+                frame for frame in all_face_frames
+                if (current_time - frame.timestamp) <= buffer_window
+            ]
+            
+            logger.info("Shot detected - DTL frames: %d (filtered from %d), Face frames: %d (filtered from %d)", 
+                       len(dtl_frames), len(all_dtl_frames), len(face_frames), len(all_face_frames))
             
             dtl_path = None
             face_path = None
@@ -1239,6 +1342,12 @@ class MainWindow(QMainWindow):
                         logger.info("Auto-saved face clip: %s", face_path)
                         # Generate thumbnail in background
                         self._generate_thumbnail_async(Path(face_path))
+                    
+                    # Clear buffers after saving to prevent old frames in next shot
+                    # (The circular buffer will continue filling with new frames)
+                    self.dtl_buffer.clear()
+                    self.face_buffer.clear()
+                    logger.debug("Buffers cleared after saving shot")
                 except Exception as e:
                     logger.error("Error saving video clips: %s", e, exc_info=True)
                     self.status_bar.showMessage(f"Warning: Failed to save video clips: {str(e)}", 5000)

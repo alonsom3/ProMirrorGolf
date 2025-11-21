@@ -25,6 +25,17 @@ DEFAULT_CONFIG: Dict[str, Any] = {
         "database": "data/promirror.db",
         "buffer_seconds": 5,
     },
+    "springbok_bridge": {
+        "enabled": False,
+        "listen_port": 922,
+        "gspro_host": "127.0.0.1",
+        "gspro_port": 921,
+        "promirror_host": "127.0.0.1",
+        "promirror_port": 5556,
+    },
+    "springbok_connector": {
+        "path": "",
+    },
 }
 
 

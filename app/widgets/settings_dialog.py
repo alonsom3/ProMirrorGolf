@@ -135,6 +135,7 @@ class SettingsDialog(QDialog):
         tabs = QTabWidget()
         tabs.addTab(self._build_camera_tab(), "Cameras")
         tabs.addTab(self._build_advanced_tab(), "Advanced")
+        tabs.addTab(self._build_springbok_tab(), "Springbok")
         tabs.addTab(self._build_appearance_tab(), "Appearance")
         tabs.addTab(self._build_shortcuts_tab(), "Shortcuts")
         tabs.addTab(self._build_custom_fields_tab(), "Custom Fields")
@@ -270,6 +271,31 @@ class SettingsDialog(QDialog):
         
         clips_dir = self.config.get("storage.clips_dir", "data/clips")
         self.clips_dir_edit.setText(str(clips_dir))
+        
+        # Load Springbok settings
+        if hasattr(self, 'springbok_path_edit'):
+            springbok_path = self.config.get("springbok_connector.path", "")
+            self.springbok_path_edit.setText(springbok_path)
+        
+        if hasattr(self, 'bridge_enabled'):
+            bridge_enabled = self.config.get("springbok_bridge.enabled", False)
+            self.bridge_enabled.setChecked(bridge_enabled)
+        
+        if hasattr(self, 'bridge_port_edit'):
+            bridge_port = str(self.config.get("springbok_bridge.listen_port", 922))
+            self.bridge_port_edit.setText(bridge_port)
+        
+        if hasattr(self, 'gspro_host_edit'):
+            gspro_host = str(self.config.get("springbok_bridge.gspro_host", "127.0.0.1"))
+            self.gspro_host_edit.setText(gspro_host)
+        
+        if hasattr(self, 'gspro_port_edit'):
+            gspro_port = str(self.config.get("springbok_bridge.gspro_port", 921))
+            self.gspro_port_edit.setText(gspro_port)
+        
+        if hasattr(self, 'promirror_port_edit'):
+            promirror_port = str(self.config.get("springbok_bridge.promirror_port", 5556))
+            self.promirror_port_edit.setText(promirror_port)
 
     def _save_and_close(self) -> None:
         dtl_id = self.dtl_combo.currentData()
@@ -290,6 +316,35 @@ class SettingsDialog(QDialog):
         clips_dir = self.clips_dir_edit.text().strip()
         if clips_dir:
             self.config.set("storage.clips_dir", clips_dir)
+        
+        # Save Springbok settings
+        if hasattr(self, 'springbok_path_edit'):
+            springbok_path = self.springbok_path_edit.text().strip()
+            if springbok_path:
+                self.config.set("springbok_connector.path", springbok_path)
+        
+        if hasattr(self, 'bridge_enabled'):
+            self.config.set("springbok_bridge.enabled", self.bridge_enabled.isChecked())
+        
+        if hasattr(self, 'bridge_port_edit'):
+            bridge_port = self.bridge_port_edit.text().strip()
+            if bridge_port and bridge_port.isdigit():
+                self.config.set("springbok_bridge.listen_port", int(bridge_port))
+        
+        if hasattr(self, 'gspro_host_edit'):
+            gspro_host = self.gspro_host_edit.text().strip()
+            if gspro_host:
+                self.config.set("springbok_bridge.gspro_host", gspro_host)
+        
+        if hasattr(self, 'gspro_port_edit'):
+            gspro_port = self.gspro_port_edit.text().strip()
+            if gspro_port and gspro_port.isdigit():
+                self.config.set("springbok_bridge.gspro_port", int(gspro_port))
+        
+        if hasattr(self, 'promirror_port_edit'):
+            promirror_port = self.promirror_port_edit.text().strip()
+            if promirror_port and promirror_port.isdigit():
+                self.config.set("springbok_bridge.promirror_port", int(promirror_port))
         
         # Save theme selection
         if hasattr(self, 'theme_combo'):
@@ -661,6 +716,223 @@ class SettingsDialog(QDialog):
             logger = logging.getLogger(__name__)
             logger.error("Error opening layout editor: %s", e, exc_info=True)
             QMessageBox.critical(self, "Error", f"Failed to open layout editor: {str(e)}")
+    
+    def _build_springbok_tab(self) -> QWidget:
+        """Build Springbok connector settings tab."""
+        from app.design_constants import get_current_colors, TYPOGRAPHY
+        current_colors = get_current_colors()
+        
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        layout.setSpacing(SPACING.MEDIUM)
+        
+        # Springbok Connector Path
+        connector_group = QGroupBox("Springbok Connector")
+        connector_layout = QFormLayout(connector_group)
+        connector_layout.setSpacing(SPACING.MEDIUM)
+        
+        # Connector path
+        connector_path_container = QWidget()
+        connector_path_layout = QHBoxLayout(connector_path_container)
+        connector_path_layout.setContentsMargins(0, 0, 0, 0)
+        self.springbok_path_edit = QLineEdit()
+        self.springbok_path_edit.setPlaceholderText("D:\\MLM2Pro-GSPro-Connector_V1_04_20")
+        browse_connector_btn = QPushButton("Browse...")
+        browse_connector_btn.setMinimumHeight(28)
+        browse_connector_btn.setMaximumHeight(36)
+        browse_connector_btn.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
+        browse_connector_btn.clicked.connect(self._browse_springbok_path)
+        connector_path_layout.addWidget(self.springbok_path_edit)
+        connector_path_layout.addWidget(browse_connector_btn)
+        connector_layout.addRow("Connector Path:", connector_path_container)
+        
+        info_label = QLabel(
+            "Path to your Springbok MLM2PRO-GSPro-Connector installation directory.\n"
+            "This is used for reference and potential future integration."
+        )
+        info_label.setWordWrap(True)
+        info_label.setStyleSheet(f"color: {current_colors.TEXT_SECONDARY}; font-size: {TYPOGRAPHY.SMALL}px; padding: {SPACING.SMALL}px;")
+        connector_layout.addRow("", info_label)
+        
+        layout.addWidget(connector_group)
+        
+        # Bridge Settings
+        bridge_group = QGroupBox("Bridge Settings")
+        bridge_layout = QFormLayout(bridge_group)
+        bridge_layout.setSpacing(SPACING.MEDIUM)
+        
+        from PyQt6.QtWidgets import QCheckBox
+        self.bridge_enabled = QCheckBox("Enable Bridge")
+        self.bridge_enabled.setToolTip(
+            "Enable bridge to intercept Springbok connector data and forward to both GSPro and ProMirrorGolf.\n"
+            "Configure Springbok to connect to the bridge port (default 922) instead of GSPro directly."
+        )
+        bridge_layout.addRow("", self.bridge_enabled)
+        
+        self.bridge_port_edit = QLineEdit()
+        self.bridge_port_edit.setPlaceholderText("922")
+        bridge_layout.addRow("Bridge Listen Port:", self.bridge_port_edit)
+        
+        self.gspro_host_edit = QLineEdit()
+        self.gspro_host_edit.setPlaceholderText("127.0.0.1")
+        bridge_layout.addRow("GSPro Host:", self.gspro_host_edit)
+        
+        self.gspro_port_edit = QLineEdit()
+        self.gspro_port_edit.setPlaceholderText("921")
+        bridge_layout.addRow("GSPro Port:", self.gspro_port_edit)
+        
+        self.promirror_port_edit = QLineEdit()
+        self.promirror_port_edit.setPlaceholderText("5556")
+        bridge_layout.addRow("ProMirrorGolf Port:", self.promirror_port_edit)
+        
+        bridge_info = QLabel(
+            "The bridge intercepts Springbok connector data and forwards to both GSPro and ProMirrorGolf.\n"
+            "Configure Springbok to connect to the Bridge Listen Port (default 922) instead of GSPro directly.\n"
+            "The bridge will forward data to GSPro on the GSPro Port (default 921) and to ProMirrorGolf.\n\n"
+            "⚠️ IMPORTANT: ProMirrorGolf must be started BEFORE Springbok and GSPro for the bridge to work."
+        )
+        bridge_info.setWordWrap(True)
+        bridge_info.setStyleSheet(f"color: {current_colors.TEXT_SECONDARY}; font-size: {TYPOGRAPHY.SMALL}px; padding: {SPACING.SMALL}px;")
+        bridge_layout.addRow("", bridge_info)
+        
+        layout.addWidget(bridge_group)
+        layout.addStretch()
+        
+        return widget
+    
+    def _browse_springbok_path(self) -> None:
+        """Open directory browser for Springbok connector path."""
+        current = self.springbok_path_edit.text().strip() or "D:\\MLM2Pro-GSPro-Connector_V1_04_20"
+        directory = QFileDialog.getExistingDirectory(
+            self,
+            "Select Springbok Connector Directory",
+            current,
+            QFileDialog.Option.ShowDirsOnly,
+        )
+        if directory:
+            self.springbok_path_edit.setText(directory)
+    
+    def _build_error_log_tab(self) -> QWidget:
+        """Build error log viewer tab."""
+        from app.widgets.error_log_viewer import ErrorLogViewer
+        widget = ErrorLogViewer(self)
+        return widget
+    
+    def _load_backup_list(self) -> None:
+        """Load list of available backups."""
+        from core.backup import list_backups
+        from pathlib import Path
+        
+        self.backup_list.clear()
+        backup_dir = Path("data/backups")
+        backups = list_backups(backup_dir)
+        
+        if not backups:
+            item = QListWidgetItem("No backups found")
+            item.setFlags(Qt.ItemFlag.NoItemFlags)
+            self.backup_list.addItem(item)
+            return
+        
+        for backup_path in backups:
+            # Format: promirror_backup_YYYYMMDD_HHMMSS.db
+            name = backup_path.stem.replace("promirror_backup_", "")
+            # Parse timestamp
+            try:
+                from datetime import datetime
+                dt = datetime.strptime(name, "%Y%m%d_%H%M%S")
+                display_name = f"{dt.strftime('%Y-%m-%d %H:%M:%S')} ({backup_path.stat().st_size / 1024:.1f} KB)"
+            except:
+                display_name = name
+            
+            item = QListWidgetItem(display_name)
+            item.setData(Qt.ItemDataRole.UserRole, str(backup_path))
+            self.backup_list.addItem(item)
+    
+    def _create_backup(self) -> None:
+        """Create a database backup."""
+        from core.backup import create_backup
+        from pathlib import Path
+        import logging
+        
+        logger = logging.getLogger(__name__)
+        db_path = Path(self.config.get("storage.database", "data/promirror.db"))
+        backup_dir = Path("data/backups")
+        
+        backup_path = create_backup(db_path, backup_dir)
+        
+        if backup_path:
+            QMessageBox.information(
+                self,
+                "Backup Created",
+                f"Backup created successfully:\n{backup_path}\n\nSize: {backup_path.stat().st_size / 1024:.1f} KB",
+            )
+            self._load_backup_list()
+        else:
+            QMessageBox.warning(
+                self,
+                "Backup Failed",
+                "Failed to create backup. Check logs for details.",
+            )
+    
+    def _restore_backup(self) -> None:
+        """Restore database from selected backup."""
+        current_item = self.backup_list.currentItem()
+        if not current_item:
+            return
+        
+        backup_path_str = current_item.data(Qt.ItemDataRole.UserRole)
+        if not backup_path_str:
+            return
+        
+        reply = QMessageBox.question(
+            self,
+            "Confirm Restore",
+            f"Are you sure you want to restore from:\n{current_item.text()}\n\n"
+            "A safety backup of your current database will be created automatically.\n"
+            "The application will need to be restarted after restore.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+        
+        from core.backup import restore_backup
+        from pathlib import Path
+        
+        backup_path = Path(backup_path_str)
+        db_path = Path(self.config.get("storage.database", "data/promirror.db"))
+        
+        if restore_backup(backup_path, db_path):
+            QMessageBox.information(
+                self,
+                "Restore Complete",
+                "Database restored successfully.\n\nPlease restart the application for changes to take effect.",
+            )
+        else:
+            QMessageBox.warning(
+                self,
+                "Restore Failed",
+                "Failed to restore backup. Check logs for details.",
+            )
+
+
+        layout.addWidget(bridge_group)
+        layout.addStretch()
+        
+        return widget
+    
+    def _browse_springbok_path(self) -> None:
+        """Open directory browser for Springbok connector path."""
+        current = self.springbok_path_edit.text().strip() or "D:\\MLM2Pro-GSPro-Connector_V1_04_20"
+        directory = QFileDialog.getExistingDirectory(
+            self,
+            "Select Springbok Connector Directory",
+            current,
+            QFileDialog.Option.ShowDirsOnly,
+        )
+        if directory:
+            self.springbok_path_edit.setText(directory)
     
     def _build_error_log_tab(self) -> QWidget:
         """Build error log viewer tab."""

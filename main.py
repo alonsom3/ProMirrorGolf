@@ -175,6 +175,46 @@ def main() -> int:
         except Exception as e:
             logging.warning("Failed to start shot listener thread: %s. Shot detection will be disabled.", e)
 
+        # Start Springbok bridge if enabled
+        springbok_bridge_thread = None
+        if config.get("springbok_bridge.enabled", False):
+            try:
+                from core.springbok_bridge import SpringbokBridge, SpringbokBridgeThread
+                
+                bridge = SpringbokBridge(
+                    listen_port=int(config.get("springbok_bridge.listen_port", 922)),
+                    gspro_host=config.get("springbok_bridge.gspro_host", "127.0.0.1"),
+                    gspro_port=int(config.get("springbok_bridge.gspro_port", 921)),
+                    promirror_host=config.get("springbok_bridge.promirror_host", "127.0.0.1"),
+                    promirror_port=int(config.get("springbok_bridge.promirror_port", 5556)),
+                )
+                
+                springbok_bridge_thread = SpringbokBridgeThread(bridge)
+                
+                # Connect status callback to window
+                def on_bridge_status(springbok_connected: bool, gspro_connected: bool) -> None:
+                    if hasattr(window, 'update_bridge_status'):
+                        window.update_bridge_status(springbok_connected, gspro_connected)
+                
+                springbok_bridge_thread.add_status_callback(on_bridge_status)
+                springbok_bridge_thread.start()
+                
+                # Store reference for cleanup
+                window._springbok_bridge_thread = springbok_bridge_thread
+                logging.info("Springbok bridge started (listening on port %d for ProMirrorGolf)", 
+                           config.get("springbok_bridge.listen_port", 922))
+            except OSError as e:
+                if e.errno == 10048:  # Windows: Address already in use
+                    logging.warning(
+                        "Springbok bridge port %d is already in use. "
+                        "Another bridge instance may be running. Bridge disabled.",
+                        config.get("springbok_bridge.listen_port", 922)
+                    )
+                else:
+                    logging.warning("Failed to start Springbok bridge: %s", e)
+            except Exception as e:
+                logging.warning("Failed to start Springbok bridge: %s. Bridge disabled.", e)
+
         # Start web server in background if enabled
         web_server_thread = None
         if config.get("web.enabled", True):
@@ -210,6 +250,8 @@ def main() -> int:
             if shot_thread:
                 shot_thread.stop()
                 shot_thread.wait()
+            if springbok_bridge_thread:
+                springbok_bridge_thread.stop()
             camera_service.stop()
             session_mgr.end_session()
 

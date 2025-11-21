@@ -67,11 +67,17 @@ Before starting, make sure you have:
 
 ### Option B: Connect Launch Monitor
 
+**Standard TCP Connection:**
 1. Configure your launch monitor to send data to:
    - Host: `127.0.0.1`
    - Port: `5556`
 2. Take a shot
 3. Shot should automatically appear in table
+
+**Springbok MLM2PRO Integration:**
+1. See [Springbok Setup Guide](SPRINGBOK_SETUP_REQUIREMENTS.md) for integration with Springbok connector and GSPro
+2. Enable bridge in Settings → Springbok tab
+3. Configure Springbok to connect to port 922
 
 ## Step 5: Review Your Shot
 

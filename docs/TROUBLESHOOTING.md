@@ -133,6 +133,35 @@ This guide helps you solve common issues with ProMirrorGolf. If you're having in
 - Check data fields match expected format
 - Review logs for parsing errors
 
+## Springbok Integration Issues
+
+### Springbok Can't Connect
+1. **ProMirrorGolf must be running first** - Start ProMirrorGolf before Springbok
+2. Verify bridge is enabled in Settings → Springbok tab
+3. Check Springbok is configured for port 922 (not 921)
+4. Check status indicator in ProMirrorGolf status bar
+5. Review logs for connection errors
+
+### Bridge Not Starting
+1. Check if port 922 is already in use
+2. Verify bridge is enabled in settings
+3. Check logs for port binding errors
+4. Try changing bridge port in settings
+
+### GSPro Not Receiving Data
+1. Verify GSPro API Connect is running
+2. Check status indicator shows "GSPro: ●" (green)
+3. Verify GSPro is listening on port 921
+4. Check bridge logs for connection errors
+
+### ProMirrorGolf Not Receiving Data
+1. Verify session is active (clicked "Start Session")
+2. Check shot listener is running (port 5556)
+3. Check bridge logs for forwarding errors
+4. Test with test script: `python scripts/test_springbok_bridge_without_shot.py`
+
+**For detailed Springbok setup, see [SPRINGBOK_SETUP_REQUIREMENTS.md](SPRINGBOK_SETUP_REQUIREMENTS.md)**
+
 ## UI Issues
 
 ### Buttons Not Working

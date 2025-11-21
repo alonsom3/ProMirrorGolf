@@ -89,6 +89,7 @@
 - **Dual USB Camera Capture** - Simultaneous DTL (Down the Line) and Face-on camera recording with live preview
 - **Session Management** - SQLite database for persistent storage of sessions and shots
 - **Shot Data Integration** - TCP JSON listener for launch monitor data via TCP/IP
+- **Springbok Integration** - Bridge to receive MLM2PRO data simultaneously with GSPro (see [Springbok Setup](docs/SPRINGBOK_SETUP_REQUIREMENTS.md))
 - **Automatic Video Recording** - Circular buffer captures video clips automatically on shot detection
 - **Modern UI with Theme Support** - GitHub-inspired dark theme with light theme option, consistent styling throughout
 
@@ -442,6 +443,11 @@ Configuration is stored in `data/config.json`. Key settings:
 - `storage.database` - Database path (default: "data/promirror.db")
 - `shot_listener.host` - TCP listener host (default: "127.0.0.1")
 - `shot_listener.port` - TCP listener port (default: 5556)
+- `springbok_bridge.enabled` - Enable Springbok bridge (default: false)
+- `springbok_bridge.listen_port` - Bridge listen port (default: 922)
+- `springbok_bridge.gspro_port` - GSPro API Connect port (default: 921)
+
+**Springbok Integration:** See [Springbok Setup Guide](docs/SPRINGBOK_SETUP_REQUIREMENTS.md) for detailed configuration.
 
 ---
 
@@ -649,6 +655,10 @@ This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)**
 - ✅ **Same license** - Derivative works must also use GPL-3.0
 
 **Note:** GPL-3.0 allows selling the software, but only if you also provide the source code under GPL-3.0. This prevents proprietary commercial versions while allowing free distribution.
+
+**Third-Party Integrations:**
+- **Springbok MLM2PRO-GSPro-Connector** - External connector application (not included)
+- **GSPro** - Commercial golf simulation software (not included, requires separate license)
 
 See the [LICENSE](LICENSE) file for details.
 
