@@ -1075,62 +1075,112 @@ class MainWindow(QMainWindow):
                 ShotModel.session_id == self.current_session_id
             ).count()
             
-            # Enable pagination if more than 100 shots
+                # Enable pagination if more than 100 shots
             if total_count > 100:
                 def load_page(offset: int, limit: int):
-                    shots = session.query(ShotModel).filter(
-                        ShotModel.session_id == self.current_session_id
-                    ).order_by(ShotModel.recorded_at).offset(offset).limit(limit).all()
-                    
-                    rows = []
-                    for shot in shots:
-                        time_item = QTableWidgetItem(shot.recorded_at.strftime("%H:%M:%S"))
-                        time_item.setData(Qt.ItemDataRole.UserRole, shot.id)
+                    # Use a new session context for each page load
+                    with Session(self.session_manager.engine) as page_session:
+                        shots = page_session.query(ShotModel).filter(
+                            ShotModel.session_id == self.current_session_id
+                        ).order_by(ShotModel.recorded_at).offset(offset).limit(limit).all()
                         
-                        has_video = bool(shot.dtl_video_path or shot.face_video_path)
-                        if has_video:
-                            time_item.setForeground(QColor(current_colors.SUCCESS))
-                            time_item.setToolTip("Click to review video")
-                        else:
-                            time_item.setToolTip("No video available")
+                        # Load all data before closing the session context
+                        shot_data_list = []
+                        for shot in shots:
+                            shot_data_list.append({
+                                'id': shot.id,
+                                'recorded_at': shot.recorded_at,
+                                'club_speed': shot.club_speed,
+                                'ball_speed': shot.ball_speed,
+                                'spin_rate': shot.spin_rate,
+                                'dtl_video_path': shot.dtl_video_path,
+                                'face_video_path': shot.face_video_path,
+                                'tags': shot.tags,
+                                'is_favorite': shot.is_favorite,
+                            })
                         
-                        # Tags
-                        tags_text = ""
-                        if shot.tags:
-                            tags_list = json.loads(shot.tags)
-                            tags_text = ", ".join(tags_list) if tags_list else ""
-                        
-                        # Favorite
-                        favorite_text = "★" if shot.is_favorite else ""
-                        favorite_item = QTableWidgetItem(favorite_text)
-                        if shot.is_favorite:
-                            favorite_item.setForeground(QColor(current_colors.ACCENT))
-                        favorite_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                        
-                        rows.append([
-                            time_item,
-                            QTableWidgetItem(f"{shot.club_speed:.1f}" if shot.club_speed else "--"),
-                            QTableWidgetItem(f"{shot.ball_speed:.1f}" if shot.ball_speed else "--"),
-                            QTableWidgetItem(f"{shot.spin_rate:.0f}" if shot.spin_rate else "--"),
-                            QTableWidgetItem(tags_text),
-                            favorite_item,
-                        ])
-                    return rows
+                        # Now build rows outside the database session context
+                        rows = []
+                        for shot_data in shot_data_list:
+                            time_item = QTableWidgetItem(shot_data['recorded_at'].strftime("%H:%M:%S"))
+                            time_item.setData(Qt.ItemDataRole.UserRole, shot_data['id'])
+                            
+                            has_video = bool(shot_data['dtl_video_path'] or shot_data['face_video_path'])
+                            if has_video:
+                                time_item.setForeground(QColor(current_colors.SUCCESS))
+                                time_item.setToolTip("Click to review video")
+                            else:
+                                time_item.setToolTip("No video available")
+                            
+                            # Tags
+                            tags_text = ""
+                            if shot_data['tags']:
+                                try:
+                                    tags_list = json.loads(shot_data['tags'])
+                                    tags_text = ", ".join(tags_list) if tags_list else ""
+                                except:
+                                    tags_text = ""
+                            
+                            # Favorite
+                            favorite_text = "★" if shot_data['is_favorite'] else ""
+                            favorite_item = QTableWidgetItem(favorite_text)
+                            if shot_data['is_favorite']:
+                                favorite_item.setForeground(QColor(current_colors.ACCENT))
+                            favorite_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                            
+                            # Ensure data is properly formatted - use explicit None checks
+                            club_speed = shot_data['club_speed']
+                            ball_speed = shot_data['ball_speed']
+                            spin_rate = shot_data['spin_rate']
+                            
+                            club_speed_item = QTableWidgetItem(f"{club_speed:.1f}" if club_speed is not None else "--")
+                            ball_speed_item = QTableWidgetItem(f"{ball_speed:.1f}" if ball_speed is not None else "--")
+                            spin_item = QTableWidgetItem(f"{spin_rate:.0f}" if spin_rate is not None else "--")
+                            
+                            rows.append([
+                                time_item,
+                                club_speed_item,
+                                ball_speed_item,
+                                spin_item,
+                                QTableWidgetItem(tags_text),
+                                favorite_item,
+                            ])
+                        return rows
                 
                 self.shot_table_widget.enable_pagination(total_count, load_page)
             else:
                 self.shot_table_widget.disable_pagination()
                 self.shot_table_widget.clear()
                 
+                # Disable sorting while populating to avoid issues
+                was_sorting_enabled = self.shot_table.isSortingEnabled()
+                self.shot_table.setSortingEnabled(False)
+                
                 shots = session.query(ShotModel).filter(
                     ShotModel.session_id == self.current_session_id
                 ).order_by(ShotModel.recorded_at).all()
                 
+                # Load all data before closing the session context
+                shot_data_list = []
                 for shot in shots:
-                    time_item = QTableWidgetItem(shot.recorded_at.strftime("%H:%M:%S"))
-                    time_item.setData(Qt.ItemDataRole.UserRole, shot.id)
+                    shot_data_list.append({
+                        'id': shot.id,
+                        'recorded_at': shot.recorded_at,
+                        'club_speed': shot.club_speed,
+                        'ball_speed': shot.ball_speed,
+                        'spin_rate': shot.spin_rate,
+                        'dtl_video_path': shot.dtl_video_path,
+                        'face_video_path': shot.face_video_path,
+                        'tags': shot.tags,
+                        'is_favorite': shot.is_favorite,
+                    })
+                
+                # Now populate the table outside the database session context
+                for shot_data in shot_data_list:
+                    time_item = QTableWidgetItem(shot_data['recorded_at'].strftime("%H:%M:%S"))
+                    time_item.setData(Qt.ItemDataRole.UserRole, shot_data['id'])
                     
-                    has_video = bool(shot.dtl_video_path or shot.face_video_path)
+                    has_video = bool(shot_data['dtl_video_path'] or shot_data['face_video_path'])
                     if has_video:
                         time_item.setForeground(QColor(current_colors.SUCCESS))
                         time_item.setToolTip("Click to review video")
@@ -1139,25 +1189,41 @@ class MainWindow(QMainWindow):
                     
                     # Tags
                     tags_text = ""
-                    if shot.tags:
-                        tags_list = json.loads(shot.tags)
-                        tags_text = ", ".join(tags_list) if tags_list else ""
+                    if shot_data['tags']:
+                        try:
+                            tags_list = json.loads(shot_data['tags'])
+                            tags_text = ", ".join(tags_list) if tags_list else ""
+                        except:
+                            tags_text = ""
                     
                     # Favorite
-                    favorite_text = "★" if shot.is_favorite else ""
+                    favorite_text = "★" if shot_data['is_favorite'] else ""
                     favorite_item = QTableWidgetItem(favorite_text)
-                    if shot.is_favorite:
+                    if shot_data['is_favorite']:
                         favorite_item.setForeground(QColor(current_colors.ACCENT))
                     favorite_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                     
+                    # Ensure data is properly formatted - use explicit None checks
+                    club_speed = shot_data['club_speed']
+                    ball_speed = shot_data['ball_speed']
+                    spin_rate = shot_data['spin_rate']
+                    
+                    club_speed_item = QTableWidgetItem(f"{club_speed:.1f}" if club_speed is not None else "--")
+                    ball_speed_item = QTableWidgetItem(f"{ball_speed:.1f}" if ball_speed is not None else "--")
+                    spin_item = QTableWidgetItem(f"{spin_rate:.0f}" if spin_rate is not None else "--")
+                    
                     self.shot_table_widget.add_row([
                         time_item,
-                        QTableWidgetItem(f"{shot.club_speed:.1f}" if shot.club_speed else "--"),
-                        QTableWidgetItem(f"{shot.ball_speed:.1f}" if shot.ball_speed else "--"),
-                        QTableWidgetItem(f"{shot.spin_rate:.0f}" if shot.spin_rate else "--"),
+                        club_speed_item,
+                        ball_speed_item,
+                        spin_item,
                         QTableWidgetItem(tags_text),
                         favorite_item,
                     ])
+                
+                # Re-enable sorting after all rows are added
+                if was_sorting_enabled:
+                    self.shot_table.setSortingEnabled(True)
 
     def _update_camera(self, view: CameraView, frame: np.ndarray) -> None:
         view.update_frame(frame)

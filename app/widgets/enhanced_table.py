@@ -403,6 +403,11 @@ class FilterableTableWidget(QWidget):
     
     def add_row(self, items: list[str | QTableWidgetItem], data: Optional[dict] = None) -> int:
         """Add a row to the table."""
+        # Disable sorting while adding to prevent issues
+        was_sorting_enabled = self.table.isSortingEnabled()
+        if was_sorting_enabled:
+            self.table.setSortingEnabled(False)
+        
         row = self.table.rowCount()
         self.table.insertRow(row)
         
@@ -417,6 +422,10 @@ class FilterableTableWidget(QWidget):
         
         if data:
             self.table.item(row, 0).setData(Qt.ItemDataRole.UserRole + 1, data)
+        
+        # Re-enable sorting after adding
+        if was_sorting_enabled:
+            self.table.setSortingEnabled(True)
         
         self._update_row_count()
         return row
