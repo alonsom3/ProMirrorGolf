@@ -17,24 +17,32 @@
             color: #c9d1d9;
             line-height: 1.6;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            padding: 0;
         }
-        .container {
-            max-width: 800px;
+        .hero {
             text-align: center;
+            padding: 4rem 20px 3rem;
+            max-width: 900px;
+            margin: 0 auto;
         }
         h1 {
-            font-size: 3rem;
+            font-size: 3.5rem;
             margin-bottom: 1rem;
             color: #ff4d4d;
+            font-weight: 700;
         }
         .subtitle {
-            font-size: 1.25rem;
+            font-size: 1.5rem;
             color: #8b949e;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+        }
+        .description {
+            font-size: 1.1rem;
+            color: #c9d1d9;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            line-height: 1.8;
         }
         .badges {
             display: flex;
@@ -45,17 +53,19 @@
         }
         .btn {
             display: inline-block;
-            padding: 12px 24px;
+            padding: 14px 28px;
             background: #ff4d4d;
             color: white;
             text-decoration: none;
             border-radius: 6px;
             font-weight: 600;
-            margin: 10px;
-            transition: background 0.2s;
+            margin: 8px;
+            transition: all 0.2s;
+            font-size: 1rem;
         }
         .btn:hover {
             background: #e63946;
+            transform: translateY(-2px);
         }
         .btn-secondary {
             background: #21262d;
@@ -64,37 +74,120 @@
         .btn-secondary:hover {
             background: #30363d;
         }
-        .features {
-            margin-top: 3rem;
-            text-align: left;
+        .section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 20px;
         }
-        .features h2 {
+        .section-title {
             text-align: center;
-            margin-bottom: 1.5rem;
+            font-size: 2.5rem;
             color: #c9d1d9;
+            margin-bottom: 3rem;
+            font-weight: 600;
         }
         .feature-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .feature {
+            background: #161b22;
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid #21262d;
+            transition: all 0.2s;
+        }
+        .feature:hover {
+            border-color: #30363d;
+            transform: translateY(-4px);
+        }
+        .feature h3 {
+            color: #ff4d4d;
+            margin-bottom: 0.75rem;
+            font-size: 1.3rem;
+        }
+        .feature p {
+            color: #8b949e;
+            line-height: 1.6;
+        }
+        .comparison {
+            background: #161b22;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid #21262d;
+        }
+        .comparison h3 {
+            color: #ff4d4d;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .comparison-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 1rem;
             margin-top: 1rem;
         }
-        .feature {
+        .comparison-item {
+            padding: 1rem;
+            background: #0f1116;
+            border-radius: 6px;
+            border: 1px solid #21262d;
+        }
+        .comparison-item strong {
+            color: #c9d1d9;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .use-cases {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .use-case {
             background: #161b22;
             padding: 1.5rem;
             border-radius: 8px;
             border: 1px solid #21262d;
         }
-        .feature h3 {
+        .use-case h4 {
             color: #ff4d4d;
             margin-bottom: 0.5rem;
+        }
+        .footer {
+            text-align: center;
+            padding: 3rem 20px;
+            border-top: 1px solid #21262d;
+            margin-top: 4rem;
+            color: #8b949e;
+        }
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            .subtitle {
+                font-size: 1.2rem;
+            }
+            .section {
+                padding: 2rem 20px;
+            }
+            .comparison-table {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="hero">
         <h1>ProMirrorGolf</h1>
-        <p class="subtitle">Professional golf swing analysis application</p>
+        <p class="subtitle">Professional Golf Swing Analysis Application</p>
+        <p class="description">
+            Connect affordable launch monitors with dual camera video capture to create comprehensive swing analysis. 
+            Automatically record video clips on shot detection, analyze performance trends, and annotate swings with 
+            professional drawing tools—all in one powerful, open-source application.
+        </p>
         
         <div class="badges">
             <img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="Python 3.10+">
@@ -107,28 +200,131 @@
             <a href="https://github.com/alonsom3/ProMirrorGolf" class="btn">View on GitHub</a>
             <a href="https://github.com/alonsom3/ProMirrorGolf#-installation" class="btn btn-secondary">Get Started</a>
         </div>
-        
-        <div class="features">
-            <h2>Key Features</h2>
-            <div class="feature-grid">
-                <div class="feature">
-                    <h3>📹 Dual Camera Capture</h3>
-                    <p>Simultaneous DTL and Face-on camera recording with live preview</p>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">Why ProMirrorGolf?</h2>
+        <div class="comparison">
+            <h3>ProMirrorGolf vs Commercial Launch Monitors</h3>
+            <div class="comparison-table">
+                <div class="comparison-item">
+                    <strong>Cost</strong>
+                    <span style="color: #238636;">✅ Free (GPL-3.0)</span>
+                    <span style="color: #da3633;">❌ $500-$5000+</span>
                 </div>
-                <div class="feature">
-                    <h3>📊 Advanced Analysis</h3>
-                    <p>Comprehensive statistics, trends, and dispersion plots</p>
+                <div class="comparison-item">
+                    <strong>Dual Video</strong>
+                    <span style="color: #238636;">✅ Simultaneous DTL & Face-on</span>
+                    <span style="color: #da3633;">❌ Most don't support</span>
                 </div>
-                <div class="feature">
-                    <h3>🎯 Drawing Tools</h3>
-                    <p>Freehand, swing plane, and reference line annotations</p>
+                <div class="comparison-item">
+                    <strong>Drawing Tools</strong>
+                    <span style="color: #238636;">✅ Full annotation suite</span>
+                    <span style="color: #8b949e;">⚠️ Limited</span>
                 </div>
-                <div class="feature">
-                    <h3>🌐 Springbok Integration</h3>
-                    <p>Bridge to receive MLM2PRO data simultaneously with GSPro</p>
+                <div class="comparison-item">
+                    <strong>Custom Reports</strong>
+                    <span style="color: #238636;">✅ PDF, HTML, DOCX</span>
+                    <span style="color: #da3633;">❌ Proprietary only</span>
+                </div>
+                <div class="comparison-item">
+                    <strong>Source Code</strong>
+                    <span style="color: #238636;">✅ Open source</span>
+                    <span style="color: #da3633;">❌ Proprietary</span>
+                </div>
+                <div class="comparison-item">
+                    <strong>Data Export</strong>
+                    <span style="color: #238636;">✅ CSV, JSON, Excel</span>
+                    <span style="color: #8b949e;">⚠️ Limited formats</span>
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">Key Features</h2>
+        <div class="feature-grid">
+            <div class="feature">
+                <h3>📹 Dual Camera Capture</h3>
+                <p>Simultaneous DTL (Down the Line) and Face-on camera recording with live preview. Automatic video clip saving on shot detection using circular buffer technology.</p>
+            </div>
+            <div class="feature">
+                <h3>📊 Advanced Analysis</h3>
+                <p>Comprehensive statistics, speed/distance/spin trends, dispersion plots with heat maps, club comparison charts, and distribution analysis.</p>
+            </div>
+            <div class="feature">
+                <h3>🎯 Drawing Tools</h3>
+                <p>Freehand drawing, swing plane lines, and reference lines with customizable colors and widths. Annotate swings directly on video playback.</p>
+            </div>
+            <div class="feature">
+                <h3>🌐 Springbok Integration</h3>
+                <p>Bridge to receive MLM2PRO launch monitor data simultaneously with GSPro. Real-time connection status indicators and automatic data conversion.</p>
+            </div>
+            <div class="feature">
+                <h3>🎬 Slow-Motion Playback</h3>
+                <p>Precise playback at 0.1x, 0.25x, 0.5x, 1x, 2x, 4x speeds with timeline scrubber and visual markers at key positions.</p>
+            </div>
+            <div class="feature">
+                <h3>📂 Session Management</h3>
+                <p>SQLite database for persistent storage. Organize shots with tags, favorites, notes, and batch operations. Advanced filtering and search.</p>
+            </div>
+            <div class="feature">
+                <h3>📥 Data Import & Export</h3>
+                <p>Import from CSV/Excel, export to PDF/HTML/DOCX reports. Custom report templates and chart exports as PNG/SVG.</p>
+            </div>
+            <div class="feature">
+                <h3>🌐 Web Dashboard</h3>
+                <p>REST API and responsive web dashboard accessible from any device. Real-time statistics, interactive charts, and mobile-optimized interface.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">Who Is This For?</h2>
+        <div class="use-cases">
+            <div class="use-case">
+                <h4>🏌️ Golf Coaches</h4>
+                <p>Provide detailed swing analysis to students with video annotations, data visualization, and custom reports.</p>
+            </div>
+            <div class="use-case">
+                <h4>🎯 Serious Golfers</h4>
+                <p>Track progress, identify swing flaws, and analyze performance trends over time with comprehensive statistics.</p>
+            </div>
+            <div class="use-case">
+                <h4>🔧 DIY Enthusiasts</h4>
+                <p>Build your own launch monitor setup with affordable USB cameras and open-source software.</p>
+            </div>
+            <div class="use-case">
+                <h4>📊 Data Analysts</h4>
+                <p>Export and analyze swing data with custom reports, advanced filtering, and multiple export formats.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">Quick Start</h2>
+        <div style="background: #161b22; padding: 2rem; border-radius: 8px; border: 1px solid #21262d; max-width: 700px; margin: 0 auto;">
+            <h3 style="color: #ff4d4d; margin-bottom: 1rem;">Get Started in 5 Minutes</h3>
+            <ol style="text-align: left; color: #8b949e; line-height: 2;">
+                <li>Install Python 3.10+ on Windows 10/11</li>
+                <li>Clone the repository: <code style="background: #0f1116; padding: 2px 6px; border-radius: 4px; color: #c9d1d9;">git clone https://github.com/alonsom3/ProMirrorGolf.git</code></li>
+                <li>Install dependencies: <code style="background: #0f1116; padding: 2px 6px; border-radius: 4px; color: #c9d1d9;">pip install -r requirements.txt</code></li>
+                <li>Run the application: <code style="background: #0f1116; padding: 2px 6px; border-radius: 4px; color: #c9d1d9;">python main.py</code></li>
+            </ol>
+            <div style="margin-top: 1.5rem;">
+                <a href="https://github.com/alonsom3/ProMirrorGolf/blob/main/docs/INSTALLATION.md" class="btn" style="display: inline-block;">📥 Installation Guide</a>
+                <a href="https://github.com/alonsom3/ProMirrorGolf/blob/main/docs/QUICK_START.md" class="btn btn-secondary" style="display: inline-block;">🚀 Quick Start</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>ProMirrorGolf</strong> - Open source golf swing analysis</p>
+        <p style="margin-top: 0.5rem;">
+            <a href="https://github.com/alonsom3/ProMirrorGolf" style="color: #8b949e; text-decoration: none;">GitHub</a> • 
+            <a href="https://github.com/alonsom3/ProMirrorGolf/blob/main/LICENSE" style="color: #8b949e; text-decoration: none;">License</a> • 
+            <a href="https://github.com/alonsom3/ProMirrorGolf/blob/main/docs/TROUBLESHOOTING.md" style="color: #8b949e; text-decoration: none;">Troubleshooting</a>
+        </p>
     </div>
 </body>
 </html>
