@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProMirrorGolf - Professional Golf Swing Analysis</title>
+    <meta name="description" content="Professional golf swing analysis application with dual camera capture, comprehensive session management, and advanced shot data integration.">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #0f1116 0%, #161b22 100%);
+            color: #c9d1d9;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ff4d4d;
+        }
+        .subtitle {
+            font-size: 1.25rem;
+            color: #8b949e;
+            margin-bottom: 2rem;
+        }
+        .badges {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #ff4d4d;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: 600;
+            margin: 10px;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #e63946;
+        }
+        .btn-secondary {
+            background: #21262d;
+            border: 1px solid #30363d;
+        }
+        .btn-secondary:hover {
+            background: #30363d;
+        }
+        .features {
+            margin-top: 3rem;
+            text-align: left;
+        }
+        .features h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #c9d1d9;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .feature {
+            background: #161b22;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #21262d;
+        }
+        .feature h3 {
+            color: #ff4d4d;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ProMirrorGolf</h1>
+        <p class="subtitle">Professional golf swing analysis application</p>
+        
+        <div class="badges">
+            <img src="https://img.shields.io/badge/python-3.10+-blue.svg" alt="Python 3.10+">
+            <img src="https://img.shields.io/badge/license-GPL--3.0-green.svg" alt="GPL-3.0">
+            <img src="https://img.shields.io/badge/platform-Windows-lightgrey.svg" alt="Windows">
+            <img src="https://img.shields.io/badge/status-active-success.svg" alt="Active">
+        </div>
+        
+        <div>
+            <a href="https://github.com/alonsom3/ProMirrorGolf" class="btn">View on GitHub</a>
+            <a href="https://github.com/alonsom3/ProMirrorGolf#-installation" class="btn btn-secondary">Get Started</a>
+        </div>
+        
+        <div class="features">
+            <h2>Key Features</h2>
+            <div class="feature-grid">
+                <div class="feature">
+                    <h3>📹 Dual Camera Capture</h3>
+                    <p>Simultaneous DTL and Face-on camera recording with live preview</p>
+                </div>
+                <div class="feature">
+                    <h3>📊 Advanced Analysis</h3>
+                    <p>Comprehensive statistics, trends, and dispersion plots</p>
+                </div>
+                <div class="feature">
+                    <h3>🎯 Drawing Tools</h3>
+                    <p>Freehand, swing plane, and reference line annotations</p>
+                </div>
+                <div class="feature">
+                    <h3>🌐 Springbok Integration</h3>
+                    <p>Bridge to receive MLM2PRO data simultaneously with GSPro</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
