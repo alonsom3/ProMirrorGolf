@@ -4,7 +4,7 @@
 
 ![License](https://img.shields.io/badge/license-GPL--3.0-green.svg)
 
-![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)
+![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)
 
 ![Status](https://img.shields.io/badge/status-active-success.svg)
 
@@ -220,7 +220,7 @@ Web dashboard accessible from any device with responsive design, interactive cha
 
 **Requirements:**
 - Python 3.10 or higher
-- Windows 10/11 (for high-resolution timer support)
+- Windows 10 or Windows 11 (required)
 - USB cameras (2 recommended for DTL and Face-on views)
 
 **Steps:**
